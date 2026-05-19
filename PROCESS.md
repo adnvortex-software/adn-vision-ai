@@ -715,10 +715,11 @@ adn-lynx-ai/
 
 #### O. COMPONENTES DE CLIENTES (src/components/clientes/)
 
-- [ ] ClienteForm.tsx
-- [ ] ClientesTable.tsx
-- [ ] SucursalForm.tsx
-- [ ] PropietarioForm.tsx
+- [x] ClienteForm.tsx (React Hook Form + Zod, crea/edita cliente con planes)
+- [x] ClientesTable.tsx (DataTable con acciones, badges de plan y estado)
+- [x] SucursalForm.tsx (con datalist de ciudades colombianas)
+- [x] PropietarioForm.tsx (con selector de sucursal, campos opcionales)
+- [x] index.ts (re-exports)
 
 #### P. COMPONENTES DE BUSES (src/components/buses/)
 
