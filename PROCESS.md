@@ -723,11 +723,12 @@ adn-lynx-ai/
 
 #### P. COMPONENTES DE BUSES (src/components/buses/)
 
-- [ ] BusForm.tsx
-- [ ] BusesTable.tsx
-- [ ] BusWizard.tsx (multi-step)
-- [ ] BusCard.tsx
-- [ ] BusStatusIndicator.tsx
+- [x] BusForm.tsx (con selector de sucursal/propietario, validacion IP/subnet)
+- [x] BusesTable.tsx (DataTable con estado, camaras, novedades)
+- [x] BusWizard.tsx (3 pasos: vehiculo, conectividad, camaras)
+- [x] BusCard.tsx (con conteo del dia, ultimo heartbeat, novedades)
+- [x] BusStatusIndicator.tsx (activo/inactivo/mantenimiento/sin_conexion)
+- [x] index.ts (re-exports)
 
 #### Q. COMPONENTES DE CÁMARAS (src/components/camaras/)
 
