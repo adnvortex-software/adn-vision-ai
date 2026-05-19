@@ -732,11 +732,12 @@ adn-lynx-ai/
 
 #### Q. COMPONENTES DE CÁMARAS (src/components/camaras/)
 
-- [ ] CamaraForm.tsx
-- [ ] CamarasGrid.tsx
-- [ ] PerfilCamaraSelect.tsx
-- [ ] ScreenshotCapture.tsx
-- [ ] StreamLiveButton.tsx (placeholder)
+- [x] CamaraForm.tsx (RTSP URLs, resolucion inferencia, canal DVR)
+- [x] CamarasGrid.tsx (grid con previews, estado, acciones)
+- [x] PerfilCamaraSelect.tsx (select con iconos, PerfilCamaraBadge)
+- [x] ScreenshotCapture.tsx (captura, preview, descarga, dialog zoom)
+- [x] StreamLiveButton.tsx (placeholder con info RTSP)
+- [x] index.ts (re-exports)
 
 #### R. COMPONENTES DE NOVEDADES (src/components/novedades/)
 
