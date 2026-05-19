@@ -582,10 +582,10 @@ adn-lynx-ai/
 - [x] Configurar fuentes Inter + JetBrains Mono (@fontsource)
 - [x] Definir radios (sm, md, lg)
 - [x] Crear clase .font-technical para datos técnicos
-- [ ] Instalar shadcn/ui CLI
-- [ ] Instalar componentes shadcn: button, card, input, label
-- [ ] Instalar componentes shadcn: dialog, dropdown, table
-- [ ] Instalar componentes shadcn: form, toast, select, checkbox
+- [x] Instalar shadcn/ui CLI (components.json configurado)
+- [x] Instalar componentes shadcn: button, card, input, label
+- [x] Instalar componentes shadcn: dialog, dropdown-menu, table
+- [x] Instalar componentes shadcn: form, toast, select, checkbox
 
 #### C. ESTRUCTURA DE CARPETAS
 
@@ -900,7 +900,7 @@ adn-lynx-ai/
 | Categoría               | Completado | Total | %    |
 | ----------------------- | ---------- | ----- | ---- |
 | Configuración inicial   | 11         | 11    | 100% |
-| Estilos y tema          | 7          | 11    | 64%  |
+| Estilos y tema          | 11         | 11    | 100% |
 | Estructura carpetas     | 20         | 20    | 100% |
 | Configuración servicios | 3          | 3     | 100% |
 | Utilidades              | 4          | 4     | 100% |
@@ -908,7 +908,7 @@ adn-lynx-ai/
 | Tipos TypeScript        | 6          | 6     | 100% |
 | Schemas Zod             | 0          | 7     | 0%   |
 | Servicios Firebase      | 0          | 9     | 0%   |
-| Hooks                   | 2          | 4     | 50%  |
+| Hooks                   | 3          | 4     | 75%  |
 | Stores                  | 1          | 3     | 33%  |
 | Componentes comunes     | 2          | 10    | 20%  |
 | Componentes layout      | 0          | 7     | 0%   |
