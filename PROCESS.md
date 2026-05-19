@@ -669,14 +669,16 @@ adn-lynx-ai/
 
 - [x] useTheme.ts - Toggle light/dark con persistencia
 - [x] useDebounce.ts - Debounce de valores y callbacks
-- [ ] useAuth.ts - Hook principal de autenticación
-- [ ] usePermissions.ts - Validación de permisos por acción
+- [x] useAuth.ts - Hook principal de autenticación
+- [x] usePermissions.ts - Validación de permisos por acción
+- [x] index.ts (re-exports)
 
 #### K. STORES ZUSTAND (src/stores/)
 
 - [x] ui.store.ts - Sidebar, modals, mobile menu
-- [ ] auth.store.ts - Usuario actual, claims
-- [ ] filters.store.ts - Filtros persistentes de dashboard
+- [x] auth.store.ts - Usuario actual, claims
+- [x] filters.store.ts - Filtros persistentes de dashboard
+- [x] index.ts (re-exports)
 
 #### L. COMPONENTES COMUNES (src/components/common/)
 
