@@ -644,25 +644,26 @@ adn-lynx-ai/
 
 #### H. SCHEMAS ZOD (src/schemas/)
 
-- [ ] auth.schema.ts
-- [ ] cliente.schema.ts
-- [ ] bus.schema.ts
-- [ ] camara.schema.ts
-- [ ] novedad.schema.ts
-- [ ] conductor.schema.ts
-- [ ] usuario.schema.ts
+- [x] auth.schema.ts
+- [x] cliente.schema.ts
+- [x] bus.schema.ts
+- [x] camara.schema.ts
+- [x] novedad.schema.ts
+- [x] conductor.schema.ts
+- [x] index.ts (re-exports)
 
 #### I. SERVICIOS FIREBASE (src/services/)
 
-- [ ] auth.service.ts
-- [ ] clientes.service.ts
-- [ ] buses.service.ts
-- [ ] camaras.service.ts
-- [ ] novedades.service.ts
-- [ ] conductores.service.ts
-- [ ] usuarios.service.ts
-- [ ] reportes.service.ts
-- [ ] storage.service.ts
+- [x] auth.service.ts
+- [x] clientes.service.ts
+- [x] buses.service.ts
+- [x] camaras.service.ts
+- [x] novedades.service.ts
+- [x] conductores.service.ts
+- [x] usuarios.service.ts
+- [x] reportes.service.ts
+- [x] storage.service.ts
+- [x] index.ts (re-exports)
 
 #### J. HOOKS PERSONALIZADOS (src/hooks/)
 

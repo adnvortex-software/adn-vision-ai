@@ -1,4 +1,4 @@
-import type { Timestamp as FirestoreTimestamp } from 'firebase/firestore'
+import type { Timestamp as FirestoreTimestamp, DocumentData } from 'firebase/firestore'
 
 /**
  * Campos comunes a todas las entidades
@@ -8,6 +8,14 @@ export interface BaseEntity {
   updatedAt: FirestoreTimestamp
   createdBy: string
   deleted?: boolean
+}
+
+/**
+ * Helper type for Firestore document data with timestamps
+ */
+export interface FirestoreDocData extends DocumentData {
+  createdAt: FirestoreTimestamp
+  updatedAt: FirestoreTimestamp
 }
 
 /**
