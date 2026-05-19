@@ -553,101 +553,373 @@ adn-lynx-ai/
 ## 8. Estado actual del desarrollo
 
 **Sprint actual:** 1 - Fundamentos
-**Progreso general:** 85%
+**Progreso general:** ~15% del MVP total
 
-### Sprint 1: Fundamentos
+---
 
-- [x] Crear PROCESS.md base
-- [x] Setup Vite + React + TypeScript estricto
-- [x] Configurar Tailwind + globals.css con variables de tema
-- [x] Configurar ESLint flat config + Prettier + Husky + lint-staged
-- [x] Estructura de carpetas completa
-- [x] Configurar paths aliases en tsconfig y vite
-- [ ] Instalar shadcn/ui base (pendiente - se instalará con npx shadcn)
+### CHECKLIST COMPLETO DEL PROYECTO
+
+#### A. CONFIGURACIÓN INICIAL Y TOOLING
+
+- [x] Crear PROCESS.md como documento maestro
+- [x] Inicializar repositorio git
+- [x] Setup Vite 5 + React 18
+- [x] TypeScript strict mode (strict: true, noImplicitAny, strictNullChecks)
+- [x] Configurar ESLint flat config
+- [x] Configurar Prettier
+- [x] Configurar Husky + lint-staged (pre-commit hooks)
+- [x] Configurar path aliases (@/\*) en tsconfig y vite
+- [x] Crear .env.example con todas las variables documentadas
+- [x] Crear .gitignore completo
+- [x] Crear README.md con instrucciones
+
+#### B. ESTILOS Y TEMA
+
+- [x] Configurar Tailwind CSS v3
+- [x] Crear globals.css con CSS variables para theming
+- [x] Definir paleta light mode (--background, --foreground, --primary, etc.)
+- [x] Definir paleta dark mode
+- [x] Configurar fuentes Inter + JetBrains Mono (@fontsource)
+- [x] Definir radios (sm, md, lg)
+- [x] Crear clase .font-technical para datos técnicos
+- [ ] Instalar shadcn/ui CLI
+- [ ] Instalar componentes shadcn: button, card, input, label
+- [ ] Instalar componentes shadcn: dialog, dropdown, table
+- [ ] Instalar componentes shadcn: form, toast, select, checkbox
+
+#### C. ESTRUCTURA DE CARPETAS
+
+- [x] src/config/ (firebase, env, constants)
+- [x] src/lib/ (utils, date, format, permissions)
+- [x] src/i18n/ (index, es.json, en.json)
+- [x] src/types/ (auth, cliente, bus, novedad, conductor, firestore)
+- [x] src/schemas/ (directorio creado, schemas pendientes)
+- [x] src/services/ (directorio creado, servicios pendientes)
+- [x] src/hooks/ (useTheme, useDebounce creados)
+- [x] src/stores/ (ui.store creado)
+- [x] src/components/ui/ (para shadcn)
+- [x] src/components/layout/ (directorio creado)
+- [x] src/components/common/ (LoadingState, Logo creados)
+- [x] src/components/auth/ (directorio creado)
+- [x] src/components/clientes/ (directorio creado)
+- [x] src/components/buses/ (directorio creado)
+- [x] src/components/camaras/ (directorio creado)
+- [x] src/components/novedades/ (directorio creado)
+- [x] src/components/conductores/ (directorio creado)
+- [x] src/components/dashboard/ (directorio creado)
+- [x] src/components/reportes/ (directorio creado)
+- [x] src/components/usuarios/ (directorio creado)
+- [x] src/pages/ (estructura completa)
+- [x] src/routes/ (directorio creado)
+- [x] src/tests/ (directorio creado)
+
+#### D. CONFIGURACIÓN DE SERVICIOS
+
+- [x] src/config/env.ts - Validación Zod de variables de entorno
+- [x] src/config/firebase.ts - Inicialización Firebase SDK modular
+- [x] src/config/constants.ts - Constantes globales (TZ, formatos, roles, etc.)
+
+#### E. UTILIDADES (src/lib/)
+
+- [x] utils.ts - cn() de shadcn y helpers genéricos
+- [x] date.ts - Wrappers date-fns con TZ Bogotá
+- [x] format.ts - Formateo de números, moneda, placas, teléfonos
+- [x] permissions.ts - Matriz de permisos por rol y helpers
+
+#### F. INTERNACIONALIZACIÓN
+
 - [x] Configurar react-i18next
-- [x] Configurar Firebase SDK con env validadas
-- [x] Crear archivos base de tipos
-- [x] Configurar React Router v6 con layouts
-- [x] Implementar ThemeProvider (hook useTheme)
-- [x] Implementar LanguageProvider (via i18next)
-- [ ] Commit inicial limpio (en progreso)
+- [x] Crear es.json con todas las traducciones base
+- [x] Crear en.json con todas las traducciones base
+- [x] Configurar detección de idioma (localStorage + navigator)
 
-### Sprint 2: Autenticación y Layout
+#### G. TIPOS TYPESCRIPT (src/types/)
 
-- [ ] LoginPage funcional
-- [ ] AuthStore (Zustand)
-- [ ] useAuth hook
-- [ ] ProtectedRoute
-- [ ] RoleGate component
-- [ ] usePermissions hook
-- [ ] AppShell con Sidebar + Header
-- [ ] Navegación dinámica según rol
-- [ ] UserMenu con logout
-- [ ] ThemeToggle funcional
-- [ ] LanguageToggle funcional
-- [ ] Breadcrumbs dinámicos
-- [ ] Páginas 404 y 403
+- [x] firestore.ts - BaseEntity, WithId, Entity<T>, helpers
+- [x] auth.ts - Usuario, AuthState, CustomClaims, LoginCredentials
+- [x] cliente.ts - Cliente, Sucursal, Propietario
+- [x] bus.ts - Bus, Camara, BusWizardData
+- [x] novedad.ts - NovedadCatalogo, NovedadConfig, Evento, Conteo
+- [x] conductor.ts - Conductor
 
-### Sprint 3: Gestión de clientes
+#### H. SCHEMAS ZOD (src/schemas/)
 
-- [ ] CRUD de clientes
-- [ ] CRUD de sucursales
-- [ ] CRUD de propietarios
-- [ ] CRUD de conductores
-- [ ] DataTable component
-- [ ] Validaciones Zod
-- [ ] Servicios Firestore
+- [ ] auth.schema.ts
+- [ ] cliente.schema.ts
+- [ ] bus.schema.ts
+- [ ] camara.schema.ts
+- [ ] novedad.schema.ts
+- [ ] conductor.schema.ts
+- [ ] usuario.schema.ts
 
-### Sprint 4: Gestión de buses
+#### I. SERVICIOS FIREBASE (src/services/)
 
-- [ ] CRUD de buses
-- [ ] BusWizard multi-step
-- [ ] Configuración de cámaras
-- [ ] Página detalle de bus
-- [ ] CamarasGrid
-- [ ] Validaciones
-- [ ] ScreenshotCapture
+- [ ] auth.service.ts
+- [ ] clientes.service.ts
+- [ ] buses.service.ts
+- [ ] camaras.service.ts
+- [ ] novedades.service.ts
+- [ ] conductores.service.ts
+- [ ] usuarios.service.ts
+- [ ] reportes.service.ts
+- [ ] storage.service.ts
 
-### Sprint 5: Configuración de novedades
+#### J. HOOKS PERSONALIZADOS (src/hooks/)
 
-- [ ] Seed catálogo MVP
-- [ ] Pantalla config cámara
-- [ ] NovedadConfigForm dinámico
-- [ ] LineaVirtualEditor
-- [ ] ZonaPoligonoEditor
-- [ ] Persistencia Firestore
-- [ ] Preview tiempo real
+- [x] useTheme.ts - Toggle light/dark con persistencia
+- [x] useDebounce.ts - Debounce de valores y callbacks
+- [ ] useAuth.ts - Hook principal de autenticación
+- [ ] usePermissions.ts - Validación de permisos por acción
 
-### Sprint 6: Dashboard y eventos
+#### K. STORES ZUSTAND (src/stores/)
 
-- [ ] DashboardPage con KPIs
-- [ ] Tabla buses tiempo real
-- [ ] Pantalla eventos
-- [ ] Modal detalle evento
-- [ ] Cambio estado evento
-- [ ] Filtros avanzados
+- [x] ui.store.ts - Sidebar, modals, mobile menu
+- [ ] auth.store.ts - Usuario actual, claims
+- [ ] filters.store.ts - Filtros persistentes de dashboard
 
-### Sprint 7: Reportes
+#### L. COMPONENTES COMUNES (src/components/common/)
 
-- [ ] ReportePDF component
-- [ ] Reportes por evento
-- [ ] Reporte consolidado
-- [ ] ReporteConteoPage
-- [ ] Exportación PDF/Excel
-- [ ] Almacenamiento reportes
+- [x] LoadingState.tsx
+- [x] Logo.tsx
+- [ ] EmptyState.tsx
+- [ ] ErrorBoundary.tsx
+- [ ] DataTable.tsx (wrapper TanStack Table)
+- [ ] PageHeader.tsx
+- [ ] ConfirmDialog.tsx
+- [ ] StatusBadge.tsx
+- [ ] FormField.tsx
+- [ ] DateRangePicker.tsx
 
-### Sprint 8: Usuarios y pulido
+#### M. COMPONENTES DE LAYOUT (src/components/layout/)
 
-- [ ] Gestión usuarios
-- [ ] Invitación email
-- [ ] Audit log
-- [ ] EmptyStates
-- [ ] LoadingStates
-- [ ] ErrorBoundaries
-- [ ] Animaciones
-- [ ] Responsive
-- [ ] Smoke tests
-- [ ] README completo
+- [ ] AppShell.tsx (layout principal)
+- [ ] Sidebar.tsx
+- [ ] Header.tsx
+- [ ] ThemeToggle.tsx
+- [ ] LanguageToggle.tsx
+- [ ] UserMenu.tsx
+- [ ] Breadcrumbs.tsx
+
+#### N. COMPONENTES DE AUTH (src/components/auth/)
+
+- [ ] LoginForm.tsx (funcional con Firebase)
+- [ ] ProtectedRoute.tsx
+- [ ] RoleGate.tsx
+
+#### O. COMPONENTES DE CLIENTES (src/components/clientes/)
+
+- [ ] ClienteForm.tsx
+- [ ] ClientesTable.tsx
+- [ ] SucursalForm.tsx
+- [ ] PropietarioForm.tsx
+
+#### P. COMPONENTES DE BUSES (src/components/buses/)
+
+- [ ] BusForm.tsx
+- [ ] BusesTable.tsx
+- [ ] BusWizard.tsx (multi-step)
+- [ ] BusCard.tsx
+- [ ] BusStatusIndicator.tsx
+
+#### Q. COMPONENTES DE CÁMARAS (src/components/camaras/)
+
+- [ ] CamaraForm.tsx
+- [ ] CamarasGrid.tsx
+- [ ] PerfilCamaraSelect.tsx
+- [ ] ScreenshotCapture.tsx
+- [ ] StreamLiveButton.tsx (placeholder)
+
+#### R. COMPONENTES DE NOVEDADES (src/components/novedades/)
+
+- [ ] NovedadCatalogoSelect.tsx
+- [ ] NovedadConfigForm.tsx (dinámico según tipo)
+- [ ] LineaVirtualEditor.tsx (drag sobre screenshot)
+- [ ] ZonaPoligonoEditor.tsx
+- [ ] NovedadesEventosTable.tsx
+- [ ] NovedadDetailModal.tsx
+
+#### S. COMPONENTES DE CONDUCTORES (src/components/conductores/)
+
+- [ ] ConductorForm.tsx
+- [ ] ConductoresTable.tsx
+
+#### T. COMPONENTES DE DASHBOARD (src/components/dashboard/)
+
+- [ ] KPICard.tsx
+- [ ] FlotaOverview.tsx
+- [ ] NovedadesRecientes.tsx
+- [ ] BusesEnVivoTable.tsx
+
+#### U. COMPONENTES DE REPORTES (src/components/reportes/)
+
+- [ ] ReporteFiltros.tsx
+- [ ] ConteoSliderHorario.tsx
+- [ ] ReportePDF.tsx (@react-pdf/renderer)
+- [ ] ReportePreview.tsx
+
+#### V. COMPONENTES DE USUARIOS (src/components/usuarios/)
+
+- [ ] UsuarioForm.tsx
+- [ ] UsuariosTable.tsx
+- [ ] AsignarRolForm.tsx
+
+#### W. PÁGINAS (src/pages/)
+
+**Auth:**
+
+- [x] LoginPage.tsx (placeholder, falta Firebase Auth)
+- [ ] RecuperarPasswordPage.tsx
+
+**Principal:**
+
+- [x] DashboardPage.tsx (placeholder con KPIs mock)
+- [x] NotFoundPage.tsx
+- [ ] ForbiddenPage.tsx (403)
+
+**Clientes:**
+
+- [ ] ClientesListPage.tsx
+- [ ] ClienteDetailPage.tsx
+- [ ] ClienteNuevoPage.tsx
+
+**Buses:**
+
+- [ ] BusesListPage.tsx
+- [ ] BusDetailPage.tsx
+- [ ] BusNuevoPage.tsx (wizard)
+- [ ] BusConfigCamarasPage.tsx
+
+**Cámaras:**
+
+- [ ] CamaraConfigPage.tsx
+
+**Novedades:**
+
+- [ ] NovedadesEventosPage.tsx
+- [ ] NovedadEventoDetailPage.tsx
+
+**Conductores:**
+
+- [ ] ConductoresListPage.tsx
+- [ ] ConductorDetailPage.tsx
+
+**Reportes:**
+
+- [ ] ReportesGeneralPage.tsx
+- [ ] ReporteConteoPage.tsx
+- [ ] ReporteNovedadesPage.tsx
+
+**Usuarios:**
+
+- [ ] UsuariosListPage.tsx
+- [ ] UsuarioDetailPage.tsx
+
+**Configuración:**
+
+- [ ] ConfiguracionPage.tsx
+
+#### X. ROUTING (src/routes/)
+
+- [x] App.tsx con createBrowserRouter básico
+- [ ] index.tsx con rutas completas y loaders
+- [ ] ProtectedLayout.tsx
+- [ ] PublicLayout.tsx
+
+#### Y. FUNCIONALIDADES ESPECÍFICAS
+
+**Editor de Línea Virtual:**
+
+- [ ] Canvas SVG sobre screenshot
+- [ ] Estados: idle, placing-first, placing-second, adjusting
+- [ ] Handles arrastrables
+- [ ] Indicador de dirección (entrada/salida)
+- [ ] Snap a horizontal/vertical/diagonal
+- [ ] Coordenadas en porcentaje
+- [ ] Validación dentro del frame
+
+**Editor de Polígono:**
+
+- [ ] Click agrega vértices
+- [ ] Doble click cierra polígono
+- [ ] Mínimo 3 vértices
+- [ ] Vértices arrastrables
+- [ ] Visualización con transparencia
+- [ ] Validación no auto-intersectante
+
+**Dashboard:**
+
+- [ ] KPI: Buses activos / total
+- [ ] KPI: Novedades hoy
+- [ ] KPI: Pasajeros transportados
+- [ ] KPI: Alertas críticas
+- [ ] Gráfico novedades últimos 7 días
+- [ ] Tabla buses con estado tiempo real
+- [ ] Filtros: cliente, sucursal, estado, placa
+
+**Wizard de Bus:**
+
+- [ ] Step 1: Datos generales
+- [ ] Step 2: Conectividad
+- [ ] Step 3: Cámaras (1-6)
+- [ ] Step 4: Revisión y crear
+
+**Reportes PDF:**
+
+- [ ] Template con header (logo + cliente)
+- [ ] Datos del vehículo
+- [ ] Fecha/hora del evento
+- [ ] Screenshot grande
+- [ ] Datos técnicos
+- [ ] Footer con número y fecha
+
+#### Z. DATOS Y SEED
+
+- [ ] Seed catálogo de novedades MVP (5 tipos)
+- [ ] Documentar reglas Firestore (para hardening)
+
+#### AA. TESTING
+
+- [ ] Configurar Vitest
+- [ ] Smoke test: login
+- [ ] Smoke test: crear bus
+- [ ] Smoke test: configurar novedad
+
+#### AB. CALIDAD Y PULIDO
+
+- [ ] EmptyStates en todas las pantallas
+- [ ] LoadingStates consistentes
+- [ ] ErrorBoundaries por ruta
+- [ ] Micro-interacciones sutiles
+- [ ] Responsive móvil completo
+- [ ] Audit log básico
+
+---
+
+### RESUMEN DE PROGRESO
+
+| Categoría               | Completado | Total | %    |
+| ----------------------- | ---------- | ----- | ---- |
+| Configuración inicial   | 11         | 11    | 100% |
+| Estilos y tema          | 7          | 11    | 64%  |
+| Estructura carpetas     | 20         | 20    | 100% |
+| Configuración servicios | 3          | 3     | 100% |
+| Utilidades              | 4          | 4     | 100% |
+| i18n                    | 4          | 4     | 100% |
+| Tipos TypeScript        | 6          | 6     | 100% |
+| Schemas Zod             | 0          | 7     | 0%   |
+| Servicios Firebase      | 0          | 9     | 0%   |
+| Hooks                   | 2          | 4     | 50%  |
+| Stores                  | 1          | 3     | 33%  |
+| Componentes comunes     | 2          | 10    | 20%  |
+| Componentes layout      | 0          | 7     | 0%   |
+| Componentes auth        | 0          | 3     | 0%   |
+| Componentes dominio     | 0          | 30+   | 0%   |
+| Páginas                 | 3          | 20+   | ~15% |
+| Routing                 | 1          | 4     | 25%  |
+| Funcionalidades         | 0          | 25+   | 0%   |
+| Testing                 | 0          | 4     | 0%   |
+
+**Total estimado: ~15% del MVP completado**
 
 ---
 
