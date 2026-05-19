@@ -708,9 +708,10 @@ adn-lynx-ai/
 
 #### N. COMPONENTES DE AUTH (src/components/auth/)
 
-- [ ] LoginForm.tsx (funcional con Firebase)
-- [ ] ProtectedRoute.tsx
-- [ ] RoleGate.tsx
+- [x] LoginForm.tsx (funcional con Firebase, React Hook Form + Zod)
+- [x] ProtectedRoute.tsx (incluye PublicRoute)
+- [x] RoleGate.tsx (incluye Can, CanAny, CanAll)
+- [x] index.ts (re-exports)
 
 #### O. COMPONENTES DE CLIENTES (src/components/clientes/)
 
