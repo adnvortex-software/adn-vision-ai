@@ -696,13 +696,15 @@ adn-lynx-ai/
 
 #### M. COMPONENTES DE LAYOUT (src/components/layout/)
 
-- [ ] AppShell.tsx (layout principal)
-- [ ] Sidebar.tsx
-- [ ] Header.tsx
-- [ ] ThemeToggle.tsx
-- [ ] LanguageToggle.tsx
-- [ ] UserMenu.tsx
-- [ ] Breadcrumbs.tsx
+- [x] AppShell.tsx (layout principal)
+- [x] Sidebar.tsx
+- [x] Header.tsx
+- [x] ThemeToggle.tsx
+- [x] LanguageToggle.tsx
+- [x] UserMenu.tsx
+- [x] Breadcrumbs.tsx
+- [x] MobileMenu.tsx (menú móvil con Sheet)
+- [x] index.ts (re-exports)
 
 #### N. COMPONENTES DE AUTH (src/components/auth/)
 
