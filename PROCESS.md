@@ -684,14 +684,15 @@ adn-lynx-ai/
 
 - [x] LoadingState.tsx
 - [x] Logo.tsx
-- [ ] EmptyState.tsx
-- [ ] ErrorBoundary.tsx
-- [ ] DataTable.tsx (wrapper TanStack Table)
-- [ ] PageHeader.tsx
-- [ ] ConfirmDialog.tsx
-- [ ] StatusBadge.tsx
-- [ ] FormField.tsx
-- [ ] DateRangePicker.tsx
+- [x] EmptyState.tsx
+- [x] ErrorBoundary.tsx
+- [x] DataTable.tsx (wrapper TanStack Table)
+- [x] PageHeader.tsx
+- [x] ConfirmDialog.tsx
+- [x] StatusBadge.tsx
+- [x] FormField.tsx (incluye FormSection, FormGrid)
+- [x] DateRangePicker.tsx (incluye SingleDatePicker)
+- [x] index.ts (re-exports)
 
 #### M. COMPONENTES DE LAYOUT (src/components/layout/)
 
