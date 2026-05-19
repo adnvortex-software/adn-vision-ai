@@ -1,0 +1,213 @@
+{
+  "app": {
+    "name": "ADN LYNX AI",
+    "tagline": "Smart fleet monitoring"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "filter": "Filter",
+    "actions": "Actions",
+    "yes": "Yes",
+    "no": "No",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "close": "Close",
+    "download": "Download",
+    "upload": "Upload",
+    "refresh": "Refresh",
+    "noData": "No data",
+    "noResults": "No results found",
+    "required": "Required",
+    "optional": "Optional",
+    "all": "All",
+    "active": "Active",
+    "inactive": "Inactive",
+    "enabled": "Enabled",
+    "disabled": "Disabled"
+  },
+  "auth": {
+    "login": "Log in",
+    "logout": "Log out",
+    "email": "Email",
+    "password": "Password",
+    "rememberMe": "Remember me",
+    "forgotPassword": "Forgot your password?",
+    "resetPassword": "Reset password",
+    "loginError": "Invalid credentials",
+    "sessionExpired": "Your session has expired"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "clientes": "Clients",
+    "buses": "Buses",
+    "novedades": "Novelties",
+    "eventos": "Events",
+    "reportes": "Reports",
+    "conductores": "Drivers",
+    "usuarios": "Users",
+    "configuracion": "Settings",
+    "miCuenta": "My account"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "busesActivos": "Active buses",
+    "novedadesHoy": "Novelties today",
+    "pasajerosHoy": "Passengers today",
+    "alertasCriticas": "Critical alerts",
+    "ultimasNovedades": "Recent novelties",
+    "estadoBuses": "Bus status"
+  },
+  "clientes": {
+    "title": "Clients",
+    "nuevo": "New client",
+    "nombre": "Name",
+    "nit": "Tax ID",
+    "email": "Contact email",
+    "telefono": "Contact phone",
+    "plan": "Subscribed plan",
+    "sucursales": "Branches",
+    "propietarios": "Owners"
+  },
+  "buses": {
+    "title": "Buses",
+    "nuevo": "New bus",
+    "placa": "License plate",
+    "cliente": "Client",
+    "sucursal": "Branch",
+    "propietario": "Owner",
+    "tipo": "Vehicle type",
+    "ruta": "Route",
+    "conductor": "Assigned driver",
+    "estado": "Status",
+    "camaras": "Cameras",
+    "conectividad": "Connectivity",
+    "ipRouter": "Router IP (ZeroTier)",
+    "subnetLan": "LAN Subnet",
+    "estados": {
+      "activo": "Active",
+      "inactivo": "Inactive",
+      "mantenimiento": "Maintenance",
+      "sin_conexion": "Disconnected"
+    },
+    "tipos": {
+      "bus": "Bus",
+      "buseta": "Minibus",
+      "van": "Van",
+      "microbus": "Microbus",
+      "otro": "Other"
+    }
+  },
+  "camaras": {
+    "title": "Cameras",
+    "nombre": "Name",
+    "perfil": "Profile",
+    "canal": "DVR Channel",
+    "rtspUrl": "RTSP URL",
+    "capturar": "Capture screenshot",
+    "verEnVivo": "View live",
+    "perfiles": {
+      "cabina": "Cabin",
+      "puerta": "Door",
+      "pasillo": "Aisle",
+      "frontal": "Front",
+      "exterior": "Exterior",
+      "otro": "Other"
+    }
+  },
+  "novedades": {
+    "title": "Novelties",
+    "configurar": "Configure novelty",
+    "eventos": "Novelty events",
+    "tipoNovedad": "Novelty type",
+    "lineaVirtual": "Virtual line",
+    "zonaPoligono": "Polygon zone",
+    "tiempoMinimo": "Minimum time (seconds)",
+    "cantidadMaxima": "Maximum count",
+    "sensibilidad": "Sensitivity",
+    "categorias": {
+      "operativa": "Operational",
+      "seguridad_conductor": "Driver safety",
+      "seguridad_pasajero": "Passenger safety",
+      "tecnica": "Technical",
+      "comercial": "Commercial"
+    },
+    "tipos": {
+      "conteo_pasajeros": "Passenger count",
+      "pasajero_en_cabina": "Passenger in cabin",
+      "sobrecupo": "Overcapacity",
+      "conductor_sin_cinturon": "Driver without seatbelt",
+      "conductor_fumando": "Driver smoking"
+    }
+  },
+  "eventos": {
+    "title": "Events",
+    "nuevo": "New",
+    "revisado": "Reviewed",
+    "resuelto": "Resolved",
+    "descartado": "Discarded",
+    "marcarRevisado": "Mark as reviewed",
+    "marcarResuelto": "Mark as resolved",
+    "descartar": "Discard",
+    "notas": "Notes",
+    "generarPDF": "Generate PDF"
+  },
+  "reportes": {
+    "title": "Reports",
+    "generar": "Generate report",
+    "tipoReporte": "Report type",
+    "fechaInicio": "Start date",
+    "fechaFin": "End date",
+    "conteo": "Count report",
+    "novedades": "Novelties report",
+    "consolidado": "Consolidated report"
+  },
+  "conductores": {
+    "title": "Drivers",
+    "nuevo": "New driver",
+    "nombre": "Name",
+    "cedula": "ID number",
+    "licencia": "License number",
+    "fechaVencimiento": "Expiration date",
+    "foto": "Photo"
+  },
+  "usuarios": {
+    "title": "Users",
+    "nuevo": "New user",
+    "nombre": "Name",
+    "email": "Email",
+    "rol": "Role",
+    "roles": {
+      "super_admin": "Super Administrator",
+      "ops_admin": "Operations Administrator",
+      "analyst": "Analyst",
+      "support": "Support",
+      "client_admin": "Client Administrator",
+      "client_viewer": "Client Viewer"
+    }
+  },
+  "validation": {
+    "required": "This field is required",
+    "email": "Enter a valid email",
+    "minLength": "Minimum {{min}} characters",
+    "maxLength": "Maximum {{max}} characters",
+    "placaInvalida": "Invalid plate format (e.g.: ABC123)",
+    "ipInvalida": "Invalid IP format",
+    "urlInvalida": "Invalid URL"
+  },
+  "errors": {
+    "generic": "An error has occurred",
+    "notFound": "Not found",
+    "forbidden": "You don't have permission to perform this action",
+    "networkError": "Connection error"
+  }
+}

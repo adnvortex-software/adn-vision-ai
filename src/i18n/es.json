@@ -1,0 +1,213 @@
+{
+  "app": {
+    "name": "ADN LYNX AI",
+    "tagline": "Monitoreo inteligente de flotas"
+  },
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "create": "Crear",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "actions": "Acciones",
+    "yes": "Sí",
+    "no": "No",
+    "confirm": "Confirmar",
+    "back": "Volver",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "close": "Cerrar",
+    "download": "Descargar",
+    "upload": "Subir",
+    "refresh": "Actualizar",
+    "noData": "Sin datos",
+    "noResults": "No se encontraron resultados",
+    "required": "Requerido",
+    "optional": "Opcional",
+    "all": "Todos",
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "enabled": "Habilitado",
+    "disabled": "Deshabilitado"
+  },
+  "auth": {
+    "login": "Iniciar sesión",
+    "logout": "Cerrar sesión",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "rememberMe": "Recordarme",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "resetPassword": "Restablecer contraseña",
+    "loginError": "Credenciales inválidas",
+    "sessionExpired": "Tu sesión ha expirado"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "clientes": "Clientes",
+    "buses": "Buses",
+    "novedades": "Novedades",
+    "eventos": "Eventos",
+    "reportes": "Reportes",
+    "conductores": "Conductores",
+    "usuarios": "Usuarios",
+    "configuracion": "Configuración",
+    "miCuenta": "Mi cuenta"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "busesActivos": "Buses activos",
+    "novedadesHoy": "Novedades hoy",
+    "pasajerosHoy": "Pasajeros hoy",
+    "alertasCriticas": "Alertas críticas",
+    "ultimasNovedades": "Últimas novedades",
+    "estadoBuses": "Estado de buses"
+  },
+  "clientes": {
+    "title": "Clientes",
+    "nuevo": "Nuevo cliente",
+    "nombre": "Nombre",
+    "nit": "NIT",
+    "email": "Email de contacto",
+    "telefono": "Teléfono de contacto",
+    "plan": "Plan contratado",
+    "sucursales": "Sucursales",
+    "propietarios": "Propietarios"
+  },
+  "buses": {
+    "title": "Buses",
+    "nuevo": "Nuevo bus",
+    "placa": "Placa",
+    "cliente": "Cliente",
+    "sucursal": "Sucursal",
+    "propietario": "Propietario",
+    "tipo": "Tipo de vehículo",
+    "ruta": "Ruta",
+    "conductor": "Conductor asignado",
+    "estado": "Estado",
+    "camaras": "Cámaras",
+    "conectividad": "Conectividad",
+    "ipRouter": "IP Router (ZeroTier)",
+    "subnetLan": "Subnet LAN",
+    "estados": {
+      "activo": "Activo",
+      "inactivo": "Inactivo",
+      "mantenimiento": "En mantenimiento",
+      "sin_conexion": "Sin conexión"
+    },
+    "tipos": {
+      "bus": "Bus",
+      "buseta": "Buseta",
+      "van": "Van",
+      "microbus": "Microbús",
+      "otro": "Otro"
+    }
+  },
+  "camaras": {
+    "title": "Cámaras",
+    "nombre": "Nombre",
+    "perfil": "Perfil",
+    "canal": "Canal DVR",
+    "rtspUrl": "URL RTSP",
+    "capturar": "Capturar screenshot",
+    "verEnVivo": "Ver en vivo",
+    "perfiles": {
+      "cabina": "Cabina",
+      "puerta": "Puerta",
+      "pasillo": "Pasillo",
+      "frontal": "Frontal",
+      "exterior": "Exterior",
+      "otro": "Otro"
+    }
+  },
+  "novedades": {
+    "title": "Novedades",
+    "configurar": "Configurar novedad",
+    "eventos": "Eventos de novedades",
+    "tipoNovedad": "Tipo de novedad",
+    "lineaVirtual": "Línea virtual",
+    "zonaPoligono": "Zona polígono",
+    "tiempoMinimo": "Tiempo mínimo (segundos)",
+    "cantidadMaxima": "Cantidad máxima",
+    "sensibilidad": "Sensibilidad",
+    "categorias": {
+      "operativa": "Operativa",
+      "seguridad_conductor": "Seguridad del conductor",
+      "seguridad_pasajero": "Seguridad del pasajero",
+      "tecnica": "Técnica",
+      "comercial": "Comercial"
+    },
+    "tipos": {
+      "conteo_pasajeros": "Conteo de pasajeros",
+      "pasajero_en_cabina": "Pasajero en cabina",
+      "sobrecupo": "Sobrecupo",
+      "conductor_sin_cinturon": "Conductor sin cinturón",
+      "conductor_fumando": "Conductor fumando"
+    }
+  },
+  "eventos": {
+    "title": "Eventos",
+    "nuevo": "Nuevo",
+    "revisado": "Revisado",
+    "resuelto": "Resuelto",
+    "descartado": "Descartado",
+    "marcarRevisado": "Marcar como revisado",
+    "marcarResuelto": "Marcar como resuelto",
+    "descartar": "Descartar",
+    "notas": "Notas",
+    "generarPDF": "Generar PDF"
+  },
+  "reportes": {
+    "title": "Reportes",
+    "generar": "Generar reporte",
+    "tipoReporte": "Tipo de reporte",
+    "fechaInicio": "Fecha inicio",
+    "fechaFin": "Fecha fin",
+    "conteo": "Reporte de conteo",
+    "novedades": "Reporte de novedades",
+    "consolidado": "Reporte consolidado"
+  },
+  "conductores": {
+    "title": "Conductores",
+    "nuevo": "Nuevo conductor",
+    "nombre": "Nombre",
+    "cedula": "Cédula",
+    "licencia": "Número de licencia",
+    "fechaVencimiento": "Fecha de vencimiento",
+    "foto": "Foto"
+  },
+  "usuarios": {
+    "title": "Usuarios",
+    "nuevo": "Nuevo usuario",
+    "nombre": "Nombre",
+    "email": "Email",
+    "rol": "Rol",
+    "roles": {
+      "super_admin": "Super Administrador",
+      "ops_admin": "Administrador de Operaciones",
+      "analyst": "Analista",
+      "support": "Soporte",
+      "client_admin": "Administrador de Cliente",
+      "client_viewer": "Visor de Cliente"
+    }
+  },
+  "validation": {
+    "required": "Este campo es requerido",
+    "email": "Ingresa un email válido",
+    "minLength": "Mínimo {{min}} caracteres",
+    "maxLength": "Máximo {{max}} caracteres",
+    "placaInvalida": "Formato de placa inválido (ej: ABC123)",
+    "ipInvalida": "Formato de IP inválido",
+    "urlInvalida": "URL inválida"
+  },
+  "errors": {
+    "generic": "Ha ocurrido un error",
+    "notFound": "No encontrado",
+    "forbidden": "No tienes permiso para realizar esta acción",
+    "networkError": "Error de conexión"
+  }
+}
