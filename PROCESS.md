@@ -885,8 +885,8 @@ adn-lynx-ai/
 
 #### Z. DATOS Y SEED
 
-- [ ] Seed catálogo de novedades MVP (5 tipos)
-- [ ] Documentar reglas Firestore (para hardening)
+- [x] Seed catálogo de novedades MVP (5 tipos)
+- [x] Documentar reglas Firestore (para hardening)
 
 #### AA. TESTING
 
