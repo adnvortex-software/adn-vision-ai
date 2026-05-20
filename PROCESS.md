@@ -765,10 +765,11 @@ adn-lynx-ai/
 
 #### U. COMPONENTES DE REPORTES (src/components/reportes/)
 
-- [ ] ReporteFiltros.tsx
-- [ ] ConteoSliderHorario.tsx
-- [ ] ReportePDF.tsx (@react-pdf/renderer)
-- [ ] ReportePreview.tsx
+- [x] ReporteFiltros.tsx (filtros: tipo, fechas, sucursal, buses seleccionables)
+- [x] ConteoSliderHorario.tsx (bar chart por hora, hora pico, detalle al click)
+- [x] ReportePDF.tsx (tipos exportados, placeholder @react-pdf/renderer)
+- [x] ReportePreview.tsx (NovedadesPreview, ConteoPreview, ConsolidadoPreview)
+- [x] index.ts (re-exports)
 
 #### V. COMPONENTES DE USUARIOS (src/components/usuarios/)
 
