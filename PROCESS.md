@@ -773,9 +773,10 @@ adn-lynx-ai/
 
 #### V. COMPONENTES DE USUARIOS (src/components/usuarios/)
 
-- [ ] UsuarioForm.tsx
-- [ ] UsuariosTable.tsx
-- [ ] AsignarRolForm.tsx
+- [x] UsuarioForm.tsx (create/edit usuarios, role selection, sucursal/propietario binding)
+- [x] UsuariosTable.tsx (DataTable con roles, cliente, estado, acciones)
+- [x] AsignarRolForm.tsx (modal para cambiar rol con advertencias de cambio de tipo)
+- [x] index.ts (re-exports, RoleBadge helper)
 
 #### W. PÁGINAS (src/pages/)
 
