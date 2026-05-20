@@ -757,10 +757,11 @@ adn-lynx-ai/
 
 #### T. COMPONENTES DE DASHBOARD (src/components/dashboard/)
 
-- [ ] KPICard.tsx
-- [ ] FlotaOverview.tsx
-- [ ] NovedadesRecientes.tsx
-- [ ] BusesEnVivoTable.tsx
+- [x] KPICard.tsx (variantes, trends, KPIGrid helper)
+- [x] FlotaOverview.tsx (estado flota, barra progreso, breakdown)
+- [x] NovedadesRecientes.tsx (lista eventos recientes con thumbnails)
+- [x] BusesEnVivoTable.tsx (estado real-time, conteo, novedades)
+- [x] index.ts (re-exports)
 
 #### U. COMPONENTES DE REPORTES (src/components/reportes/)
 
