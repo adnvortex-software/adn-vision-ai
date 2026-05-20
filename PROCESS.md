@@ -832,9 +832,9 @@ adn-lynx-ai/
 #### X. ROUTING (src/routes/)
 
 - [x] App.tsx con createBrowserRouter básico
-- [ ] index.tsx con rutas completas y loaders
-- [ ] ProtectedLayout.tsx
-- [ ] PublicLayout.tsx
+- [x] index.tsx con rutas completas y loaders
+- [x] ProtectedLayout.tsx
+- [x] PublicLayout.tsx
 
 #### Y. FUNCIONALIDADES ESPECÍFICAS
 
@@ -926,7 +926,7 @@ adn-lynx-ai/
 | Componentes auth        | 0          | 3     | 0%   |
 | Componentes dominio     | 0          | 30+   | 0%   |
 | Páginas                 | 3          | 20+   | ~15% |
-| Routing                 | 1          | 4     | 25%  |
+| Routing                 | 4          | 4     | 100% |
 | Funcionalidades         | 0          | 25+   | 0%   |
 | Testing                 | 0          | 4     | 0%   |
 
