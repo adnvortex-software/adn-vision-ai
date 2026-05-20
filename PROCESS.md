@@ -840,32 +840,32 @@ adn-lynx-ai/
 
 **Editor de Línea Virtual:**
 
-- [ ] Canvas SVG sobre screenshot
-- [ ] Estados: idle, placing-first, placing-second, adjusting
-- [ ] Handles arrastrables
-- [ ] Indicador de dirección (entrada/salida)
+- [x] Canvas SVG sobre screenshot
+- [x] Estados: idle, placing-first, placing-second, adjusting
+- [ ] Handles arrastrables (drag to adjust)
+- [x] Indicador de dirección (entrada/salida)
 - [ ] Snap a horizontal/vertical/diagonal
-- [ ] Coordenadas en porcentaje
-- [ ] Validación dentro del frame
+- [x] Coordenadas en porcentaje
+- [x] Validación dentro del frame
 
 **Editor de Polígono:**
 
-- [ ] Click agrega vértices
+- [x] Click agrega vértices
 - [ ] Doble click cierra polígono
-- [ ] Mínimo 3 vértices
-- [ ] Vértices arrastrables
-- [ ] Visualización con transparencia
+- [x] Mínimo 3 vértices
+- [ ] Vértices arrastrables (drag to adjust)
+- [x] Visualización con transparencia
 - [ ] Validación no auto-intersectante
 
 **Dashboard:**
 
-- [ ] KPI: Buses activos / total
-- [ ] KPI: Novedades hoy
-- [ ] KPI: Pasajeros transportados
-- [ ] KPI: Alertas críticas
-- [ ] Gráfico novedades últimos 7 días
-- [ ] Tabla buses con estado tiempo real
-- [ ] Filtros: cliente, sucursal, estado, placa
+- [x] KPI: Buses activos / total
+- [x] KPI: Novedades hoy
+- [x] KPI: Pasajeros transportados
+- [x] KPI: Alertas críticas
+- [x] Gráfico novedades últimos 7 días
+- [x] Tabla buses con estado tiempo real
+- [x] Filtros: cliente, sucursal, estado, placa
 
 **Wizard de Bus:**
 
