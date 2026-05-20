@@ -741,12 +741,13 @@ adn-lynx-ai/
 
 #### R. COMPONENTES DE NOVEDADES (src/components/novedades/)
 
-- [ ] NovedadCatalogoSelect.tsx
-- [ ] NovedadConfigForm.tsx (dinámico según tipo)
-- [ ] LineaVirtualEditor.tsx (drag sobre screenshot)
-- [ ] ZonaPoligonoEditor.tsx
-- [ ] NovedadesEventosTable.tsx
-- [ ] NovedadDetailModal.tsx
+- [x] NovedadCatalogoSelect.tsx (agrupado por categoria, NovedadIcon, NovedadCategoriaBadge)
+- [x] NovedadConfigForm.tsx (dinamico segun tipo, params por novedad)
+- [x] LineaVirtualEditor.tsx (dibujo SVG sobre screenshot, orientacion)
+- [x] ZonaPoligonoEditor.tsx (poligono editable con vertices numerados)
+- [x] NovedadesEventosTable.tsx (DataTable con estado, EventoEstadoBadge)
+- [x] NovedadDetailModal.tsx (vista completa, acciones resolver/descartar/PDF)
+- [x] index.ts (re-exports)
 
 #### S. COMPONENTES DE CONDUCTORES (src/components/conductores/)
 
