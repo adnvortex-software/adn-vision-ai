@@ -2,10 +2,11 @@ import type { Timestamp as FirestoreTimestamp, DocumentData } from 'firebase/fir
 
 /**
  * Campos comunes a todas las entidades
+ * Note: createdAt/updatedAt can be null for mock data or before server timestamps are set
  */
 export interface BaseEntity {
-  createdAt: FirestoreTimestamp
-  updatedAt: FirestoreTimestamp
+  createdAt: FirestoreTimestamp | null
+  updatedAt: FirestoreTimestamp | null
   createdBy: string
   deleted?: boolean
 }
