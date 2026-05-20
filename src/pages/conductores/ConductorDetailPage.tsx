@@ -190,7 +190,7 @@ export default function ConductorDetailPage() {
                 <Button
                   variant="outline"
                   onClick={() => {
-                    navigate(`/buses/${mockConductor.busAsignado.id}`)
+                    navigate(`/buses/${mockConductor.busAsignado?.id ?? ''}`)
                   }}
                 >
                   Ver Bus

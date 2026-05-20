@@ -17,6 +17,7 @@ export interface Cliente extends BaseEntity {
  * Sucursal de un cliente
  */
 export interface Sucursal extends BaseEntity {
+  clienteId: string
   nombre: string
   direccion: string
   ciudad: string

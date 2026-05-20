@@ -43,6 +43,7 @@ export async function getCamara(busId: string, camaraId: string): Promise<Entity
   return {
     id: docSnap.id,
     ...parsed.data,
+    ultimoScreenshotAt: (data as { ultimoScreenshotAt?: unknown }).ultimoScreenshotAt as Camara['ultimoScreenshotAt'] ?? null,
     createdAt: data.createdAt,
     updatedAt: data.updatedAt,
   }
@@ -60,7 +61,7 @@ export async function listCamaras(busId: string): Promise<Entity<Camara>[]> {
 
   const snapshot = await getDocs(q)
 
-  const camaras: Entity<Camara>[] = snapshot.docs
+  const camaras = snapshot.docs
     .map((docSnap) => {
       const data = docSnap.data() as FirestoreDocData
       const parsed = camaraFirestoreSchema.safeParse(data)
@@ -68,9 +69,10 @@ export async function listCamaras(busId: string): Promise<Entity<Camara>[]> {
       return {
         id: docSnap.id,
         ...parsed.data,
+        ultimoScreenshotAt: (data as { ultimoScreenshotAt?: unknown }).ultimoScreenshotAt as Camara['ultimoScreenshotAt'] ?? null,
         createdAt: data.createdAt,
         updatedAt: data.updatedAt,
-      }
+      } as Entity<Camara>
     })
     .filter((item): item is Entity<Camara> => item !== null)
   return camaras
@@ -241,7 +243,7 @@ export function subscribeToCamaras(
   )
 
   return onSnapshot(q, (snapshot) => {
-    const camaras: Entity<Camara>[] = snapshot.docs
+    const camaras = snapshot.docs
       .map((docSnap) => {
         const data = docSnap.data() as FirestoreDocData
         const parsed = camaraFirestoreSchema.safeParse(data)
@@ -249,9 +251,10 @@ export function subscribeToCamaras(
         return {
           id: docSnap.id,
           ...parsed.data,
+          ultimoScreenshotAt: (data as { ultimoScreenshotAt?: unknown }).ultimoScreenshotAt as Camara['ultimoScreenshotAt'] ?? null,
           createdAt: data.createdAt,
           updatedAt: data.updatedAt,
-        }
+        } as Entity<Camara>
       })
       .filter((item): item is Entity<Camara> => item !== null)
 

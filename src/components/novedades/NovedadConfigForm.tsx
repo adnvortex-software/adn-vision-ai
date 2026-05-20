@@ -6,12 +6,13 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { NovedadCatalogoSelect, NovedadIcon } from './NovedadCatalogoSelect'
+import type { CameraProfile } from '@/config/constants'
 import type { NovedadCatalogo, NovedadParams, CreateNovedadConfigData } from '@/types/novedad'
 import type { Entity } from '@/types/firestore'
 
 interface NovedadConfigFormProps {
   catalogo: Entity<NovedadCatalogo>[]
-  camaraPerfil?: string
+  camaraPerfil?: CameraProfile
   initialConfig?: CreateNovedadConfigData
   onSubmit: (data: CreateNovedadConfigData) => Promise<void>
   onCancel?: () => void

@@ -993,6 +993,61 @@ adn-lynx-ai/
   - Instalar componentes shadcn/ui base
   - Completar Sprint 2: Autenticación y Layout completo
 
+### Sesión 2 — 2026-05-20 (DEMO PREPARATION)
+
+- **Lo que se hizo:**
+  
+  **Frontend (adn-lynx-ai):**
+  - Corregidos ~40+ errores de TypeScript para que el build compile correctamente
+  - Fixes incluyen: DateRangePicker `autoFocus`, BusWizardData tipos opcionales con `| null`, DashboardPage mockData con `Timestamp.now()`, CameraProfile type assertions, Sucursal `clienteId`, PageHeader `title: ReactNode`, CamarasGrid `onConfigNovedades` prop, service type assertions para Firestore
+  - Build ahora completa sin errores (`pnpm build` exitoso)
+  - Dev server funcionando en puerto 3001
+  
+  **Backend (adn-lynx-back) - REORGANIZADO COMPLETO:**
+  - Creado `main.py` - Contador de pasajeros con YOLOv8 + Firebase
+    - Detección de personas con tracking (ByteTrack)
+    - Cruce de línea virtual para conteo entrada/salida
+    - Sincronización en tiempo real con Firestore (conteos, eventos)
+    - Detección de sobrecupo con alerta
+    - Screenshots a Firebase Storage
+    - Heartbeat para estado de conectividad
+    - Listener de configuración desde Firestore
+  - Creado `.env.example` con todas las variables necesarias
+  - Creado `requirements.txt` (firebase-admin, opencv-python, ultralytics, python-dotenv)
+  - Creado `README.md` con documentación de setup y uso
+  - Creado `seed_demo.py` para inicializar datos de demo (cliente, sucursal, bus, cámara)
+  - Creado `.gitignore` (credentials, .pt models, venv, etc.)
+  - Eliminados archivos obsoletos del proyecto de prueba anterior
+  
+  **Modelo de datos alineado:**
+  - Backend usa misma estructura que frontend: busId, clienteId, camaraId
+  - Colección `conteos/{busId}` con entradasDia, salidasDia, aforoActual
+  - Subcolección `conteos/{busId}/eventos/{auto}` para eventos de cruce
+  - Colección `eventos/{auto}` para novedades (sobrecupo, etc.)
+  - Heartbeat en `buses/{busId}.lastHeartbeat`
+
+- **Decisiones tomadas:**
+  - main.py como nombre profesional del edge counter
+  - Modelo YOLOv8n.pt recomendado para CPU (liviano)
+  - ByteTrack para tracking persistente de personas
+  - Configuración dinámica desde Firestore (cámara puede cambiar parámetros remotamente)
+  - Variables de entorno para configuración del dispositivo edge
+
+- **Pendiente para demo:**
+  - [x] Frontend compila sin errores
+  - [x] Backend reorganizado y documentado
+  - [x] Modelo de datos alineado
+  - [ ] Usuario configura ZeroTier en Teltonika (manual)
+  - [ ] Usuario crea credenciales Firebase y las configura en backend
+  - [ ] Usuario ejecuta seed_demo.py para crear datos de prueba
+  - [ ] Usuario conecta cámara real y configura RTSP_URL
+  - [ ] Probar flujo completo: crear bus en frontend → edge detecta → eventos aparecen
+
+- **Lo que sigue después del demo:**
+  - Continuar con testing
+  - EmptyStates y LoadingStates consistentes
+  - ErrorBoundaries por ruta
+
 ---
 
 ## 12. Glosario y notas

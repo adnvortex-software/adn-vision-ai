@@ -87,7 +87,7 @@ export default function NovedadEventoDetailPage() {
         title={
           <div className="flex items-center gap-3">
             <AlertTriangle className="h-6 w-6" />
-            {mockEvento.tipoNovedadNombre ?? mockEvento.tipoNovedad}
+            {mockEvento.novedadNombre ?? mockEvento.tipoNovedad}
           </div>
         }
         description={`Bus: ${mockEvento.busPlaca ?? mockEvento.busId}`}
@@ -166,7 +166,7 @@ export default function NovedadEventoDetailPage() {
               <div>
                 <p className="text-sm text-muted-foreground">Tipo</p>
                 <p className="font-medium">
-                  {mockEvento.tipoNovedadNombre ?? mockEvento.tipoNovedad}
+                  {mockEvento.novedadNombre ?? mockEvento.tipoNovedad}
                 </p>
               </div>
               <div>

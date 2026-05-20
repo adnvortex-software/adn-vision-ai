@@ -42,9 +42,10 @@ export async function getConductor(conductorId: string): Promise<Entity<Conducto
   return {
     id: docSnap.id,
     ...parsed.data,
+    fechaVencimientoLicencia: (data as { fechaVencimientoLicencia: unknown }).fechaVencimientoLicencia as Conductor['fechaVencimientoLicencia'],
     createdAt: data.createdAt,
     updatedAt: data.updatedAt,
-  }
+  } as Entity<Conductor>
 }
 
 /**
@@ -72,9 +73,10 @@ export async function getConductorByCedula(cedula: string): Promise<Entity<Condu
   return {
     id: docSnap.id,
     ...parsed.data,
+    fechaVencimientoLicencia: (data as { fechaVencimientoLicencia: unknown }).fechaVencimientoLicencia as Conductor['fechaVencimientoLicencia'],
     createdAt: data.createdAt,
     updatedAt: data.updatedAt,
-  }
+  } as Entity<Conductor>
 }
 
 /**
@@ -125,7 +127,7 @@ export async function listConductores(
   const docs = snapshot.docs.slice(0, pageLimit)
   const hasMore = snapshot.docs.length > pageLimit
 
-  const data: Entity<Conductor>[] = docs
+  const data = docs
     .map((docSnap) => {
       const docData = docSnap.data() as FirestoreDocData
       const parsed = conductorFirestoreSchema.safeParse(docData)
@@ -133,9 +135,10 @@ export async function listConductores(
       return {
         id: docSnap.id,
         ...parsed.data,
+        fechaVencimientoLicencia: (docData as { fechaVencimientoLicencia: unknown }).fechaVencimientoLicencia as Conductor['fechaVencimientoLicencia'],
         createdAt: docData.createdAt,
         updatedAt: docData.updatedAt,
-      }
+      } as Entity<Conductor>
     })
     .filter((item): item is Entity<Conductor> => item !== null)
 
@@ -165,17 +168,18 @@ export async function listConductoresLicenciasPorVencer(
 
   const snapshot = await getDocs(q)
 
-  const conductores: Entity<Conductor>[] = snapshot.docs
+  const conductores = snapshot.docs
     .map((docSnap) => {
-      const data = docSnap.data() as FirestoreDocData
-      const parsed = conductorFirestoreSchema.safeParse(data)
+      const docData = docSnap.data() as FirestoreDocData
+      const parsed = conductorFirestoreSchema.safeParse(docData)
       if (!parsed.success) return null
       return {
         id: docSnap.id,
         ...parsed.data,
-        createdAt: data.createdAt,
-        updatedAt: data.updatedAt,
-      }
+        fechaVencimientoLicencia: (docData as { fechaVencimientoLicencia: unknown }).fechaVencimientoLicencia as Conductor['fechaVencimientoLicencia'],
+        createdAt: docData.createdAt,
+        updatedAt: docData.updatedAt,
+      } as Entity<Conductor>
     })
     .filter((item): item is Entity<Conductor> => item !== null)
   return conductores

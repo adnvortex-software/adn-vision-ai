@@ -134,6 +134,7 @@ export interface EventoConDetalles extends Evento {
   busPlaca?: string
   clienteNombre?: string
   novedadNombre?: string
+  novedadCategoria?: NoveltyCategory
   camaraNombre?: string
 }
 

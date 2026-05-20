@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { Timestamp } from 'firebase/firestore'
 import { Bus, AlertTriangle, Users, Activity, Search, X, Filter, RefreshCw } from 'lucide-react'
 import {
   BarChart,
@@ -59,7 +60,7 @@ const mockBuses: BusConDetalles[] = [
     deleted: false,
     clienteNombre: 'Transportes ABC',
     sucursalNombre: 'Terminal Norte',
-    conductorNombre: null,
+    conductorNombre: undefined,
     novedadesHoy: 3,
     conteoDia: { entradas: 120, salidas: 85, aforo: 35 },
   },
@@ -84,7 +85,7 @@ const mockBuses: BusConDetalles[] = [
     deleted: false,
     clienteNombre: 'Transportes ABC',
     sucursalNombre: 'Terminal Norte',
-    conductorNombre: null,
+    conductorNombre: undefined,
     novedadesHoy: 1,
     conteoDia: { entradas: 95, salidas: 90, aforo: 5 },
   },
@@ -109,9 +110,9 @@ const mockBuses: BusConDetalles[] = [
     deleted: false,
     clienteNombre: 'Transportes ABC',
     sucursalNombre: 'Terminal Sur',
-    conductorNombre: null,
+    conductorNombre: undefined,
     novedadesHoy: 0,
-    conteoDia: null,
+    conteoDia: undefined,
   },
   {
     id: 'bus-4',
@@ -134,11 +135,14 @@ const mockBuses: BusConDetalles[] = [
     deleted: false,
     clienteNombre: 'Transportes ABC',
     sucursalNombre: 'Terminal Norte',
-    conductorNombre: null,
+    conductorNombre: undefined,
     novedadesHoy: 0,
-    conteoDia: null,
+    conteoDia: undefined,
   },
 ]
+
+// Mock timestamp for demo data
+const mockTimestamp = Timestamp.now()
 
 const mockEventos: EventoConDetalles[] = [
   {
@@ -148,7 +152,7 @@ const mockEventos: EventoConDetalles[] = [
     clienteId: 'client-1',
     sucursalId: 'suc-1',
     camaraId: 'cam-1',
-    timestamp: null,
+    timestamp: mockTimestamp,
     screenshotUrl: null,
     videoClipUrl: null,
     datos: {},
@@ -173,7 +177,7 @@ const mockEventos: EventoConDetalles[] = [
     clienteId: 'client-1',
     sucursalId: 'suc-1',
     camaraId: 'cam-1',
-    timestamp: null,
+    timestamp: mockTimestamp,
     screenshotUrl: null,
     videoClipUrl: null,
     datos: {},
@@ -198,7 +202,7 @@ const mockEventos: EventoConDetalles[] = [
     clienteId: 'client-1',
     sucursalId: 'suc-1',
     camaraId: 'cam-2',
-    timestamp: null,
+    timestamp: mockTimestamp,
     screenshotUrl: null,
     videoClipUrl: null,
     datos: {},

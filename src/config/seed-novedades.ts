@@ -10,6 +10,7 @@
  */
 
 import type { NovedadCatalogo } from '@/types/novedad'
+import type { CameraProfile } from './constants'
 
 type NovedadCatalogoSeed = Omit<
   NovedadCatalogo,
@@ -236,7 +237,9 @@ export function getNovedadByCodigo(codigo: string): NovedadCatalogoSeed | undefi
 /**
  * Get novedades filtered by camera profile
  */
-export function getNovedadesByPerfil(perfil: string): Array<NovedadCatalogoSeed & { id: string }> {
+export function getNovedadesByPerfil(
+  perfil: CameraProfile
+): Array<NovedadCatalogoSeed & { id: string }> {
   return getCatalogoNovedadesList().filter((n) => n.perfilesCompatibles.includes(perfil))
 }
 

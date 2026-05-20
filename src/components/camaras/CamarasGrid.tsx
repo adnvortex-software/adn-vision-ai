@@ -1,4 +1,4 @@
-import { Video, Settings, Power, PowerOff, ImageOff, Clock } from 'lucide-react'
+import { Video, Settings, Power, PowerOff, ImageOff, Clock, AlertTriangle } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { PerfilCamaraBadge } from './PerfilCamaraSelect'
@@ -15,6 +15,7 @@ interface CamarasGridProps {
   onEdit?: (camara: Entity<Camara>) => void
   onToggle?: (camara: Entity<Camara>) => void
   onCapture?: (camara: Entity<Camara>) => void
+  onConfigNovedades?: (camara: Entity<Camara>) => void
   className?: string
 }
 
@@ -34,6 +35,7 @@ export function CamarasGrid({
   onEdit,
   onToggle,
   onCapture,
+  onConfigNovedades,
   className,
 }: CamarasGridProps) {
   if (isLoading) {
@@ -74,6 +76,7 @@ export function CamarasGrid({
           onEdit={onEdit}
           onToggle={onToggle}
           onCapture={onCapture}
+          onConfigNovedades={onConfigNovedades}
         />
       ))}
     </div>
@@ -85,9 +88,10 @@ interface CamaraCardProps {
   onEdit?: (camara: Entity<Camara>) => void
   onToggle?: (camara: Entity<Camara>) => void
   onCapture?: (camara: Entity<Camara>) => void
+  onConfigNovedades?: (camara: Entity<Camara>) => void
 }
 
-function CamaraCard({ camara, onEdit, onToggle, onCapture }: CamaraCardProps) {
+function CamaraCard({ camara, onEdit, onToggle, onCapture, onConfigNovedades }: CamaraCardProps) {
   return (
     <Card className={cn('overflow-hidden', !camara.habilitada && 'opacity-60')}>
       <CardHeader className="pb-2">
@@ -156,7 +160,7 @@ function CamaraCard({ camara, onEdit, onToggle, onCapture }: CamaraCardProps) {
         </div>
 
         {/* Actions */}
-        {(onEdit ?? onToggle ?? onCapture) && (
+        {(onEdit ?? onToggle ?? onCapture ?? onConfigNovedades) && (
           <div className="flex gap-2 pt-2">
             {onCapture && (
               <Button
@@ -169,6 +173,19 @@ function CamaraCard({ camara, onEdit, onToggle, onCapture }: CamaraCardProps) {
                 disabled={!camara.habilitada}
               >
                 Capturar
+              </Button>
+            )}
+            {onConfigNovedades && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1"
+                onClick={() => {
+                  onConfigNovedades(camara)
+                }}
+              >
+                <AlertTriangle className="mr-1 h-4 w-4" />
+                Novedades
               </Button>
             )}
             {onEdit && (

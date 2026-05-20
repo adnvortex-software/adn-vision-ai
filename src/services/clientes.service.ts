@@ -76,7 +76,7 @@ export async function listClientes(
   const docs = snapshot.docs.slice(0, pageLimit)
   const hasMore = snapshot.docs.length > pageLimit
 
-  const data: Entity<Cliente>[] = docs
+  const data = docs
     .map((docSnap) => {
       const docData = docSnap.data() as FirestoreDocData
       const parsed = clienteFirestoreSchema.safeParse(docData)
@@ -86,7 +86,7 @@ export async function listClientes(
         ...parsed.data,
         createdAt: docData.createdAt,
         updatedAt: docData.updatedAt,
-      }
+      } as Entity<Cliente>
     })
     .filter((item): item is Entity<Cliente> => item !== null)
 

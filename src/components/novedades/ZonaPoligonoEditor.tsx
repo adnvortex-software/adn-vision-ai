@@ -113,17 +113,21 @@ export function ZonaPoligonoEditor({
             {points.length >= 2 &&
               points
                 .slice(0, -1)
-                .map((p, i) => (
-                  <line
-                    key={`line-${String(i)}`}
-                    x1={`${String(p.x * 100)}%`}
-                    y1={`${String(p.y * 100)}%`}
-                    x2={`${String(points[i + 1].x * 100)}%`}
-                    y2={`${String(points[i + 1].y * 100)}%`}
-                    stroke="#22c55e"
-                    strokeWidth="2"
-                  />
-                ))}
+                .map((p, i) => {
+                  const nextPoint = points[i + 1]
+                  if (!nextPoint) return null
+                  return (
+                    <line
+                      key={`line-${String(i)}`}
+                      x1={`${String(p.x * 100)}%`}
+                      y1={`${String(p.y * 100)}%`}
+                      x2={`${String(nextPoint.x * 100)}%`}
+                      y2={`${String(nextPoint.y * 100)}%`}
+                      stroke="#22c55e"
+                      strokeWidth="2"
+                    />
+                  )
+                })}
 
             {/* Points */}
             {points.map((p, i) => (

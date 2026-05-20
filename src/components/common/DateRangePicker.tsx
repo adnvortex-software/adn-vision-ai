@@ -62,13 +62,13 @@ export function DateRangePicker({
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar
-          initialFocus
           mode="range"
           defaultMonth={value?.from}
           selected={value}
           onSelect={onChange}
           numberOfMonths={numberOfMonths}
           locale={es}
+          autoFocus
         />
       </PopoverContent>
     </Popover>
@@ -115,8 +115,8 @@ export function SingleDatePicker({
           mode="single"
           selected={value}
           onSelect={onChange}
-          initialFocus
           locale={es}
+          autoFocus
           disabled={(date) => {
             if (minDate && date < minDate) return true
             if (maxDate && date > maxDate) return true

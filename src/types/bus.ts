@@ -97,10 +97,10 @@ export interface BusWizardData {
   placa: string
   clienteId: string
   sucursalId: string
-  propietarioId?: string
+  propietarioId?: string | null
   tipoVehiculo: VehicleType
-  rutaTexto?: string
-  conductorAsignadoId?: string
+  rutaTexto?: string | null
+  conductorAsignadoId?: string | null
 
   // Step 2: Conectividad
   ztIpRouter: string

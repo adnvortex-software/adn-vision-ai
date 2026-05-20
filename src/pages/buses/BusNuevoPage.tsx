@@ -6,14 +6,12 @@ import { Button } from '@/components/ui/button'
 import { BusWizard } from '@/components/buses'
 import type { BusWizardData } from '@/types/bus'
 import type { Sucursal, Propietario } from '@/types/cliente'
-import type { Conductor } from '@/types/conductor'
 import type { Entity } from '@/types/firestore'
 import { useToast } from '@/hooks/use-toast'
 
 // Mock data - replace with actual data fetching
 const mockSucursales: Entity<Sucursal>[] = []
 const mockPropietarios: Entity<Propietario>[] = []
-const mockConductores: Entity<Conductor>[] = []
 
 export default function BusNuevoPage() {
   const navigate = useNavigate()
@@ -66,7 +64,6 @@ export default function BusNuevoPage() {
         clienteId="mock-client-id"
         sucursales={mockSucursales}
         propietarios={mockPropietarios}
-        conductores={mockConductores}
         onComplete={handleComplete}
         isLoading={isLoading}
       />

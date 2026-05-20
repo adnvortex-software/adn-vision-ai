@@ -43,6 +43,7 @@ export async function getBus(busId: string): Promise<Entity<Bus> | null> {
   return {
     id: docSnap.id,
     ...parsed.data,
+    lastHeartbeat: (data as { lastHeartbeat?: unknown }).lastHeartbeat as Bus['lastHeartbeat'] ?? null,
     createdAt: data.createdAt,
     updatedAt: data.updatedAt,
   }
@@ -73,6 +74,7 @@ export async function getBusByPlaca(placa: string): Promise<Entity<Bus> | null> 
   return {
     id: docSnap.id,
     ...parsed.data,
+    lastHeartbeat: (data as { lastHeartbeat?: unknown }).lastHeartbeat as Bus['lastHeartbeat'] ?? null,
     createdAt: data.createdAt,
     updatedAt: data.updatedAt,
   }
@@ -121,7 +123,7 @@ export async function listBuses(
   const docs = snapshot.docs.slice(0, pageLimit)
   const hasMore = snapshot.docs.length > pageLimit
 
-  const data: Entity<Bus>[] = docs
+  const data = docs
     .map((docSnap) => {
       const docData = docSnap.data() as FirestoreDocData
       const parsed = busFirestoreSchema.safeParse(docData)
@@ -129,9 +131,10 @@ export async function listBuses(
       return {
         id: docSnap.id,
         ...parsed.data,
+        lastHeartbeat: (docData as { lastHeartbeat?: unknown }).lastHeartbeat as Bus['lastHeartbeat'] ?? null,
         createdAt: docData.createdAt,
         updatedAt: docData.updatedAt,
-      }
+      } as Entity<Bus>
     })
     .filter((item): item is Entity<Bus> => item !== null)
 
@@ -229,7 +232,7 @@ export function subscribeToBuses(
   }
 
   return onSnapshot(q, (snapshot) => {
-    const buses: Entity<Bus>[] = snapshot.docs
+    const buses = snapshot.docs
       .map((docSnap) => {
         const data = docSnap.data() as FirestoreDocData
         const parsed = busFirestoreSchema.safeParse(data)
@@ -237,9 +240,10 @@ export function subscribeToBuses(
         return {
           id: docSnap.id,
           ...parsed.data,
+          lastHeartbeat: (data as { lastHeartbeat?: unknown }).lastHeartbeat as Bus['lastHeartbeat'] ?? null,
           createdAt: data.createdAt,
           updatedAt: data.updatedAt,
-        }
+        } as Entity<Bus>
       })
       .filter((item): item is Entity<Bus> => item !== null)
 

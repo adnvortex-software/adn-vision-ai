@@ -50,7 +50,7 @@ export async function listNovedadesCatalogo(): Promise<Entity<NovedadCatalogo>[]
 
   const snapshot = await getDocs(q)
 
-  const catalogo: Entity<NovedadCatalogo>[] = snapshot.docs
+  const catalogo = snapshot.docs
     .map((docSnap) => {
       const data = docSnap.data() as FirestoreDocData
       const parsed = novedadCatalogoSchema.safeParse(data)
@@ -58,9 +58,11 @@ export async function listNovedadesCatalogo(): Promise<Entity<NovedadCatalogo>[]
       return {
         id: docSnap.id,
         ...parsed.data,
+        createdBy: typeof data.createdBy === 'string' ? data.createdBy : 'system',
+        deleted: typeof data.deleted === 'boolean' ? data.deleted : false,
         createdAt: data.createdAt,
         updatedAt: data.updatedAt,
-      }
+      } as Entity<NovedadCatalogo>
     })
     .filter((item): item is Entity<NovedadCatalogo> => item !== null)
   return catalogo
@@ -88,9 +90,11 @@ export async function getNovedadCatalogoByCodigo(
   return {
     id: docSnap.id,
     ...parsed.data,
+    createdBy: typeof data.createdBy === 'string' ? data.createdBy : 'system',
+    deleted: typeof data.deleted === 'boolean' ? data.deleted : false,
     createdAt: data.createdAt,
     updatedAt: data.updatedAt,
-  }
+  } as Entity<NovedadCatalogo>
 }
 
 // ============ CONFIGURACIÓN DE NOVEDADES ============
@@ -280,7 +284,7 @@ export async function listEventos(
   const docs = snapshot.docs.slice(0, pageLimit)
   const hasMore = snapshot.docs.length > pageLimit
 
-  const data: Entity<Evento>[] = docs
+  const data = docs
     .map((docSnap) => {
       const docData = docSnap.data() as FirestoreDocData
       const parsed = eventoFirestoreSchema.safeParse(docData)
@@ -288,9 +292,11 @@ export async function listEventos(
       return {
         id: docSnap.id,
         ...parsed.data,
+        timestamp: (docData as { timestamp: unknown }).timestamp as Evento['timestamp'],
+        revisadoAt: ((docData as { revisadoAt?: unknown }).revisadoAt ?? null) as Evento['revisadoAt'],
         createdAt: docData.createdAt,
         updatedAt: docData.updatedAt,
-      }
+      } as Entity<Evento>
     })
     .filter((item): item is Entity<Evento> => item !== null)
 
@@ -323,9 +329,11 @@ export async function getEvento(eventoId: string): Promise<Entity<Evento> | null
   return {
     id: docSnap.id,
     ...parsed.data,
+    timestamp: (data as { timestamp: unknown }).timestamp as Evento['timestamp'],
+    revisadoAt: ((data as { revisadoAt?: unknown }).revisadoAt ?? null) as Evento['revisadoAt'],
     createdAt: data.createdAt,
     updatedAt: data.updatedAt,
-  }
+  } as Entity<Evento>
 }
 
 /**
@@ -377,7 +385,7 @@ export function subscribeToEventos(
   }
 
   return onSnapshot(q, (snapshot) => {
-    const eventos: Entity<Evento>[] = snapshot.docs
+    const eventos = snapshot.docs
       .map((docSnap) => {
         const data = docSnap.data() as FirestoreDocData
         const parsed = eventoFirestoreSchema.safeParse(data)
@@ -385,9 +393,11 @@ export function subscribeToEventos(
         return {
           id: docSnap.id,
           ...parsed.data,
+          timestamp: data.timestamp,
+          revisadoAt: data.revisadoAt ?? null,
           createdAt: data.createdAt,
           updatedAt: data.updatedAt,
-        }
+        } as Entity<Evento>
       })
       .filter((item): item is Entity<Evento> => item !== null)
 

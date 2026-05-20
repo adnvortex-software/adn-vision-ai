@@ -39,15 +39,13 @@ export function KPICard({
   className,
   variant = 'default',
 }: KPICardProps) {
-  const TrendIcon =
-    trend?.value === 0 ? Minus : (trend?.isPositive ?? trend?.value > 0) ? TrendingUp : TrendingDown
+  const trendValue = trend?.value ?? 0
+  const isPositiveTrend = trend?.isPositive ?? trendValue > 0
+
+  const TrendIcon = trendValue === 0 ? Minus : isPositiveTrend ? TrendingUp : TrendingDown
 
   const trendColor =
-    trend?.value === 0
-      ? 'text-gray-500'
-      : (trend?.isPositive ?? trend?.value > 0)
-        ? 'text-green-600'
-        : 'text-red-600'
+    trendValue === 0 ? 'text-gray-500' : isPositiveTrend ? 'text-green-600' : 'text-red-600'
 
   return (
     <Card className={cn(VARIANT_STYLES[variant], className)}>
@@ -65,8 +63,8 @@ export function KPICard({
           {trend && (
             <div className={cn('flex items-center text-xs font-medium', trendColor)}>
               <TrendIcon className="mr-1 h-3 w-3" />
-              {trend.value > 0 && '+'}
-              {String(trend.value)}%
+              {trendValue > 0 && '+'}
+              {String(trendValue)}%
               {trend.label && <span className="ml-1 text-muted-foreground">{trend.label}</span>}
             </div>
           )}

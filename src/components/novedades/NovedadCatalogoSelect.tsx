@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import type { NoveltyCategory } from '@/config/constants'
+import type { NoveltyCategory, CameraProfile } from '@/config/constants'
 import type { NovedadCatalogo } from '@/types/novedad'
 import type { Entity } from '@/types/firestore'
 import { cn } from '@/lib/utils'
@@ -19,7 +19,7 @@ interface NovedadCatalogoSelectProps {
   catalogo: Entity<NovedadCatalogo>[]
   disabled?: boolean
   filterByCategory?: NoveltyCategory
-  filterByPerfil?: string
+  filterByPerfil?: CameraProfile
   className?: string
 }
 

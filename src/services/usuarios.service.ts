@@ -23,7 +23,7 @@ const COLLECTION = 'usuarios'
 /**
  * Obtiene un usuario por UID
  */
-export async function getUsuario(uid: string): Promise<Entity<Usuario> | null> {
+export async function getUsuarioById(uid: string): Promise<Entity<Usuario> | null> {
   const docRef = doc(db, COLLECTION, uid)
   const docSnap = await getDoc(docRef)
 
@@ -119,7 +119,7 @@ export async function listUsuarios(
   const docs = snapshot.docs.slice(0, pageLimit)
   const hasMore = snapshot.docs.length > pageLimit
 
-  const data: Entity<Usuario>[] = docs
+  const data = docs
     .map((docSnap) => {
       const docData = docSnap.data() as FirestoreDocData
       const parsed = usuarioFirestoreSchema.safeParse(docData)
@@ -129,7 +129,7 @@ export async function listUsuarios(
         ...parsed.data,
         createdAt: docData.createdAt,
         updatedAt: docData.updatedAt,
-      }
+      } as Entity<Usuario>
     })
     .filter((item): item is Entity<Usuario> => item !== null)
 
@@ -229,7 +229,7 @@ export async function listUsuariosBySucursal(sucursalId: string): Promise<Entity
 
   const snapshot = await getDocs(q)
 
-  const usuarios: Entity<Usuario>[] = snapshot.docs
+  const usuarios = snapshot.docs
     .map((docSnap) => {
       const data = docSnap.data() as FirestoreDocData
       const parsed = usuarioFirestoreSchema.safeParse(data)
@@ -239,7 +239,7 @@ export async function listUsuariosBySucursal(sucursalId: string): Promise<Entity
         ...parsed.data,
         createdAt: data.createdAt,
         updatedAt: data.updatedAt,
-      }
+      } as Entity<Usuario>
     })
     .filter((item): item is Entity<Usuario> => item !== null)
   return usuarios
@@ -259,7 +259,7 @@ export async function listUsuariosByRol(rol: Role): Promise<Entity<Usuario>[]> {
 
   const snapshot = await getDocs(q)
 
-  const usuarios: Entity<Usuario>[] = snapshot.docs
+  const usuarios = snapshot.docs
     .map((docSnap) => {
       const data = docSnap.data() as FirestoreDocData
       const parsed = usuarioFirestoreSchema.safeParse(data)
@@ -269,7 +269,7 @@ export async function listUsuariosByRol(rol: Role): Promise<Entity<Usuario>[]> {
         ...parsed.data,
         createdAt: data.createdAt,
         updatedAt: data.updatedAt,
-      }
+      } as Entity<Usuario>
     })
     .filter((item): item is Entity<Usuario> => item !== null)
   return usuarios

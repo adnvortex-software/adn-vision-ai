@@ -160,8 +160,6 @@ export default function BusConfigCamarasPage() {
       ) : (
         <CamarasGrid
           camaras={mockCamaras}
-          busPlaca={mockBus.placa}
-          busSubnet={mockBus.subnetLan}
           onEdit={setEditingCamara}
           onConfigNovedades={handleConfigNovedades}
         />
@@ -179,7 +177,6 @@ export default function BusConfigCamarasPage() {
           </DialogHeader>
           <CamaraForm
             busPlaca={mockBus.placa}
-            busSubnet={mockBus.subnetLan}
             onSubmit={handleCreateCamara}
             onCancel={() => {
               setShowNewCamara(false)
@@ -210,7 +207,6 @@ export default function BusConfigCamarasPage() {
             <CamaraForm
               camara={editingCamara}
               busPlaca={mockBus.placa}
-              busSubnet={mockBus.subnetLan}
               onSubmit={handleEditCamara}
               onCancel={() => {
                 setEditingCamara(null)

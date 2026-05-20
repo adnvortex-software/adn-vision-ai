@@ -77,13 +77,25 @@ export async function getReporte(reporteId: string): Promise<Entity<Reporte> | n
 
   return {
     id: docSnap.id,
-    ...data,
+    tipo: data.tipo as TipoReporte,
+    clienteId: data.clienteId as string,
+    sucursalId: data.sucursalId as string | null,
+    busId: data.busId as string | null,
+    titulo: data.titulo as string,
+    descripcion: data.descripcion as string | null,
     fechaInicio: (data.fechaInicio as Timestamp).toDate(),
     fechaFin: (data.fechaFin as Timestamp).toDate(),
+    estado: data.estado as EstadoReporte,
+    pdfUrl: data.pdfUrl as string | null,
+    errorMensaje: data.errorMensaje as string | null,
+    parametros: data.parametros as Record<string, unknown>,
+    solicitadoPor: data.solicitadoPor as string,
     completadoAt: data.completadoAt ? (data.completadoAt as Timestamp).toDate() : null,
     createdAt: data.createdAt,
     updatedAt: data.updatedAt,
-  }
+    createdBy: data.createdBy as string,
+    deleted: data.deleted as boolean | undefined,
+  } as Entity<Reporte>
 }
 
 /**
@@ -131,17 +143,29 @@ export async function listReportes(
   const docs = snapshot.docs.slice(0, pageLimit)
   const hasMore = snapshot.docs.length > pageLimit
 
-  const data: Entity<Reporte>[] = docs.map((docSnap) => {
+  const data = docs.map((docSnap) => {
     const docData = docSnap.data() as FirestoreDocData
     return {
       id: docSnap.id,
-      ...docData,
+      tipo: docData.tipo as TipoReporte,
+      clienteId: docData.clienteId as string,
+      sucursalId: docData.sucursalId as string | null,
+      busId: docData.busId as string | null,
+      titulo: docData.titulo as string,
+      descripcion: docData.descripcion as string | null,
       fechaInicio: (docData.fechaInicio as Timestamp).toDate(),
       fechaFin: (docData.fechaFin as Timestamp).toDate(),
+      estado: docData.estado as EstadoReporte,
+      pdfUrl: docData.pdfUrl as string | null,
+      errorMensaje: docData.errorMensaje as string | null,
+      parametros: docData.parametros as Record<string, unknown>,
+      solicitadoPor: docData.solicitadoPor as string,
       completadoAt: docData.completadoAt ? (docData.completadoAt as Timestamp).toDate() : null,
       createdAt: docData.createdAt,
       updatedAt: docData.updatedAt,
-    }
+      createdBy: docData.createdBy as string,
+      deleted: docData.deleted as boolean | undefined,
+    } as Entity<Reporte>
   })
 
   return {
@@ -227,17 +251,29 @@ export async function listReportesPendientes(): Promise<Entity<Reporte>[]> {
 
   const snapshot = await getDocs(q)
 
-  const reportes: Entity<Reporte>[] = snapshot.docs.map((docSnap) => {
-    const data = docSnap.data() as FirestoreDocData
+  const reportes = snapshot.docs.map((docSnap) => {
+    const docData = docSnap.data() as FirestoreDocData
     return {
       id: docSnap.id,
-      ...data,
-      fechaInicio: (data.fechaInicio as Timestamp).toDate(),
-      fechaFin: (data.fechaFin as Timestamp).toDate(),
-      completadoAt: data.completadoAt ? (data.completadoAt as Timestamp).toDate() : null,
-      createdAt: data.createdAt,
-      updatedAt: data.updatedAt,
-    }
+      tipo: docData.tipo as TipoReporte,
+      clienteId: docData.clienteId as string,
+      sucursalId: docData.sucursalId as string | null,
+      busId: docData.busId as string | null,
+      titulo: docData.titulo as string,
+      descripcion: docData.descripcion as string | null,
+      fechaInicio: (docData.fechaInicio as Timestamp).toDate(),
+      fechaFin: (docData.fechaFin as Timestamp).toDate(),
+      estado: docData.estado as EstadoReporte,
+      pdfUrl: docData.pdfUrl as string | null,
+      errorMensaje: docData.errorMensaje as string | null,
+      parametros: docData.parametros as Record<string, unknown>,
+      solicitadoPor: docData.solicitadoPor as string,
+      completadoAt: docData.completadoAt ? (docData.completadoAt as Timestamp).toDate() : null,
+      createdAt: docData.createdAt,
+      updatedAt: docData.updatedAt,
+      createdBy: docData.createdBy as string,
+      deleted: docData.deleted as boolean | undefined,
+    } as Entity<Reporte>
   })
   return reportes
 }

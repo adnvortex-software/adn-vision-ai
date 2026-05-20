@@ -210,9 +210,7 @@ export default function ClienteDetailPage() {
                 >
                   <div>
                     <p className="font-medium">{sucursal.nombre}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {sucursal.ciudad}, {sucursal.departamento}
-                    </p>
+                    <p className="text-sm text-muted-foreground">{sucursal.ciudad}</p>
                   </div>
                 </div>
               ))}
@@ -253,7 +251,9 @@ export default function ClienteDetailPage() {
                 >
                   <div>
                     <p className="font-medium">{propietario.nombre}</p>
-                    <p className="text-sm text-muted-foreground">{propietario.email ?? '-'}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {propietario.contactoEmail ?? '-'}
+                    </p>
                   </div>
                 </div>
               ))}

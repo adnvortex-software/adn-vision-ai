@@ -65,7 +65,7 @@ export default function BusesListPage() {
           isLoading={isLoading}
           onView={handleView}
           onEdit={handleEdit}
-          onConfigCamaras={handleConfigCamaras}
+          onManageCamaras={handleConfigCamaras}
         />
       )}
     </div>
