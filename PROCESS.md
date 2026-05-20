@@ -869,19 +869,19 @@ adn-lynx-ai/
 
 **Wizard de Bus:**
 
-- [ ] Step 1: Datos generales
-- [ ] Step 2: Conectividad
-- [ ] Step 3: Cámaras (1-6)
-- [ ] Step 4: Revisión y crear
+- [x] Step 1: Datos generales
+- [x] Step 2: Conectividad
+- [x] Step 3: Cámaras (placeholder, config post-creation)
+- [x] Step 4: Revisión y crear (integrated in step 3)
 
 **Reportes PDF:**
 
-- [ ] Template con header (logo + cliente)
-- [ ] Datos del vehículo
-- [ ] Fecha/hora del evento
-- [ ] Screenshot grande
-- [ ] Datos técnicos
-- [ ] Footer con número y fecha
+- [x] Template con header (logo + cliente)
+- [x] Datos del vehículo
+- [x] Fecha/hora del evento
+- [x] Screenshot grande
+- [x] Datos técnicos
+- [x] Footer con número y fecha
 
 #### Z. DATOS Y SEED
 
