@@ -751,8 +751,9 @@ adn-lynx-ai/
 
 #### S. COMPONENTES DE CONDUCTORES (src/components/conductores/)
 
-- [ ] ConductorForm.tsx
-- [ ] ConductoresTable.tsx
+- [x] ConductorForm.tsx (licencia vencimiento, alerta expiración, foto)
+- [x] ConductoresTable.tsx (estado licencia, bus asignado, acciones)
+- [x] index.ts (re-exports)
 
 #### T. COMPONENTES DE DASHBOARD (src/components/dashboard/)
 
