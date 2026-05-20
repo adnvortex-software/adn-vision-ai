@@ -783,55 +783,51 @@ adn-lynx-ai/
 **Auth:**
 
 - [x] LoginPage.tsx (placeholder, falta Firebase Auth)
-- [ ] RecuperarPasswordPage.tsx
+- [x] RecuperarPasswordPage.tsx (form con confirmacion, placeholder Firebase)
 
 **Principal:**
 
 - [x] DashboardPage.tsx (placeholder con KPIs mock)
 - [x] NotFoundPage.tsx
-- [ ] ForbiddenPage.tsx (403)
+- [x] ForbiddenPage.tsx (403 con opciones de navegacion)
 
 **Clientes:**
 
-- [ ] ClientesListPage.tsx
-- [ ] ClienteDetailPage.tsx
-- [ ] ClienteNuevoPage.tsx
+- [x] ClientesListPage.tsx (lista con tabla, empty state)
+- [x] ClienteDetailPage.tsx (info, sucursales, propietarios, stats)
+- [x] ClienteNuevoPage.tsx (wizard de creacion)
 
 **Buses:**
 
-- [ ] BusesListPage.tsx
-- [ ] BusDetailPage.tsx
-- [ ] BusNuevoPage.tsx (wizard)
-- [ ] BusConfigCamarasPage.tsx
-
-**Cámaras:**
-
-- [ ] CamaraConfigPage.tsx
+- [x] BusesListPage.tsx (lista con tabla, empty state)
+- [x] BusDetailPage.tsx (info, camaras, stats del dia)
+- [x] BusNuevoPage.tsx (wizard de creacion)
+- [x] BusConfigCamarasPage.tsx (grid de camaras, dialogs crear/editar)
 
 **Novedades:**
 
-- [ ] NovedadesEventosPage.tsx
-- [ ] NovedadEventoDetailPage.tsx
+- [x] NovedadesEventosPage.tsx (tabla de eventos con filtros)
+- [x] NovedadEventoDetailPage.tsx (detalle con acciones resolver/descartar)
 
 **Conductores:**
 
-- [ ] ConductoresListPage.tsx
-- [ ] ConductorDetailPage.tsx
+- [x] ConductoresListPage.tsx (tabla con estado licencia)
+- [x] ConductorDetailPage.tsx (info personal, licencia, bus asignado)
 
 **Reportes:**
 
-- [ ] ReportesGeneralPage.tsx
-- [ ] ReporteConteoPage.tsx
-- [ ] ReporteNovedadesPage.tsx
+- [x] ReportesGeneralPage.tsx (centro de reportes, tipos disponibles)
+- [x] ReporteConteoPage.tsx (filtros + preview conteo)
+- [x] ReporteNovedadesPage.tsx (filtros + preview novedades)
 
 **Usuarios:**
 
-- [ ] UsuariosListPage.tsx
-- [ ] UsuarioDetailPage.tsx
+- [x] UsuariosListPage.tsx (tabla con roles y acciones)
+- [x] UsuarioDetailPage.tsx (info, permisos, cambio de rol)
 
 **Configuración:**
 
-- [ ] ConfiguracionPage.tsx
+- [x] ConfiguracionPage.tsx (tema, idioma, notificaciones, seguridad)
 
 #### X. ROUTING (src/routes/)
 
