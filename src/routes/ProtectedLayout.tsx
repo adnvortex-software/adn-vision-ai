@@ -1,6 +1,7 @@
 import { Outlet, Navigate, useLocation } from 'react-router-dom'
 import { AppShell } from '@/components/layout/AppShell'
 import { LoadingState } from '@/components/common/LoadingState'
+import { OnboardingTour } from '@/components/onboarding'
 import { useAuthStore } from '@/stores/auth.store'
 import { logout } from '@/services/auth.service'
 
@@ -33,6 +34,7 @@ export function ProtectedLayout() {
 
   return (
     <AppShell usuario={usuario} onLogout={handleLogout}>
+      <OnboardingTour />
       <Outlet />
     </AppShell>
   )

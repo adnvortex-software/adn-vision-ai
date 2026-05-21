@@ -213,7 +213,9 @@ export function ConductorForm({
                   <FormItem>
                     <FormLabel>Propietario (Opcional)</FormLabel>
                     <Select
-                      onValueChange={(v) => field.onChange(v === '_none_' ? null : v)}
+                      onValueChange={(v) => {
+                        field.onChange(v === '_none_' ? null : v)
+                      }}
                       value={field.value ?? '_none_'}
                       disabled={isLoading || filteredPropietarios.length === 0}
                     >

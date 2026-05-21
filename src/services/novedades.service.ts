@@ -115,7 +115,7 @@ export async function listNovedadesConfig(
       camaraId,
       NOVEDADES_CONFIG_SUBCOLLECTION
     ),
-    where('deleted', '!=', true),
+    where('activa', '==', true),
     orderBy('tipoNovedad')
   )
 
@@ -244,7 +244,6 @@ export async function listEventos(
 
   let q = query(
     collection(db, EVENTOS_COLLECTION),
-    where('deleted', '!=', true),
     orderBy('timestamp', 'desc'),
     limit(pageLimit + 1)
   )
@@ -370,12 +369,7 @@ export function subscribeToEventos(
 ): Unsubscribe {
   const { clienteId, busId, limit: eventLimit = 50 } = options
 
-  let q = query(
-    collection(db, EVENTOS_COLLECTION),
-    where('deleted', '!=', true),
-    orderBy('timestamp', 'desc'),
-    limit(eventLimit)
-  )
+  let q = query(collection(db, EVENTOS_COLLECTION), orderBy('timestamp', 'desc'), limit(eventLimit))
 
   if (clienteId) {
     q = query(q, where('clienteId', '==', clienteId))

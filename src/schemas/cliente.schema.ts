@@ -76,11 +76,11 @@ export const clienteFirestoreSchema = z.object({
   contactoEmail: z.string(),
   contactoTelefono: z.string(),
   planContratado: z.enum(PLANS),
-  activo: z.boolean(),
+  activo: z.boolean().optional().default(true),
   createdAt: z.unknown(),
   updatedAt: z.unknown(),
-  createdBy: z.string(),
-  deleted: z.boolean().optional(),
+  createdBy: z.string().optional().default('system'),
+  deleted: z.boolean().optional().default(false),
 })
 
 export type ClienteFirestore = z.infer<typeof clienteFirestoreSchema>

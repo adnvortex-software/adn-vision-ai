@@ -11,6 +11,7 @@ import {
   UserX,
   UserCheck,
   Mail,
+  RotateCcw,
 } from 'lucide-react'
 import { DataTable } from '@/components/common/DataTable'
 import { Button } from '@/components/ui/button'
@@ -42,6 +43,7 @@ interface UsuariosTableProps {
   onToggleActive?: (usuario: UsuarioConDetalles) => void
   onChangeRole?: (usuario: UsuarioConDetalles) => void
   onResendInvite?: (usuario: UsuarioConDetalles) => void
+  onResetOnboarding?: (usuario: UsuarioConDetalles) => void
   /** Current user ID to prevent self-modification */
   currentUserId?: string
 }
@@ -55,6 +57,7 @@ export function UsuariosTable({
   onToggleActive,
   onChangeRole,
   onResendInvite,
+  onResetOnboarding,
   currentUserId,
 }: UsuariosTableProps) {
   const columns: ColumnDef<UsuarioConDetalles>[] = useMemo(
@@ -201,6 +204,16 @@ export function UsuariosTable({
                     Reenviar invitacion
                   </DropdownMenuItem>
                 )}
+                {onResetOnboarding && (
+                  <DropdownMenuItem
+                    onClick={() => {
+                      onResetOnboarding(usuario)
+                    }}
+                  >
+                    <RotateCcw className="mr-2 h-4 w-4" />
+                    Reiniciar tour
+                  </DropdownMenuItem>
+                )}
                 {onToggleActive && !isSelf && (
                   <DropdownMenuItem
                     onClick={() => {
@@ -240,7 +253,16 @@ export function UsuariosTable({
         },
       },
     ],
-    [onView, onEdit, onDelete, onToggleActive, onChangeRole, onResendInvite, currentUserId]
+    [
+      onView,
+      onEdit,
+      onDelete,
+      onToggleActive,
+      onChangeRole,
+      onResendInvite,
+      onResetOnboarding,
+      currentUserId,
+    ]
   )
 
   return (

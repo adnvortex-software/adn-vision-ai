@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Moon, Sun, Globe, Bell, Shield, Palette } from 'lucide-react'
+import { Moon, Sun, Globe, Bell, Shield, Palette, HelpCircle, Loader2 } from 'lucide-react'
 import { PageHeader } from '@/components/common/PageHeader'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -14,15 +14,23 @@ import {
 } from '@/components/ui/select'
 import { useTheme } from '@/hooks/useTheme'
 import { useTranslation } from 'react-i18next'
+import { useTriggerOnboarding } from '@/components/onboarding'
 
 export default function ConfiguracionPage() {
   const { theme, toggleTheme } = useTheme()
   const { i18n } = useTranslation()
   const [notificaciones, setNotificaciones] = useState(true)
   const [sonidos, setSonidos] = useState(true)
+  const [isRestartingTour, setIsRestartingTour] = useState(false)
+  const { triggerTour } = useTriggerOnboarding()
 
   const handleLanguageChange = (lang: string) => {
     void i18n.changeLanguage(lang)
+  }
+
+  const handleRestartTour = async () => {
+    setIsRestartingTour(true)
+    await triggerTour()
   }
 
   return (
@@ -123,6 +131,43 @@ export default function ConfiguracionPage() {
               <p className="text-sm text-muted-foreground">Ver y gestionar sesiones abiertas</p>
             </div>
             <Button variant="outline">Ver Sesiones</Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Ayuda */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <HelpCircle className="h-5 w-5" />
+            Ayuda
+          </CardTitle>
+          <CardDescription>Recursos de ayuda y tutoriales</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label>Tour de la Aplicacion</Label>
+              <p className="text-sm text-muted-foreground">
+                Vuelve a ver el recorrido guiado por la plataforma
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => {
+                void handleRestartTour()
+              }}
+              disabled={isRestartingTour}
+            >
+              {isRestartingTour ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Reiniciando...
+                </>
+              ) : (
+                'Ver Tour'
+              )}
+            </Button>
           </div>
         </CardContent>
       </Card>

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { User, Shield, BarChart, Eye } from 'lucide-react'
 import { LoginForm } from '@/components/auth/LoginForm'
 import { login, getMockUsers } from '@/services/auth.service'
@@ -117,6 +117,16 @@ export default function LoginPage() {
         {env.VITE_MOCK_AUTH && (
           <p className="mt-4 text-center text-xs text-muted-foreground">
             Modo desarrollo - Autenticacion simulada
+          </p>
+        )}
+
+        {/* Setup link for first-time configuration */}
+        {!env.VITE_MOCK_AUTH && (
+          <p className="mt-4 text-center text-xs text-muted-foreground">
+            Primera vez?{' '}
+            <Link to="/setup" className="text-primary hover:underline">
+              Configurar sistema
+            </Link>
           </p>
         )}
       </div>

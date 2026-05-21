@@ -54,7 +54,7 @@ export async function getUsuarioByEmail(email: string): Promise<Entity<Usuario> 
   const q = query(
     collection(db, COLLECTION),
     where('email', '==', email.toLowerCase()),
-    where('deleted', '!=', true),
+    where('activo', '==', true),
     limit(1)
   )
 
@@ -89,9 +89,12 @@ export async function listUsuarios(
 ): Promise<PaginatedResult<Entity<Usuario>>> {
   const { limit: pageLimit = 20, startAfter: startAfterId, clienteId, rol, activo } = options
 
+  // Use provided activo filter, default to true if not specified
+  const activoFilter = activo ?? true
+
   let q = query(
     collection(db, COLLECTION),
-    where('deleted', '!=', true),
+    where('activo', '==', activoFilter),
     orderBy('nombre'),
     limit(pageLimit + 1)
   )
@@ -102,10 +105,6 @@ export async function listUsuarios(
 
   if (rol) {
     q = query(q, where('rol', '==', rol))
-  }
-
-  if (activo !== undefined) {
-    q = query(q, where('activo', '==', activo))
   }
 
   if (startAfterId) {
@@ -129,7 +128,7 @@ export async function listUsuarios(
         ...parsed.data,
         createdAt: docData.createdAt,
         updatedAt: docData.updatedAt,
-      } as Entity<Usuario>
+      }
     })
     .filter((item): item is Entity<Usuario> => item !== null)
 
@@ -221,7 +220,7 @@ export async function updateUsuarioSucursales(uid: string, sucursalIds: string[]
 export async function listUsuariosBySucursal(sucursalId: string): Promise<Entity<Usuario>[]> {
   const q = query(
     collection(db, COLLECTION),
-    where('deleted', '!=', true),
+    where('activo', '==', true),
     where('activo', '==', true),
     where('sucursalIds', 'array-contains', sucursalId),
     orderBy('nombre')
@@ -239,7 +238,7 @@ export async function listUsuariosBySucursal(sucursalId: string): Promise<Entity
         ...parsed.data,
         createdAt: data.createdAt,
         updatedAt: data.updatedAt,
-      } as Entity<Usuario>
+      }
     })
     .filter((item): item is Entity<Usuario> => item !== null)
   return usuarios
@@ -251,7 +250,7 @@ export async function listUsuariosBySucursal(sucursalId: string): Promise<Entity
 export async function listUsuariosByRol(rol: Role): Promise<Entity<Usuario>[]> {
   const q = query(
     collection(db, COLLECTION),
-    where('deleted', '!=', true),
+    where('activo', '==', true),
     where('activo', '==', true),
     where('rol', '==', rol),
     orderBy('nombre')
@@ -269,7 +268,7 @@ export async function listUsuariosByRol(rol: Role): Promise<Entity<Usuario>[]> {
         ...parsed.data,
         createdAt: data.createdAt,
         updatedAt: data.updatedAt,
-      } as Entity<Usuario>
+      }
     })
     .filter((item): item is Entity<Usuario> => item !== null)
   return usuarios

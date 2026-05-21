@@ -54,6 +54,7 @@ export const usuarioFirestoreSchema = z.object({
   updatedAt: z.unknown(),
   createdBy: z.string(),
   deleted: z.boolean().optional(),
+  onboardingCompleted: z.boolean().optional(),
 })
 
 export type UsuarioFirestore = z.infer<typeof usuarioFirestoreSchema>

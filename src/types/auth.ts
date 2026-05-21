@@ -13,6 +13,7 @@ export interface Usuario extends BaseEntity {
   sucursalIds: string[] | null
   propietarioId: string | null
   activo: boolean
+  onboardingCompleted?: boolean
 }
 
 /**

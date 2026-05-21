@@ -56,7 +56,7 @@ export async function getConductorByCedula(cedula: string): Promise<Entity<Condu
   const q = query(
     collection(db, COLLECTION),
     where('cedula', '==', cedula),
-    where('deleted', '!=', true),
+    where('activo', '==', true),
     limit(1)
   )
 
@@ -101,7 +101,7 @@ export async function listConductores(
 
   let q = query(
     collection(db, COLLECTION),
-    where('deleted', '!=', true),
+    where('activo', '==', true),
     orderBy('nombre'),
     limit(pageLimit + 1)
   )
@@ -163,7 +163,7 @@ export async function listConductoresLicenciasPorVencer(
 
   const q = query(
     collection(db, COLLECTION),
-    where('deleted', '!=', true),
+    where('activo', '==', true),
     where('activo', '==', true),
     where('fechaVencimientoLicencia', '<=', Timestamp.fromDate(fechaLimite)),
     orderBy('fechaVencimientoLicencia')
@@ -252,7 +252,7 @@ export async function canDeleteConductor(
   const busesQuery = query(
     collection(db, 'buses'),
     where('conductorAsignadoId', '==', conductorId),
-    where('deleted', '!=', true),
+    where('activo', '==', true),
     limit(1)
   )
   const busesSnapshot = await getDocs(busesQuery)

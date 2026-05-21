@@ -95,7 +95,7 @@ export async function getReporte(reporteId: string): Promise<Entity<Reporte> | n
     updatedAt: data.updatedAt,
     createdBy: data.createdBy as string,
     deleted: data.deleted as boolean | undefined,
-  } as Entity<Reporte>
+  }
 }
 
 /**
@@ -114,7 +114,6 @@ export async function listReportes(
 
   let q = query(
     collection(db, REPORTES_COLLECTION),
-    where('deleted', '!=', true),
     orderBy('createdAt', 'desc'),
     limit(pageLimit + 1)
   )
@@ -165,7 +164,7 @@ export async function listReportes(
       updatedAt: docData.updatedAt,
       createdBy: docData.createdBy as string,
       deleted: docData.deleted as boolean | undefined,
-    } as Entity<Reporte>
+    }
   })
 
   return {
@@ -244,7 +243,6 @@ export async function listReportesPendientes(): Promise<Entity<Reporte>[]> {
   const q = query(
     collection(db, REPORTES_COLLECTION),
     where('estado', '==', 'pendiente'),
-    where('deleted', '!=', true),
     orderBy('createdAt'),
     limit(10)
   )
@@ -273,7 +271,7 @@ export async function listReportesPendientes(): Promise<Entity<Reporte>[]> {
       updatedAt: docData.updatedAt,
       createdBy: docData.createdBy as string,
       deleted: docData.deleted as boolean | undefined,
-    } as Entity<Reporte>
+    }
   })
   return reportes
 }
