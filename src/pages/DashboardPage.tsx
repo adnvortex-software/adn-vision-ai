@@ -1,18 +1,19 @@
-import { useState, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Timestamp } from 'firebase/firestore'
-import { Bus, AlertTriangle, Users, Activity, Search, X, Filter, RefreshCw } from 'lucide-react'
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-} from 'recharts'
+  Bus,
+  AlertTriangle,
+  Users,
+  Activity,
+  Search,
+  X,
+  Filter,
+  RefreshCw,
+  Loader2,
+} from 'lucide-react'
+// Recharts imports reserved for future charts
+// import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import { PageHeader } from '@/components/common/PageHeader'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -23,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   KPICard,
   KPIGrid,
@@ -36,219 +37,25 @@ import { BUS_STATES } from '@/config/constants'
 import type { BusState } from '@/config/constants'
 import type { BusConDetalles } from '@/types/bus'
 import type { EventoConDetalles } from '@/types/novedad'
-
-// Mock data for demonstration
-const mockBuses: BusConDetalles[] = [
-  {
-    id: 'bus-1',
-    placa: 'ABC123',
-    clienteId: 'client-1',
-    sucursalId: 'suc-1',
-    propietarioId: null,
-    tipoVehiculo: 'bus',
-    rutaTexto: 'Ruta 1',
-    conductorAsignadoId: null,
-    ztIpRouter: '172.23.1.100',
-    subnetLan: '192.168.1.0/24',
-    estado: 'activo',
-    lastHeartbeat: null,
-    numCamarasConfiguradas: 4,
-    activo: true,
-    createdAt: null,
-    updatedAt: null,
-    createdBy: 'system',
-    deleted: false,
-    clienteNombre: 'Transportes ABC',
-    sucursalNombre: 'Terminal Norte',
-    conductorNombre: undefined,
-    novedadesHoy: 3,
-    conteoDia: { entradas: 120, salidas: 85, aforo: 35 },
-  },
-  {
-    id: 'bus-2',
-    placa: 'DEF456',
-    clienteId: 'client-1',
-    sucursalId: 'suc-1',
-    propietarioId: null,
-    tipoVehiculo: 'buseta',
-    rutaTexto: 'Ruta 2',
-    conductorAsignadoId: null,
-    ztIpRouter: '172.23.1.101',
-    subnetLan: '192.168.2.0/24',
-    estado: 'activo',
-    lastHeartbeat: null,
-    numCamarasConfiguradas: 4,
-    activo: true,
-    createdAt: null,
-    updatedAt: null,
-    createdBy: 'system',
-    deleted: false,
-    clienteNombre: 'Transportes ABC',
-    sucursalNombre: 'Terminal Norte',
-    conductorNombre: undefined,
-    novedadesHoy: 1,
-    conteoDia: { entradas: 95, salidas: 90, aforo: 5 },
-  },
-  {
-    id: 'bus-3',
-    placa: 'GHI789',
-    clienteId: 'client-1',
-    sucursalId: 'suc-2',
-    propietarioId: null,
-    tipoVehiculo: 'bus',
-    rutaTexto: 'Ruta 3',
-    conductorAsignadoId: null,
-    ztIpRouter: '172.23.1.102',
-    subnetLan: '192.168.3.0/24',
-    estado: 'sin_conexion',
-    lastHeartbeat: null,
-    numCamarasConfiguradas: 4,
-    activo: true,
-    createdAt: null,
-    updatedAt: null,
-    createdBy: 'system',
-    deleted: false,
-    clienteNombre: 'Transportes ABC',
-    sucursalNombre: 'Terminal Sur',
-    conductorNombre: undefined,
-    novedadesHoy: 0,
-    conteoDia: undefined,
-  },
-  {
-    id: 'bus-4',
-    placa: 'JKL012',
-    clienteId: 'client-1',
-    sucursalId: 'suc-1',
-    propietarioId: null,
-    tipoVehiculo: 'van',
-    rutaTexto: 'Ruta 4',
-    conductorAsignadoId: null,
-    ztIpRouter: '172.23.1.103',
-    subnetLan: '192.168.4.0/24',
-    estado: 'mantenimiento',
-    lastHeartbeat: null,
-    numCamarasConfiguradas: 2,
-    activo: true,
-    createdAt: null,
-    updatedAt: null,
-    createdBy: 'system',
-    deleted: false,
-    clienteNombre: 'Transportes ABC',
-    sucursalNombre: 'Terminal Norte',
-    conductorNombre: undefined,
-    novedadesHoy: 0,
-    conteoDia: undefined,
-  },
-]
-
-// Mock timestamp for demo data
-const mockTimestamp = Timestamp.now()
-
-const mockEventos: EventoConDetalles[] = [
-  {
-    id: 'ev-1',
-    tipoNovedad: 'pasajero_en_cabina',
-    busId: 'bus-1',
-    clienteId: 'client-1',
-    sucursalId: 'suc-1',
-    camaraId: 'cam-1',
-    timestamp: mockTimestamp,
-    screenshotUrl: null,
-    videoClipUrl: null,
-    datos: {},
-    estado: 'nuevo',
-    revisadoPor: null,
-    revisadoAt: null,
-    notas: null,
-    reportePdfUrl: null,
-    createdAt: null,
-    updatedAt: null,
-    createdBy: 'system',
-    deleted: false,
-    busPlaca: 'ABC123',
-    camaraNombre: 'Cabina',
-    novedadNombre: 'Pasajero en Cabina',
-    novedadCategoria: 'seguridad_pasajero',
-  },
-  {
-    id: 'ev-2',
-    tipoNovedad: 'conductor_sin_cinturon',
-    busId: 'bus-1',
-    clienteId: 'client-1',
-    sucursalId: 'suc-1',
-    camaraId: 'cam-1',
-    timestamp: mockTimestamp,
-    screenshotUrl: null,
-    videoClipUrl: null,
-    datos: {},
-    estado: 'revisado',
-    revisadoPor: 'user-1',
-    revisadoAt: null,
-    notas: 'Verificado',
-    reportePdfUrl: null,
-    createdAt: null,
-    updatedAt: null,
-    createdBy: 'system',
-    deleted: false,
-    busPlaca: 'ABC123',
-    camaraNombre: 'Cabina',
-    novedadNombre: 'Conductor sin Cinturon',
-    novedadCategoria: 'seguridad_conductor',
-  },
-  {
-    id: 'ev-3',
-    tipoNovedad: 'sobrecupo',
-    busId: 'bus-2',
-    clienteId: 'client-1',
-    sucursalId: 'suc-1',
-    camaraId: 'cam-2',
-    timestamp: mockTimestamp,
-    screenshotUrl: null,
-    videoClipUrl: null,
-    datos: {},
-    estado: 'nuevo',
-    revisadoPor: null,
-    revisadoAt: null,
-    notas: null,
-    reportePdfUrl: null,
-    createdAt: null,
-    updatedAt: null,
-    createdBy: 'system',
-    deleted: false,
-    busPlaca: 'DEF456',
-    camaraNombre: 'Pasillo',
-    novedadNombre: 'Sobrecupo',
-    novedadCategoria: 'operativa',
-  },
-]
-
-// Mock chart data - novedades last 7 days
-const mockChartData = [
-  { name: 'Lun', operativas: 4, seguridad: 2, tecnicas: 1 },
-  { name: 'Mar', operativas: 3, seguridad: 1, tecnicas: 0 },
-  { name: 'Mie', operativas: 5, seguridad: 3, tecnicas: 2 },
-  { name: 'Jue', operativas: 2, seguridad: 2, tecnicas: 1 },
-  { name: 'Vie', operativas: 6, seguridad: 4, tecnicas: 0 },
-  { name: 'Sab', operativas: 1, seguridad: 0, tecnicas: 0 },
-  { name: 'Dom', operativas: 0, seguridad: 0, tecnicas: 0 },
-]
-
-// Mock clientes for filter
-const mockClientes = [
-  { id: 'client-1', nombre: 'Transportes ABC' },
-  { id: 'client-2', nombre: 'Buses del Norte' },
-]
-
-// Mock sucursales
-const mockSucursales = [
-  { id: 'suc-1', nombre: 'Terminal Norte', clienteId: 'client-1' },
-  { id: 'suc-2', nombre: 'Terminal Sur', clienteId: 'client-1' },
-]
+import type { Cliente, Sucursal } from '@/types/cliente'
+import type { Entity } from '@/types/firestore'
+import { listBuses, subscribeToBuses } from '@/services/buses.service'
+import { listClientes, listSucursales } from '@/services/clientes.service'
+import { listEventos } from '@/services/novedades.service'
+import { useToast } from '@/hooks/use-toast'
 
 export default function DashboardPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { toast } = useToast()
+  const [isLoading, setIsLoading] = useState(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
+
+  // Data from Firebase
+  const [buses, setBuses] = useState<BusConDetalles[]>([])
+  const [clientes, setClientes] = useState<Entity<Cliente>[]>([])
+  const [sucursales, setSucursales] = useState<Entity<Sucursal>[]>([])
+  const [eventos, setEventos] = useState<EventoConDetalles[]>([])
 
   // Filters from store
   const { clienteId, sucursalId, setClienteId, setSucursalId, clearLocationFilters } =
@@ -258,15 +65,88 @@ export default function DashboardPage() {
   const searchQuery = useFiltersStore((s) => s.searchQuery)
   const setSearchQuery = useFiltersStore((s) => s.setSearchQuery)
 
-  // Filter sucursales based on selected cliente
-  const filteredSucursales = useMemo(() => {
-    if (!clienteId) return mockSucursales
-    return mockSucursales.filter((s) => s.clienteId === clienteId)
+  // Load initial data
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [busesResult, clientesResult, eventosResult] = await Promise.all([
+          listBuses({ limit: 100 }),
+          listClientes({ limit: 100 }),
+          listEventos({ limit: 20 }),
+        ])
+
+        // Convert buses to BusConDetalles
+        const busesConDetalles: BusConDetalles[] = busesResult.data.map((bus) => ({
+          ...bus,
+          clienteNombre: '',
+          sucursalNombre: '',
+          novedadesHoy: 0,
+          conteoDia: undefined,
+        }))
+        setBuses(busesConDetalles)
+        setClientes(clientesResult.data)
+
+        // Convert eventos to EventoConDetalles
+        const eventosConDetalles: EventoConDetalles[] = eventosResult.data.map((evento) => ({
+          ...evento,
+          busPlaca: busesResult.data.find((b) => b.id === evento.busId)?.placa ?? evento.busId,
+          camaraNombre: evento.camaraId,
+          novedadNombre: evento.tipoNovedad,
+          novedadCategoria: 'operativa' as const,
+        }))
+        setEventos(eventosConDetalles)
+      } catch (error) {
+        console.error('Error loading dashboard data:', error)
+        toast({
+          title: 'Error',
+          description: 'No se pudieron cargar los datos del dashboard',
+          variant: 'destructive',
+        })
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    void loadData()
+  }, [toast])
+
+  // Load sucursales when cliente changes
+  useEffect(() => {
+    async function loadSucursales() {
+      if (!clienteId) {
+        setSucursales([])
+        return
+      }
+      try {
+        const sucursalesData = await listSucursales(clienteId)
+        setSucursales(sucursalesData)
+      } catch (error) {
+        console.error('Error loading sucursales:', error)
+      }
+    }
+    void loadSucursales()
   }, [clienteId])
+
+  // Subscribe to real-time bus updates
+  useEffect(() => {
+    const unsubscribe = subscribeToBuses((updatedBuses) => {
+      const busesConDetalles: BusConDetalles[] = updatedBuses.map((bus) => ({
+        ...bus,
+        clienteNombre: '',
+        sucursalNombre: '',
+        novedadesHoy: 0,
+        conteoDia: undefined,
+      }))
+      setBuses(busesConDetalles)
+    })
+
+    return () => {
+      unsubscribe()
+    }
+  }, [])
 
   // Filter buses based on filters
   const filteredBuses = useMemo(() => {
-    let result = mockBuses
+    let result = buses
 
     if (clienteId) {
       result = result.filter((b) => b.clienteId === clienteId)
@@ -285,18 +165,18 @@ export default function DashboardPage() {
     }
 
     return result
-  }, [clienteId, sucursalId, estadoBus, searchQuery])
+  }, [buses, clienteId, sucursalId, estadoBus, searchQuery])
 
   // Calculate KPIs from filtered buses
   const kpis = useMemo(() => {
     const activos = filteredBuses.filter((b) => b.estado === 'activo').length
     const total = filteredBuses.length
-    const novedadesHoy = filteredBuses.reduce((sum, b) => sum + (b.novedadesHoy ?? 0), 0)
+    const novedadesHoy = eventos.filter((e) => e.estado === 'nuevo').length
     const pasajerosHoy = filteredBuses.reduce((sum, b) => sum + (b.conteoDia?.entradas ?? 0), 0)
-    const alertasCriticas = mockEventos.filter((e) => e.estado === 'nuevo').length
+    const alertasCriticas = eventos.filter((e) => e.estado === 'nuevo').length
 
     return { activos, total, novedadesHoy, pasajerosHoy, alertasCriticas }
-  }, [filteredBuses])
+  }, [filteredBuses, eventos])
 
   // Calculate flota stats
   const flotaStats = useMemo(() => {
@@ -312,12 +192,35 @@ export default function DashboardPage() {
   const hasActiveFilters =
     clienteId !== null || sucursalId !== null || estadoBus !== null || searchQuery !== ''
 
-  const handleRefresh = () => {
+  const handleRefresh = async () => {
     setIsRefreshing(true)
-    // Simulate refresh
-    setTimeout(() => {
+    try {
+      const [busesResult, eventosResult] = await Promise.all([
+        listBuses({ limit: 100 }),
+        listEventos({ limit: 20 }),
+      ])
+      const busesConDetalles: BusConDetalles[] = busesResult.data.map((bus) => ({
+        ...bus,
+        clienteNombre: '',
+        sucursalNombre: '',
+        novedadesHoy: 0,
+        conteoDia: undefined,
+      }))
+      setBuses(busesConDetalles)
+
+      const eventosConDetalles: EventoConDetalles[] = eventosResult.data.map((evento) => ({
+        ...evento,
+        busPlaca: busesResult.data.find((b) => b.id === evento.busId)?.placa ?? evento.busId,
+        camaraNombre: evento.camaraId,
+        novedadNombre: evento.tipoNovedad,
+        novedadCategoria: 'operativa' as const,
+      }))
+      setEventos(eventosConDetalles)
+    } catch (error) {
+      console.error('Error refreshing:', error)
+    } finally {
       setIsRefreshing(false)
-    }, 1000)
+    }
   }
 
   const handleClearFilters = () => {
@@ -326,13 +229,21 @@ export default function DashboardPage() {
     setSearchQuery('')
   }
 
+  if (isLoading) {
+    return (
+      <div className="flex h-96 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
   return (
     <div className="container mx-auto space-y-6 py-6">
       <PageHeader
         title={t('dashboard.title')}
         description="Vision general del estado de la flota y novedades"
         actions={
-          <Button variant="outline" onClick={handleRefresh} disabled={isRefreshing}>
+          <Button variant="outline" onClick={() => void handleRefresh()} disabled={isRefreshing}>
             <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             Actualizar
           </Button>
@@ -371,7 +282,7 @@ export default function DashboardPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos los clientes</SelectItem>
-                  {mockClientes.map((c) => (
+                  {clientes.map((c) => (
                     <SelectItem key={c.id} value={c.id}>
                       {c.nombre}
                     </SelectItem>
@@ -395,7 +306,7 @@ export default function DashboardPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todas las sucursales</SelectItem>
-                  {filteredSucursales.map((s) => (
+                  {sucursales.map((s) => (
                     <SelectItem key={s.id} value={s.id}>
                       {s.nombre}
                     </SelectItem>
@@ -427,18 +338,18 @@ export default function DashboardPage() {
               </Select>
             </div>
 
-            {/* Search filter */}
+            {/* Search */}
             <div className="space-y-1.5">
-              <label className="text-sm font-medium">Buscar placa</label>
+              <label className="text-sm font-medium">Buscar</label>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="ABC123..."
+                  placeholder="Placa o ruta..."
+                  className="pl-8"
                   value={searchQuery}
                   onChange={(e) => {
                     setSearchQuery(e.target.value)
                   }}
-                  className="pl-9"
                 />
               </div>
             </div>
@@ -446,90 +357,50 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
 
-      {/* KPI Cards */}
-      <KPIGrid columns={4}>
+      {/* KPIs */}
+      <KPIGrid>
         <KPICard
-          title={t('dashboard.busesActivos')}
-          value={`${String(kpis.activos)} / ${String(kpis.total)}`}
-          description="Buses conectados"
+          title="Buses Activos"
+          value={kpis.activos}
+          description={`de ${String(kpis.total)} totales`}
           icon={Bus}
-          trend={{ value: 10, label: 'vs ayer' }}
-          variant={kpis.activos === kpis.total ? 'success' : 'default'}
+          trend={
+            kpis.total > 0
+              ? { value: Math.round((kpis.activos / kpis.total) * 100), isPositive: true }
+              : undefined
+          }
         />
         <KPICard
-          title={t('dashboard.novedadesHoy')}
+          title="Novedades Hoy"
           value={kpis.novedadesHoy}
-          description="Ultimas 24 horas"
+          description="pendientes de revision"
           icon={AlertTriangle}
-          trend={{ value: -5, label: 'vs ayer', isPositive: true }}
-          variant={kpis.novedadesHoy > 10 ? 'warning' : 'default'}
+          variant={kpis.novedadesHoy > 5 ? 'warning' : 'default'}
         />
         <KPICard
-          title={t('dashboard.pasajerosHoy')}
-          value={kpis.pasajerosHoy.toLocaleString('es-CO')}
-          description="Conteo acumulado"
+          title="Pasajeros Hoy"
+          value={kpis.pasajerosHoy}
+          description="entradas registradas"
           icon={Users}
-          trend={{ value: 8, label: 'vs ayer' }}
         />
         <KPICard
-          title={t('dashboard.alertasCriticas')}
+          title="Alertas Criticas"
           value={kpis.alertasCriticas}
-          description="Requieren atencion"
+          description="requieren atencion"
           icon={Activity}
-          variant={kpis.alertasCriticas > 0 ? 'danger' : 'success'}
+          variant={kpis.alertasCriticas > 0 ? 'danger' : 'default'}
         />
       </KPIGrid>
 
-      {/* Chart - Novedades last 7 days */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Novedades Ultimos 7 Dias</CardTitle>
-          <CardDescription>Eventos detectados por categoria</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={mockChartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="name" className="text-xs" />
-                <YAxis className="text-xs" />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '6px',
-                  }}
-                />
-                <Legend />
-                <Bar
-                  dataKey="operativas"
-                  name="Operativas"
-                  fill="hsl(var(--primary))"
-                  radius={[4, 4, 0, 0]}
-                />
-                <Bar
-                  dataKey="seguridad"
-                  name="Seguridad"
-                  fill="hsl(25 95% 53%)"
-                  radius={[4, 4, 0, 0]}
-                />
-                <Bar
-                  dataKey="tecnicas"
-                  name="Tecnicas"
-                  fill="hsl(220 14% 46%)"
-                  radius={[4, 4, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Main content */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Flota Overview */}
+        <FlotaOverview stats={flotaStats} className="lg:col-span-1" />
 
-      {/* Two column layout: Flota Overview + Novedades Recientes */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <FlotaOverview stats={flotaStats} />
+        {/* Novedades Recientes */}
         <NovedadesRecientes
-          eventos={mockEventos}
+          className="lg:col-span-2"
+          eventos={eventos.slice(0, 5)}
           onVerTodos={() => {
             navigate('/novedades')
           }}
@@ -539,9 +410,9 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* Buses en vivo table */}
+      {/* Buses Table */}
       <BusesEnVivoTable
-        buses={filteredBuses}
+        buses={filteredBuses.slice(0, 10)}
         onVerBus={(bus) => {
           navigate(`/buses/${bus.id}`)
         }}

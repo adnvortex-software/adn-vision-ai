@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { ClienteForm } from '@/components/clientes'
 import type { CreateClienteFormData } from '@/schemas/cliente.schema'
 import { useToast } from '@/hooks/use-toast'
+import { createCliente } from '@/services/clientes.service'
 
 export default function ClienteNuevoPage() {
   const navigate = useNavigate()
@@ -15,19 +16,19 @@ export default function ClienteNuevoPage() {
   const handleSubmit = async (data: CreateClienteFormData) => {
     setIsLoading(true)
     try {
-      // TODO: Implement actual Firebase create
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const clienteId = await createCliente(data, 'system')
 
       toast({
         title: 'Cliente creado',
-        description: `${data.nombre} ha sido registrado exitosamente`,
+        description: `${data.nombre} ha sido registrado exitosamente (ID: ${clienteId})`,
       })
 
       navigate('/clientes')
-    } catch {
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'No se pudo crear el cliente'
       toast({
         title: 'Error',
-        description: 'No se pudo crear el cliente',
+        description: message,
         variant: 'destructive',
       })
     } finally {

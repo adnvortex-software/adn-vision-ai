@@ -43,7 +43,8 @@ export async function getBus(busId: string): Promise<Entity<Bus> | null> {
   return {
     id: docSnap.id,
     ...parsed.data,
-    lastHeartbeat: (data as { lastHeartbeat?: unknown }).lastHeartbeat as Bus['lastHeartbeat'] ?? null,
+    lastHeartbeat:
+      ((data as { lastHeartbeat?: unknown }).lastHeartbeat as Bus['lastHeartbeat']) ?? null,
     createdAt: data.createdAt,
     updatedAt: data.updatedAt,
   }
@@ -74,7 +75,8 @@ export async function getBusByPlaca(placa: string): Promise<Entity<Bus> | null> 
   return {
     id: docSnap.id,
     ...parsed.data,
-    lastHeartbeat: (data as { lastHeartbeat?: unknown }).lastHeartbeat as Bus['lastHeartbeat'] ?? null,
+    lastHeartbeat:
+      ((data as { lastHeartbeat?: unknown }).lastHeartbeat as Bus['lastHeartbeat']) ?? null,
     createdAt: data.createdAt,
     updatedAt: data.updatedAt,
   }
@@ -131,10 +133,11 @@ export async function listBuses(
       return {
         id: docSnap.id,
         ...parsed.data,
-        lastHeartbeat: (docData as { lastHeartbeat?: unknown }).lastHeartbeat as Bus['lastHeartbeat'] ?? null,
+        lastHeartbeat:
+          ((docData as { lastHeartbeat?: unknown }).lastHeartbeat as Bus['lastHeartbeat']) ?? null,
         createdAt: docData.createdAt,
         updatedAt: docData.updatedAt,
-      } as Entity<Bus>
+      }
     })
     .filter((item): item is Entity<Bus> => item !== null)
 
@@ -202,9 +205,38 @@ export async function updateBus(busId: string, data: Partial<Bus>): Promise<void
 }
 
 /**
- * Soft delete de bus
+ * Verifica si un bus puede ser eliminado (no tiene cámaras configuradas activas)
+ */
+export async function canDeleteBus(
+  busId: string
+): Promise<{ canDelete: boolean; reason?: string }> {
+  // Verificar si tiene cámaras activas
+  const camarasQuery = query(
+    collection(db, COLLECTION, busId, 'camaras'),
+    where('activa', '==', true),
+    limit(1)
+  )
+  const camarasSnapshot = await getDocs(camarasQuery)
+
+  if (!camarasSnapshot.empty) {
+    return {
+      canDelete: false,
+      reason: 'El bus tiene cámaras configuradas. Elimina las cámaras primero.',
+    }
+  }
+
+  return { canDelete: true }
+}
+
+/**
+ * Soft delete de bus (con validación de dependencias)
  */
 export async function deleteBus(busId: string): Promise<void> {
+  const { canDelete, reason } = await canDeleteBus(busId)
+  if (!canDelete) {
+    throw new Error(reason)
+  }
+
   const docRef = doc(db, COLLECTION, busId)
   await updateDoc(docRef, {
     deleted: true,
@@ -240,10 +272,11 @@ export function subscribeToBuses(
         return {
           id: docSnap.id,
           ...parsed.data,
-          lastHeartbeat: (data as { lastHeartbeat?: unknown }).lastHeartbeat as Bus['lastHeartbeat'] ?? null,
+          lastHeartbeat:
+            ((data as { lastHeartbeat?: unknown }).lastHeartbeat as Bus['lastHeartbeat']) ?? null,
           createdAt: data.createdAt,
           updatedAt: data.updatedAt,
-        } as Entity<Bus>
+        }
       })
       .filter((item): item is Entity<Bus> => item !== null)
 

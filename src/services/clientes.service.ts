@@ -86,7 +86,7 @@ export async function listClientes(
         ...parsed.data,
         createdAt: docData.createdAt,
         updatedAt: docData.updatedAt,
-      } as Entity<Cliente>
+      }
     })
     .filter((item): item is Entity<Cliente> => item !== null)
 
@@ -127,9 +127,40 @@ export async function updateCliente(clienteId: string, data: Partial<Cliente>): 
 }
 
 /**
- * Soft delete de cliente
+ * Verifica si un cliente puede ser eliminado (no tiene buses asociados)
+ */
+export async function canDeleteCliente(
+  clienteId: string
+): Promise<{ canDelete: boolean; reason?: string }> {
+  // Verificar si tiene buses
+  const busesQuery = query(
+    collection(db, 'buses'),
+    where('clienteId', '==', clienteId),
+    where('deleted', '!=', true),
+    limit(1)
+  )
+  const busesSnapshot = await getDocs(busesQuery)
+
+  if (!busesSnapshot.empty) {
+    return {
+      canDelete: false,
+      reason: 'El cliente tiene buses asociados. Elimina o reasigna los buses primero.',
+    }
+  }
+
+  return { canDelete: true }
+}
+
+/**
+ * Soft delete de cliente (con validación de dependencias)
  */
 export async function deleteCliente(clienteId: string): Promise<void> {
+  // Verificar dependencias
+  const { canDelete, reason } = await canDeleteCliente(clienteId)
+  if (!canDelete) {
+    throw new Error(reason)
+  }
+
   const docRef = doc(db, COLLECTION, clienteId)
   await updateDoc(docRef, {
     deleted: true,
@@ -167,12 +198,72 @@ export async function createSucursal(
 ): Promise<string> {
   const docRef = await addDoc(collection(db, COLLECTION, clienteId, 'sucursales'), {
     ...data,
+    clienteId,
     activa: true,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
     createdBy,
   })
   return docRef.id
+}
+
+/**
+ * Actualiza una sucursal
+ */
+export async function updateSucursal(
+  clienteId: string,
+  sucursalId: string,
+  data: Partial<Sucursal>
+): Promise<void> {
+  const docRef = doc(db, COLLECTION, clienteId, 'sucursales', sucursalId)
+  await updateDoc(docRef, {
+    ...data,
+    updatedAt: serverTimestamp(),
+  })
+}
+
+/**
+ * Verifica si una sucursal puede ser eliminada
+ */
+export async function canDeleteSucursal(
+  clienteId: string,
+  sucursalId: string
+): Promise<{ canDelete: boolean; reason?: string }> {
+  // Verificar si tiene buses
+  const busesQuery = query(
+    collection(db, 'buses'),
+    where('clienteId', '==', clienteId),
+    where('sucursalId', '==', sucursalId),
+    where('deleted', '!=', true),
+    limit(1)
+  )
+  const busesSnapshot = await getDocs(busesQuery)
+
+  if (!busesSnapshot.empty) {
+    return {
+      canDelete: false,
+      reason: 'La sucursal tiene buses asociados. Elimina o reasigna los buses primero.',
+    }
+  }
+
+  return { canDelete: true }
+}
+
+/**
+ * Soft delete de sucursal
+ */
+export async function deleteSucursal(clienteId: string, sucursalId: string): Promise<void> {
+  const { canDelete, reason } = await canDeleteSucursal(clienteId, sucursalId)
+  if (!canDelete) {
+    throw new Error(reason)
+  }
+
+  const docRef = doc(db, COLLECTION, clienteId, 'sucursales', sucursalId)
+  await updateDoc(docRef, {
+    activa: false,
+    deleted: true,
+    updatedAt: serverTimestamp(),
+  })
 }
 
 // ============ PROPIETARIOS ============
@@ -217,4 +308,63 @@ export async function createPropietario(
     createdBy,
   })
   return docRef.id
+}
+
+/**
+ * Actualiza un propietario
+ */
+export async function updatePropietario(
+  clienteId: string,
+  propietarioId: string,
+  data: Partial<Propietario>
+): Promise<void> {
+  const docRef = doc(db, COLLECTION, clienteId, 'propietarios', propietarioId)
+  await updateDoc(docRef, {
+    ...data,
+    updatedAt: serverTimestamp(),
+  })
+}
+
+/**
+ * Verifica si un propietario puede ser eliminado
+ */
+export async function canDeletePropietario(
+  clienteId: string,
+  propietarioId: string
+): Promise<{ canDelete: boolean; reason?: string }> {
+  // Verificar si tiene buses
+  const busesQuery = query(
+    collection(db, 'buses'),
+    where('clienteId', '==', clienteId),
+    where('propietarioId', '==', propietarioId),
+    where('deleted', '!=', true),
+    limit(1)
+  )
+  const busesSnapshot = await getDocs(busesQuery)
+
+  if (!busesSnapshot.empty) {
+    return {
+      canDelete: false,
+      reason: 'El propietario tiene buses asociados. Elimina o reasigna los buses primero.',
+    }
+  }
+
+  return { canDelete: true }
+}
+
+/**
+ * Soft delete de propietario
+ */
+export async function deletePropietario(clienteId: string, propietarioId: string): Promise<void> {
+  const { canDelete, reason } = await canDeletePropietario(clienteId, propietarioId)
+  if (!canDelete) {
+    throw new Error(reason)
+  }
+
+  const docRef = doc(db, COLLECTION, clienteId, 'propietarios', propietarioId)
+  await updateDoc(docRef, {
+    activo: false,
+    deleted: true,
+    updatedAt: serverTimestamp(),
+  })
 }

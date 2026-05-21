@@ -42,10 +42,11 @@ export async function getConductor(conductorId: string): Promise<Entity<Conducto
   return {
     id: docSnap.id,
     ...parsed.data,
-    fechaVencimientoLicencia: (data as { fechaVencimientoLicencia: unknown }).fechaVencimientoLicencia as Conductor['fechaVencimientoLicencia'],
+    fechaVencimientoLicencia: (data as unknown as { fechaVencimientoLicencia: unknown })
+      .fechaVencimientoLicencia as Conductor['fechaVencimientoLicencia'],
     createdAt: data.createdAt,
     updatedAt: data.updatedAt,
-  } as Entity<Conductor>
+  }
 }
 
 /**
@@ -73,10 +74,11 @@ export async function getConductorByCedula(cedula: string): Promise<Entity<Condu
   return {
     id: docSnap.id,
     ...parsed.data,
-    fechaVencimientoLicencia: (data as { fechaVencimientoLicencia: unknown }).fechaVencimientoLicencia as Conductor['fechaVencimientoLicencia'],
+    fechaVencimientoLicencia: (data as unknown as { fechaVencimientoLicencia: unknown })
+      .fechaVencimientoLicencia as Conductor['fechaVencimientoLicencia'],
     createdAt: data.createdAt,
     updatedAt: data.updatedAt,
-  } as Entity<Conductor>
+  }
 }
 
 /**
@@ -135,10 +137,11 @@ export async function listConductores(
       return {
         id: docSnap.id,
         ...parsed.data,
-        fechaVencimientoLicencia: (docData as { fechaVencimientoLicencia: unknown }).fechaVencimientoLicencia as Conductor['fechaVencimientoLicencia'],
+        fechaVencimientoLicencia: (docData as unknown as { fechaVencimientoLicencia: unknown })
+          .fechaVencimientoLicencia as Conductor['fechaVencimientoLicencia'],
         createdAt: docData.createdAt,
         updatedAt: docData.updatedAt,
-      } as Entity<Conductor>
+      }
     })
     .filter((item): item is Entity<Conductor> => item !== null)
 
@@ -176,10 +179,11 @@ export async function listConductoresLicenciasPorVencer(
       return {
         id: docSnap.id,
         ...parsed.data,
-        fechaVencimientoLicencia: (docData as { fechaVencimientoLicencia: unknown }).fechaVencimientoLicencia as Conductor['fechaVencimientoLicencia'],
+        fechaVencimientoLicencia: (docData as unknown as { fechaVencimientoLicencia: unknown })
+          .fechaVencimientoLicencia as Conductor['fechaVencimientoLicencia'],
         createdAt: docData.createdAt,
         updatedAt: docData.updatedAt,
-      } as Entity<Conductor>
+      }
     })
     .filter((item): item is Entity<Conductor> => item !== null)
   return conductores
@@ -239,9 +243,39 @@ export async function updateConductor(
 }
 
 /**
- * Soft delete de conductor
+ * Verifica si un conductor puede ser eliminado
+ */
+export async function canDeleteConductor(
+  conductorId: string
+): Promise<{ canDelete: boolean; reason?: string }> {
+  // Verificar si está asignado a algún bus
+  const busesQuery = query(
+    collection(db, 'buses'),
+    where('conductorAsignadoId', '==', conductorId),
+    where('deleted', '!=', true),
+    limit(1)
+  )
+  const busesSnapshot = await getDocs(busesQuery)
+
+  if (!busesSnapshot.empty) {
+    return {
+      canDelete: false,
+      reason: 'El conductor está asignado a un bus. Desasígnalo primero.',
+    }
+  }
+
+  return { canDelete: true }
+}
+
+/**
+ * Soft delete de conductor (con validación de dependencias)
  */
 export async function deleteConductor(conductorId: string): Promise<void> {
+  const { canDelete, reason } = await canDeleteConductor(conductorId)
+  if (!canDelete) {
+    throw new Error(reason)
+  }
+
   const docRef = doc(db, COLLECTION, conductorId)
   await updateDoc(docRef, {
     deleted: true,

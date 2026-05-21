@@ -62,7 +62,7 @@ export async function listNovedadesCatalogo(): Promise<Entity<NovedadCatalogo>[]
         deleted: typeof data.deleted === 'boolean' ? data.deleted : false,
         createdAt: data.createdAt,
         updatedAt: data.updatedAt,
-      } as Entity<NovedadCatalogo>
+      }
     })
     .filter((item): item is Entity<NovedadCatalogo> => item !== null)
   return catalogo
@@ -94,7 +94,7 @@ export async function getNovedadCatalogoByCodigo(
     deleted: typeof data.deleted === 'boolean' ? data.deleted : false,
     createdAt: data.createdAt,
     updatedAt: data.updatedAt,
-  } as Entity<NovedadCatalogo>
+  }
 }
 
 // ============ CONFIGURACIÓN DE NOVEDADES ============
@@ -292,11 +292,12 @@ export async function listEventos(
       return {
         id: docSnap.id,
         ...parsed.data,
-        timestamp: (docData as { timestamp: unknown }).timestamp as Evento['timestamp'],
-        revisadoAt: ((docData as { revisadoAt?: unknown }).revisadoAt ?? null) as Evento['revisadoAt'],
+        timestamp: (docData as unknown as { timestamp: unknown }).timestamp as Evento['timestamp'],
+        revisadoAt: ((docData as { revisadoAt?: unknown }).revisadoAt ??
+          null) as Evento['revisadoAt'],
         createdAt: docData.createdAt,
         updatedAt: docData.updatedAt,
-      } as Entity<Evento>
+      }
     })
     .filter((item): item is Entity<Evento> => item !== null)
 
@@ -329,11 +330,11 @@ export async function getEvento(eventoId: string): Promise<Entity<Evento> | null
   return {
     id: docSnap.id,
     ...parsed.data,
-    timestamp: (data as { timestamp: unknown }).timestamp as Evento['timestamp'],
+    timestamp: (data as unknown as { timestamp: unknown }).timestamp as Evento['timestamp'],
     revisadoAt: ((data as { revisadoAt?: unknown }).revisadoAt ?? null) as Evento['revisadoAt'],
     createdAt: data.createdAt,
     updatedAt: data.updatedAt,
-  } as Entity<Evento>
+  }
 }
 
 /**
@@ -393,11 +394,12 @@ export function subscribeToEventos(
         return {
           id: docSnap.id,
           ...parsed.data,
-          timestamp: data.timestamp,
-          revisadoAt: data.revisadoAt ?? null,
+          timestamp: (data as unknown as { timestamp: unknown }).timestamp as Evento['timestamp'],
+          revisadoAt: ((data as unknown as { revisadoAt?: unknown }).revisadoAt ??
+            null) as Evento['revisadoAt'],
           createdAt: data.createdAt,
           updatedAt: data.updatedAt,
-        } as Entity<Evento>
+        }
       })
       .filter((item): item is Entity<Evento> => item !== null)
 
