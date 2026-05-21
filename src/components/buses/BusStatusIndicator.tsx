@@ -98,9 +98,7 @@ export function BusStatusIndicator({
         className
       )}
     >
-      <span
-        className={cn('rounded-full', config.colorClass.replace('text-', 'bg-'), sizeConfig.dot)}
-      />
+      <Icon className={sizeConfig.icon} />
       {config.label}
     </span>
   )
