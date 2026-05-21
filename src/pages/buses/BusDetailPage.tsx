@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
   ArrowLeft,
@@ -10,30 +10,59 @@ import {
   Settings,
   Wifi,
   WifiOff,
+  Loader2,
 } from 'lucide-react'
 import { PageHeader } from '@/components/common/PageHeader'
-import { LoadingState } from '@/components/common/LoadingState'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { BusStatusIndicator } from '@/components/buses'
-import type { BusConDetalles, Camara } from '@/types/bus'
+import { getBus } from '@/services/buses.service'
+import { listCamaras } from '@/services/camaras.service'
+import type { Bus as BusType, Camara } from '@/types/bus'
 import type { Entity } from '@/types/firestore'
-
-// Mock data - replace with actual data fetching
-const mockBus: BusConDetalles | null = null
-const mockCamaras: Entity<Camara>[] = []
+import { useToast } from '@/hooks/use-toast'
 
 export default function BusDetailPage() {
   const { busId } = useParams<{ busId: string }>()
   const navigate = useNavigate()
-  const [isLoading] = useState(false)
+  const { toast } = useToast()
+  const [isLoading, setIsLoading] = useState(true)
+  const [bus, setBus] = useState<Entity<BusType> | null>(null)
+  const [camaras, setCamaras] = useState<Entity<Camara>[]>([])
+
+  useEffect(() => {
+    async function loadBusData() {
+      if (!busId) return
+
+      try {
+        const [busData, camarasData] = await Promise.all([getBus(busId), listCamaras(busId)])
+        setBus(busData)
+        setCamaras(camarasData)
+      } catch (error) {
+        console.error('Error loading bus:', error)
+        toast({
+          title: 'Error',
+          description: 'No se pudo cargar la información del bus',
+          variant: 'destructive',
+        })
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    void loadBusData()
+  }, [busId, toast])
 
   if (isLoading) {
-    return <LoadingState fullScreen />
+    return (
+      <div className="flex h-96 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    )
   }
 
-  if (!mockBus) {
+  if (!bus) {
     return (
       <div className="container mx-auto py-6">
         <div className="flex flex-col items-center justify-center rounded-lg border py-12">
@@ -60,11 +89,11 @@ export default function BusDetailPage() {
       <PageHeader
         title={
           <div className="flex items-center gap-3">
-            <span className="font-mono">{mockBus.placa}</span>
-            <BusStatusIndicator estado={mockBus.estado} />
+            <span className="font-mono">{bus.placa}</span>
+            <BusStatusIndicator estado={bus.estado} />
           </div>
         }
-        description={mockBus.rutaTexto ?? 'Sin ruta asignada'}
+        description={bus.deviceId ? `Device ID: ${bus.deviceId}` : 'Sin Device ID'}
         actions={
           <div className="flex items-center gap-2">
             <Button
@@ -110,19 +139,19 @@ export default function BusDetailPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <p className="text-sm text-muted-foreground">Tipo de Vehiculo</p>
-                <p className="font-medium capitalize">{mockBus.tipoVehiculo}</p>
+                <p className="font-medium capitalize">{bus.tipoVehiculo}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Sucursal</p>
-                <p className="font-medium">{mockBus.sucursalNombre ?? '-'}</p>
+                <p className="text-sm text-muted-foreground">Device ID</p>
+                <p className="font-mono text-sm">{bus.deviceId ?? '-'}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Propietario</p>
-                <p className="font-medium">{mockBus.propietarioNombre ?? 'No asignado'}</p>
+                <p className="text-sm text-muted-foreground">Estado</p>
+                <BusStatusIndicator estado={bus.estado} />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Conductor</p>
-                <p className="font-medium">{mockBus.conductorNombre ?? 'Sin asignar'}</p>
+                <p className="text-sm text-muted-foreground">Camaras Configuradas</p>
+                <p className="font-medium">{bus.numCamarasConfiguradas}</p>
               </div>
             </div>
           </CardContent>
@@ -132,7 +161,7 @@ export default function BusDetailPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              {mockBus.estado === 'sin_conexion' ? (
+              {bus.estado === 'sin_conexion' ? (
                 <WifiOff className="h-5 w-5 text-destructive" />
               ) : (
                 <Wifi className="h-5 w-5 text-green-500" />
@@ -143,16 +172,16 @@ export default function BusDetailPage() {
           <CardContent className="space-y-4">
             <div>
               <p className="text-sm text-muted-foreground">IP ZeroTier</p>
-              <p className="font-mono text-sm">{mockBus.ztIpRouter}</p>
+              <p className="font-mono text-sm">{bus.ztIpRouter}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Subnet LAN</p>
-              <p className="font-mono text-sm">{mockBus.subnetLan}</p>
+              <p className="font-mono text-sm">{bus.subnetLan}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Ultimo Heartbeat</p>
               <p className="text-sm">
-                {mockBus.lastHeartbeat ? mockBus.lastHeartbeat.toDate().toLocaleString() : 'Nunca'}
+                {bus.lastHeartbeat ? bus.lastHeartbeat.toDate().toLocaleString() : 'Nunca'}
               </p>
             </div>
           </CardContent>
@@ -168,7 +197,7 @@ export default function BusDetailPage() {
                 <Users className="h-6 w-6 text-green-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{mockBus.conteoDia?.entradas ?? 0}</p>
+                <p className="text-2xl font-bold">0</p>
                 <p className="text-sm text-muted-foreground">Entradas hoy</p>
               </div>
             </div>
@@ -181,7 +210,7 @@ export default function BusDetailPage() {
                 <Users className="h-6 w-6 text-red-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{mockBus.conteoDia?.salidas ?? 0}</p>
+                <p className="text-2xl font-bold">0</p>
                 <p className="text-sm text-muted-foreground">Salidas hoy</p>
               </div>
             </div>
@@ -194,7 +223,7 @@ export default function BusDetailPage() {
                 <AlertTriangle className="h-6 w-6 text-amber-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{mockBus.novedadesHoy ?? 0}</p>
+                <p className="text-2xl font-bold">0</p>
                 <p className="text-sm text-muted-foreground">Novedades hoy</p>
               </div>
             </div>
@@ -210,9 +239,7 @@ export default function BusDetailPage() {
               <Camera className="h-5 w-5" />
               Camaras Configuradas
             </CardTitle>
-            <CardDescription>
-              {mockCamaras.length} de {mockBus.numCamarasConfiguradas} camaras
-            </CardDescription>
+            <CardDescription>{camaras.length} camara(s) configurada(s)</CardDescription>
           </div>
           <Button
             variant="outline"
@@ -226,14 +253,14 @@ export default function BusDetailPage() {
           </Button>
         </CardHeader>
         <CardContent>
-          {mockCamaras.length === 0 ? (
+          {camaras.length === 0 ? (
             <div className="py-8 text-center">
               <Camera className="mx-auto h-8 w-8 text-muted-foreground/30" />
               <p className="mt-2 text-sm text-muted-foreground">No hay camaras configuradas</p>
             </div>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {mockCamaras.map((camara) => (
+              {camaras.map((camara) => (
                 <div key={camara.id} className="rounded-lg border p-4">
                   <div className="flex items-center justify-between">
                     <span className="font-medium">{camara.nombre}</span>

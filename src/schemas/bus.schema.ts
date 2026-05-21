@@ -35,12 +35,11 @@ const subnetSchema = z
 export const createBusSchema = z.object({
   placa: placaSchema,
   clienteId: z.string().min(1, 'Cliente es requerido'),
-  sucursalId: z.string().min(1, 'Sucursal es requerida'),
-  propietarioId: z.string().nullable().optional(),
   tipoVehiculo: z.enum(VEHICLE_TYPES, {
     errorMap: () => ({ message: 'Tipo de vehículo inválido' }),
   }),
-  rutaTexto: z.string().max(200, 'Máximo 200 caracteres').nullable().optional(),
+  deviceId: z.string().min(1, 'Device ID es requerido'),
+  ipVirtual: z.string().min(1, 'IP Virtual es requerida'),
   conductorAsignadoId: z.string().nullable().optional(),
   ztIpRouter: ipSchema,
   subnetLan: subnetSchema,
@@ -60,10 +59,9 @@ export type UpdateBusFormData = z.infer<typeof updateBusSchema>
 export const busWizardStep1Schema = z.object({
   placa: placaSchema,
   clienteId: z.string().min(1, 'Cliente es requerido'),
-  sucursalId: z.string().min(1, 'Sucursal es requerida'),
-  propietarioId: z.string().nullable().optional(),
   tipoVehiculo: z.enum(VEHICLE_TYPES),
-  rutaTexto: z.string().max(200).nullable().optional(),
+  deviceId: z.string().min(1, 'Device ID es requerido'),
+  ipVirtual: z.string().min(1, 'IP Virtual es requerida'),
   conductorAsignadoId: z.string().nullable().optional(),
 })
 
@@ -81,21 +79,24 @@ export type BusWizardStep2Data = z.infer<typeof busWizardStep2Schema>
 export const busFirestoreSchema = z.object({
   placa: z.string(),
   clienteId: z.string(),
-  sucursalId: z.string(),
-  propietarioId: z.string().nullable(),
+  deviceId: z.string().optional().default(''),
+  ipVirtual: z.string().optional().default(''),
+  sucursalId: z.string().nullable().optional(),
+  propietarioId: z.string().nullable().optional(),
   tipoVehiculo: z.enum(VEHICLE_TYPES),
-  rutaTexto: z.string().nullable(),
-  conductorAsignadoId: z.string().nullable(),
+  rutaTexto: z.string().nullable().optional(),
+  conductorAsignadoId: z.string().nullable().optional(),
   ztIpRouter: z.string(),
   subnetLan: z.string(),
-  estado: z.enum(BUS_STATES),
-  lastHeartbeat: z.unknown().nullable(),
-  numCamarasConfiguradas: z.number(),
-  activo: z.boolean(),
+  estado: z.enum(BUS_STATES).optional().default('sin_conexion'),
+  lastHeartbeat: z.unknown().nullable().optional(),
+  numCamarasConfiguradas: z.number().optional().default(0),
+  camarasNombres: z.array(z.string()).optional().default([]),
+  activo: z.boolean().optional().default(true),
   createdAt: z.unknown(),
   updatedAt: z.unknown(),
-  createdBy: z.string(),
-  deleted: z.boolean().optional(),
+  createdBy: z.string().optional().default('system'),
+  deleted: z.boolean().optional().default(false),
 })
 
 export type BusFirestore = z.infer<typeof busFirestoreSchema>

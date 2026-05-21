@@ -8,6 +8,7 @@ import { PublicLayout } from './PublicLayout'
 // Auth pages
 const LoginPage = lazy(() => import('@/pages/auth/LoginPage'))
 const RecuperarPasswordPage = lazy(() => import('@/pages/auth/RecuperarPasswordPage'))
+const SetupPage = lazy(() => import('@/pages/auth/SetupPage'))
 
 // Main pages
 const DashboardPage = lazy(() => import('@/pages/DashboardPage'))
@@ -23,6 +24,7 @@ const ClienteNuevoPage = lazy(() => import('@/pages/clientes/ClienteNuevoPage'))
 const BusesListPage = lazy(() => import('@/pages/buses/BusesListPage'))
 const BusDetailPage = lazy(() => import('@/pages/buses/BusDetailPage'))
 const BusNuevoPage = lazy(() => import('@/pages/buses/BusNuevoPage'))
+const BusEditPage = lazy(() => import('@/pages/buses/BusEditPage'))
 const BusConfigCamarasPage = lazy(() => import('@/pages/buses/BusConfigCamarasPage'))
 
 // Novedades pages
@@ -64,6 +66,14 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingState fullScreen />}>
             <RecuperarPasswordPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/setup',
+        element: (
+          <Suspense fallback={<LoadingState fullScreen />}>
+            <SetupPage />
           </Suspense>
         ),
       },
@@ -151,7 +161,7 @@ export const router = createBrowserRouter([
         path: '/buses/:busId/editar',
         element: (
           <Suspense fallback={<LoadingState fullScreen />}>
-            <BusNuevoPage />
+            <BusEditPage />
           </Suspense>
         ),
       },

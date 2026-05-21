@@ -23,13 +23,10 @@ import {
 } from '@/components/ui/select'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import type { Bus } from '@/types/bus'
-import type { Sucursal, Propietario } from '@/types/cliente'
 import type { Entity } from '@/types/firestore'
 
 interface BusFormProps {
   bus?: Entity<Bus>
-  sucursales: Entity<Sucursal>[]
-  propietarios: Entity<Propietario>[]
   clienteId: string
   onSubmit: (data: CreateBusFormData) => Promise<void>
   onCancel?: () => void
@@ -44,34 +41,19 @@ const VEHICLE_TYPE_LABELS: Record<string, string> = {
   otro: 'Otro',
 }
 
-export function BusForm({
-  bus,
-  sucursales,
-  propietarios,
-  clienteId,
-  onSubmit,
-  onCancel,
-  isLoading = false,
-}: BusFormProps) {
+export function BusForm({ bus, clienteId, onSubmit, onCancel, isLoading = false }: BusFormProps) {
   const form = useForm<CreateBusFormData>({
     resolver: zodResolver(createBusSchema),
     defaultValues: {
       placa: bus?.placa ?? '',
       clienteId: bus?.clienteId ?? clienteId,
-      sucursalId: bus?.sucursalId ?? '',
-      propietarioId: bus?.propietarioId,
+      deviceId: bus?.deviceId ?? '',
       tipoVehiculo: bus?.tipoVehiculo ?? 'bus',
-      rutaTexto: bus?.rutaTexto,
       conductorAsignadoId: bus?.conductorAsignadoId,
       ztIpRouter: bus?.ztIpRouter ?? '',
       subnetLan: bus?.subnetLan ?? '',
     },
   })
-
-  const selectedSucursalId = form.watch('sucursalId')
-  const filteredPropietarios = propietarios.filter(
-    (p) => !selectedSucursalId || p.sucursalId === selectedSucursalId
-  )
 
   const handleSubmit = async (data: CreateBusFormData) => {
     await onSubmit(data)
@@ -150,95 +132,16 @@ export function BusForm({
 
                 <FormField
                   control={form.control}
-                  name="sucursalId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Sucursal</FormLabel>
-                      <Select
-                        onValueChange={(value) => {
-                          field.onChange(value)
-                          // Reset propietario if sucursal changes
-                          form.setValue('propietarioId', null)
-                        }}
-                        defaultValue={field.value}
-                        disabled={isLoading || sucursales.length === 0}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue
-                              placeholder={
-                                sucursales.length === 0
-                                  ? 'No hay sucursales'
-                                  : 'Seleccionar sucursal'
-                              }
-                            />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {sucursales.map((sucursal) => (
-                            <SelectItem key={sucursal.id} value={sucursal.id}>
-                              {sucursal.nombre} - {sucursal.ciudad}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="propietarioId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Propietario (Opcional)</FormLabel>
-                      <Select
-                        onValueChange={(v) => field.onChange(v === '_none_' ? null : v)}
-                        value={field.value ?? '_none_'}
-                        disabled={isLoading || filteredPropietarios.length === 0}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue
-                              placeholder={
-                                filteredPropietarios.length === 0
-                                  ? 'Sin propietarios'
-                                  : 'Seleccionar propietario'
-                              }
-                            />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="_none_">Sin propietario</SelectItem>
-                          {filteredPropietarios.map((propietario) => (
-                            <SelectItem key={propietario.id} value={propietario.id}>
-                              {propietario.nombre}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormDescription>Dueno o afiliador del vehiculo</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="rutaTexto"
+                  name="deviceId"
                   render={({ field }) => (
                     <FormItem className="md:col-span-2">
-                      <FormLabel>Ruta (Opcional)</FormLabel>
+                      <FormLabel>Device ID</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="Centro - Norte"
-                          disabled={isLoading}
-                          {...field}
-                          value={field.value ?? ''}
-                        />
+                        <Input placeholder="ID del dispositivo" disabled={isLoading} {...field} />
                       </FormControl>
-                      <FormDescription>Descripcion de la ruta que cubre</FormDescription>
+                      <FormDescription>
+                        Identificador unico del dispositivo DVR (ZeroTier)
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -291,7 +194,7 @@ export function BusForm({
                   Cancelar
                 </Button>
               )}
-              <Button type="submit" disabled={isLoading || sucursales.length === 0}>
+              <Button type="submit" disabled={isLoading}>
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

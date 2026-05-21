@@ -58,12 +58,9 @@ export async function listClientes(
     orderBy: orderField = 'nombre',
   } = options
 
-  let q = query(
-    collection(db, COLLECTION),
-    where('deleted', '!=', true),
-    orderBy(orderField),
-    limit(pageLimit + 1)
-  )
+  // Query without deleted filter - we filter in JavaScript to handle documents
+  // that might not have the 'activo' or 'deleted' fields set
+  let q = query(collection(db, COLLECTION), orderBy(orderField), limit(pageLimit + 1))
 
   if (startAfterId) {
     const startDoc = await getDoc(doc(db, COLLECTION, startAfterId))
@@ -80,7 +77,10 @@ export async function listClientes(
     .map((docSnap) => {
       const docData = docSnap.data() as FirestoreDocData
       const parsed = clienteFirestoreSchema.safeParse(docData)
-      if (!parsed.success) return null
+      if (!parsed.success) {
+        console.warn('Failed to parse cliente:', docSnap.id, parsed.error.errors)
+        return null
+      }
       return {
         id: docSnap.id,
         ...parsed.data,
@@ -88,7 +88,14 @@ export async function listClientes(
         updatedAt: docData.updatedAt,
       }
     })
-    .filter((item): item is Entity<Cliente> => item !== null)
+    .filter((item): item is Entity<Cliente> => {
+      // Filter out null items and deleted/inactive clients
+      if (item === null) return false
+      if (item.deleted) return false
+      // Allow items where activo is true or undefined (for backwards compatibility)
+      if (!item.activo) return false
+      return true
+    })
 
   return {
     data,
@@ -132,11 +139,11 @@ export async function updateCliente(clienteId: string, data: Partial<Cliente>): 
 export async function canDeleteCliente(
   clienteId: string
 ): Promise<{ canDelete: boolean; reason?: string }> {
-  // Verificar si tiene buses
+  // Verificar si tiene buses activos
   const busesQuery = query(
     collection(db, 'buses'),
     where('clienteId', '==', clienteId),
-    where('deleted', '!=', true),
+    where('activo', '==', true),
     limit(1)
   )
   const busesSnapshot = await getDocs(busesQuery)
@@ -229,12 +236,12 @@ export async function canDeleteSucursal(
   clienteId: string,
   sucursalId: string
 ): Promise<{ canDelete: boolean; reason?: string }> {
-  // Verificar si tiene buses
+  // Verificar si tiene buses activos
   const busesQuery = query(
     collection(db, 'buses'),
     where('clienteId', '==', clienteId),
     where('sucursalId', '==', sucursalId),
-    where('deleted', '!=', true),
+    where('activo', '==', true),
     limit(1)
   )
   const busesSnapshot = await getDocs(busesQuery)
@@ -332,12 +339,12 @@ export async function canDeletePropietario(
   clienteId: string,
   propietarioId: string
 ): Promise<{ canDelete: boolean; reason?: string }> {
-  // Verificar si tiene buses
+  // Verificar si tiene buses activos
   const busesQuery = query(
     collection(db, 'buses'),
     where('clienteId', '==', clienteId),
     where('propietarioId', '==', propietarioId),
-    where('deleted', '!=', true),
+    where('activo', '==', true),
     limit(1)
   )
   const busesSnapshot = await getDocs(busesQuery)

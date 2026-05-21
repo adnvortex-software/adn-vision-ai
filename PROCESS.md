@@ -1,8 +1,8 @@
-# ADN LYNX AI — PROCESS.md
+# ADN VISION AI — PROCESS.md
 
 ## 0. Cómo usar este documento
 
-Este es el **archivo maestro** del proyecto ADN LYNX AI. Contiene toda la información necesaria para entender el estado actual del desarrollo y continuar el trabajo.
+Este es el **archivo maestro** del proyecto ADN VISION AI. Contiene toda la información necesaria para entender el estado actual del desarrollo y continuar el trabajo.
 
 **REGLAS OBLIGATORIAS:**
 
@@ -15,7 +15,7 @@ Este es el **archivo maestro** del proyecto ADN LYNX AI. Contiene toda la inform
 
 ## 1. Visión del producto
 
-**ADN LYNX AI** es una plataforma SaaS multi-tenant para monitoreo automático de flotas de buses urbanos en Colombia mediante visión computacional.
+**ADN VISION AI** es una plataforma SaaS multi-tenant para monitoreo automático de flotas de buses urbanos en Colombia mediante visión computacional.
 
 ### El problema
 
@@ -53,7 +53,7 @@ Sistema automatizado que:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                           ARQUITECTURA ADN LYNX AI                       │
+│                           ARQUITECTURA ADN VISION AI                       │
 └─────────────────────────────────────────────────────────────────────────┘
 
 ┌──────────┐     ┌──────────┐     ┌──────────┐
@@ -996,13 +996,13 @@ adn-lynx-ai/
 ### Sesión 2 — 2026-05-20 (DEMO PREPARATION)
 
 - **Lo que se hizo:**
-  
+
   **Frontend (adn-lynx-ai):**
   - Corregidos ~40+ errores de TypeScript para que el build compile correctamente
   - Fixes incluyen: DateRangePicker `autoFocus`, BusWizardData tipos opcionales con `| null`, DashboardPage mockData con `Timestamp.now()`, CameraProfile type assertions, Sucursal `clienteId`, PageHeader `title: ReactNode`, CamarasGrid `onConfigNovedades` prop, service type assertions para Firestore
   - Build ahora completa sin errores (`pnpm build` exitoso)
   - Dev server funcionando en puerto 3001
-  
+
   **Backend (adn-lynx-back) - REORGANIZADO COMPLETO:**
   - Creado `main.py` - Contador de pasajeros con YOLOv8 + Firebase
     - Detección de personas con tracking (ByteTrack)
@@ -1018,7 +1018,7 @@ adn-lynx-ai/
   - Creado `seed_demo.py` para inicializar datos de demo (cliente, sucursal, bus, cámara)
   - Creado `.gitignore` (credentials, .pt models, venv, etc.)
   - Eliminados archivos obsoletos del proyecto de prueba anterior
-  
+
   **Modelo de datos alineado:**
   - Backend usa misma estructura que frontend: busId, clienteId, camaraId
   - Colección `conteos/{busId}` con entradasDia, salidasDia, aforoActual

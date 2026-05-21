@@ -8,6 +8,8 @@ import { ConfirmDialog } from '@/components/common/ConfirmDialog'
 import type { BusConDetalles, Bus } from '@/types/bus'
 import type { Entity } from '@/types/firestore'
 import { listBuses, deleteBus, canDeleteBus } from '@/services/buses.service'
+import { listClientes } from '@/services/clientes.service'
+import type { Cliente } from '@/types/cliente'
 import { useToast } from '@/hooks/use-toast'
 
 export default function BusesListPage() {
@@ -25,12 +27,28 @@ export default function BusesListPage() {
 
   const loadBuses = async () => {
     try {
-      const result = await listBuses({ limit: 100 })
-      const busesConDetalles: BusConDetalles[] = result.data.map((bus: Entity<Bus>) => ({
+      // Load buses and clients in parallel
+      const [busesResult, clientesResult] = await Promise.all([
+        listBuses({ limit: 100 }),
+        listClientes({ limit: 100 }),
+      ])
+
+      // Create a map of client IDs to names
+      const clientesMap = new Map<string, string>()
+      clientesResult.data.forEach((cliente: Entity<Cliente>) => {
+        clientesMap.set(cliente.id, cliente.nombre)
+      })
+
+      // Enrich buses with client names
+      const busesConDetalles: BusConDetalles[] = busesResult.data.map((bus: Entity<Bus>) => ({
         ...bus,
-        clienteNombre: '',
+        clienteNombre: clientesMap.get(bus.clienteId) ?? 'Cliente desconocido',
         sucursalNombre: '',
       }))
+
+      // Sort by client name for better grouping
+      busesConDetalles.sort((a, b) => (a.clienteNombre ?? '').localeCompare(b.clienteNombre ?? ''))
+
       setBuses(busesConDetalles)
     } catch (error) {
       console.error('Error loading buses:', error)

@@ -11,16 +11,7 @@
  * - Cierre con firmas
  */
 
-import {
-  Document,
-  Page,
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  Font,
-  pdf,
-} from '@react-pdf/renderer'
+import { Document, Page, View, Text, Image, StyleSheet, Font, pdf } from '@react-pdf/renderer'
 import type { EventoConDetalles } from '@/types/novedad'
 
 // Register fonts
@@ -377,9 +368,9 @@ function formatFechaEspanol(date: Date): string {
     'diciembre',
   ]
 
-  const dia = dias[date.getDay()]
+  const dia = dias[date.getDay()] ?? ''
   const diaNum = date.getDate()
-  const mes = meses[date.getMonth()]
+  const mes = meses[date.getMonth()] ?? ''
   const anio = date.getFullYear()
 
   return `${dia} ${String(diaNum)} de ${mes} del ${String(anio)}`
@@ -416,7 +407,7 @@ function InformeDisciplinarioPDFDocument({ data }: { data: InformeDisciplinarioD
         {/* Header */}
         <View style={styles.headerContainer}>
           <View style={styles.logoSection}>
-            <Text style={styles.logoText}>ADN LYNX</Text>
+            <Text style={styles.logoText}>ADN VISION</Text>
             <Text style={styles.logoSubtext}>AI MONITORING</Text>
           </View>
           <View style={styles.companySection}>
@@ -495,9 +486,7 @@ function InformeDisciplinarioPDFDocument({ data }: { data: InformeDisciplinarioD
           </View>
         </View>
 
-        <Text style={styles.footer}>
-          ADN LYNX AI - Sistema de Monitoreo de Flotas
-        </Text>
+        <Text style={styles.footer}>ADN VISION AI - Sistema de Monitoreo de Flotas</Text>
       </Page>
 
       {/* Page 2 */}
@@ -562,9 +551,7 @@ function InformeDisciplinarioPDFDocument({ data }: { data: InformeDisciplinarioD
           </View>
         </View>
 
-        <Text style={styles.footer}>
-          ADN LYNX AI - Sistema de Monitoreo de Flotas
-        </Text>
+        <Text style={styles.footer}>ADN VISION AI - Sistema de Monitoreo de Flotas</Text>
       </Page>
     </Document>
   )
@@ -585,7 +572,7 @@ export function eventToInformeDisciplinario(
   let eventoFecha = new Date()
   let eventoHora = '00:00:00'
 
-  if (evento.timestamp && typeof evento.timestamp === 'object' && 'toDate' in evento.timestamp) {
+  if (typeof evento.timestamp === 'object' && 'toDate' in evento.timestamp) {
     const date = (evento.timestamp as { toDate: () => Date }).toDate()
     eventoFecha = date
     eventoHora = date.toLocaleTimeString('es-CO', {

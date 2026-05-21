@@ -1,0 +1,19 @@
+rules_version = '2';
+
+/**
+ * ADN VISION AI - Firestore Security Rules (DEVELOPMENT ONLY)
+ *
+ * WARNING: These rules allow all read/write operations.
+ * DO NOT use in production!
+ *
+ * Deploy with: firebase deploy --only firestore:rules
+ */
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow all operations in development
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}

@@ -57,7 +57,7 @@ export async function getBusByPlaca(placa: string): Promise<Entity<Bus> | null> 
   const q = query(
     collection(db, COLLECTION),
     where('placa', '==', placa.toUpperCase()),
-    where('deleted', '!=', true),
+    where('activo', '==', true),
     limit(1)
   )
 
@@ -88,26 +88,17 @@ export async function getBusByPlaca(placa: string): Promise<Entity<Bus> | null> 
 export async function listBuses(
   options: PaginatedQuery & {
     clienteId?: string
-    sucursalId?: string
     estado?: string
   } = {}
 ): Promise<PaginatedResult<Entity<Bus>>> {
-  const { limit: pageLimit = 20, startAfter: startAfterId, clienteId, sucursalId, estado } = options
+  const { limit: pageLimit = 20, startAfter: startAfterId, clienteId, estado } = options
 
-  let q = query(
-    collection(db, COLLECTION),
-    where('deleted', '!=', true),
-    where('activo', '==', true),
-    orderBy('placa'),
-    limit(pageLimit + 1)
-  )
+  // Query without activo filter - we filter in JavaScript to handle documents
+  // that might not have the 'activo' field set
+  let q = query(collection(db, COLLECTION), orderBy('placa'), limit(pageLimit + 1))
 
   if (clienteId) {
     q = query(q, where('clienteId', '==', clienteId))
-  }
-
-  if (sucursalId) {
-    q = query(q, where('sucursalId', '==', sucursalId))
   }
 
   if (estado) {
@@ -129,7 +120,10 @@ export async function listBuses(
     .map((docSnap) => {
       const docData = docSnap.data() as FirestoreDocData
       const parsed = busFirestoreSchema.safeParse(docData)
-      if (!parsed.success) return null
+      if (!parsed.success) {
+        console.warn('Failed to parse bus:', docSnap.id, parsed.error.errors)
+        return null
+      }
       return {
         id: docSnap.id,
         ...parsed.data,
@@ -139,7 +133,14 @@ export async function listBuses(
         updatedAt: docData.updatedAt,
       }
     })
-    .filter((item): item is Entity<Bus> => item !== null)
+    .filter((item): item is Entity<Bus> => {
+      // Filter out null items and deleted/inactive buses
+      if (item === null) return false
+      if (item.deleted) return false
+      // Allow items where activo is true or undefined (for backwards compatibility)
+      if (!item.activo) return false
+      return true
+    })
 
   return {
     data,
@@ -252,12 +253,7 @@ export function subscribeToBuses(
   callback: (buses: Entity<Bus>[]) => void,
   options: { clienteId?: string } = {}
 ): Unsubscribe {
-  let q = query(
-    collection(db, COLLECTION),
-    where('deleted', '!=', true),
-    where('activo', '==', true),
-    orderBy('placa')
-  )
+  let q = query(collection(db, COLLECTION), orderBy('placa'))
 
   if (options.clienteId) {
     q = query(q, where('clienteId', '==', options.clienteId))
@@ -268,7 +264,10 @@ export function subscribeToBuses(
       .map((docSnap) => {
         const data = docSnap.data() as FirestoreDocData
         const parsed = busFirestoreSchema.safeParse(data)
-        if (!parsed.success) return null
+        if (!parsed.success) {
+          console.warn('Failed to parse bus:', docSnap.id, parsed.error.errors)
+          return null
+        }
         return {
           id: docSnap.id,
           ...parsed.data,
@@ -278,7 +277,12 @@ export function subscribeToBuses(
           updatedAt: data.updatedAt,
         }
       })
-      .filter((item): item is Entity<Bus> => item !== null)
+      .filter((item): item is Entity<Bus> => {
+        if (item === null) return false
+        if (item.deleted) return false
+        if (!item.activo) return false
+        return true
+      })
 
     callback(buses)
   })

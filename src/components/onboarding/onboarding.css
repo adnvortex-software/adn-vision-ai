@@ -1,0 +1,206 @@
+/* ADN VISION AI - Custom Onboarding Tour Styles */
+
+/* Override Driver.js default styles for a modern look */
+
+/* Popover container */
+.driver-popover.adn-lynx-popover {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 12px;
+  box-shadow:
+    0 20px 25px -5px rgb(0 0 0 / 0.1),
+    0 8px 10px -6px rgb(0 0 0 / 0.1),
+    0 0 0 1px rgb(0 0 0 / 0.05);
+  padding: 0;
+  max-width: 360px;
+  font-family: inherit;
+}
+
+/* Popover arrow */
+.driver-popover.adn-lynx-popover .driver-popover-arrow-side-left,
+.driver-popover.adn-lynx-popover .driver-popover-arrow-side-right,
+.driver-popover.adn-lynx-popover .driver-popover-arrow-side-top,
+.driver-popover.adn-lynx-popover .driver-popover-arrow-side-bottom {
+  border-color: hsl(var(--card));
+}
+
+.driver-popover.adn-lynx-popover .driver-popover-arrow-side-left::before,
+.driver-popover.adn-lynx-popover .driver-popover-arrow-side-right::before,
+.driver-popover.adn-lynx-popover .driver-popover-arrow-side-top::before,
+.driver-popover.adn-lynx-popover .driver-popover-arrow-side-bottom::before {
+  border-color: hsl(var(--border));
+}
+
+/* Title */
+.driver-popover.adn-lynx-popover .driver-popover-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  padding: 16px 20px 8px;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Description */
+.driver-popover.adn-lynx-popover .driver-popover-description {
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+  padding: 0 20px 16px;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Progress indicator */
+.driver-popover.adn-lynx-popover .driver-popover-progress-text {
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+  padding: 0 20px;
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+
+/* Footer with buttons */
+.driver-popover.adn-lynx-popover .driver-popover-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-top: 1px solid hsl(var(--border));
+  background: hsl(var(--muted) / 0.3);
+  border-radius: 0 0 12px 12px;
+  gap: 8px;
+}
+
+/* Buttons base style */
+.driver-popover.adn-lynx-popover button {
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  outline: none;
+}
+
+.driver-popover.adn-lynx-popover button:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* Previous button (ghost style) */
+.driver-popover.adn-lynx-popover .driver-popover-prev-btn {
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  border: 1px solid hsl(var(--border));
+}
+
+.driver-popover.adn-lynx-popover .driver-popover-prev-btn:hover {
+  background: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}
+
+/* Next and Done buttons (primary style) */
+.driver-popover.adn-lynx-popover .driver-popover-next-btn,
+.driver-popover.adn-lynx-popover .driver-popover-done-btn {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.driver-popover.adn-lynx-popover .driver-popover-next-btn:hover,
+.driver-popover.adn-lynx-popover .driver-popover-done-btn:hover {
+  background: hsl(var(--primary) / 0.9);
+}
+
+/* Close button */
+.driver-popover.adn-lynx-popover .driver-popover-close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  border-radius: 6px;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.driver-popover.adn-lynx-popover .driver-popover-close-btn:hover {
+  background: hsl(var(--accent));
+  color: hsl(var(--foreground));
+}
+
+/* Overlay */
+.driver-overlay {
+  background: hsl(var(--background) / 0.8) !important;
+  backdrop-filter: blur(4px);
+}
+
+/* Highlighted element stage */
+.driver-active-element {
+  box-shadow:
+    0 0 0 4px hsl(var(--primary) / 0.2),
+    0 0 0 9999px hsl(var(--background) / 0.75) !important;
+  border-radius: 8px !important;
+}
+
+/* Animation for popover appearance */
+.driver-popover.adn-lynx-popover {
+  animation: popover-fade-in 0.25s ease-out;
+}
+
+@keyframes popover-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .driver-popover.adn-lynx-popover {
+    max-width: calc(100vw - 32px);
+    margin: 16px;
+  }
+
+  .driver-popover.adn-lynx-popover .driver-popover-title {
+    font-size: 1rem;
+    padding: 14px 16px 6px;
+  }
+
+  .driver-popover.adn-lynx-popover .driver-popover-description {
+    font-size: 0.8125rem;
+    padding: 0 16px 14px;
+  }
+
+  .driver-popover.adn-lynx-popover .driver-popover-footer {
+    padding: 10px 12px;
+  }
+
+  .driver-popover.adn-lynx-popover button {
+    font-size: 0.8125rem;
+    padding: 6px 12px;
+  }
+}
+
+/* Dark mode adjustments (inherits from CSS variables) */
+.dark .driver-popover.adn-lynx-popover {
+  box-shadow:
+    0 20px 25px -5px rgb(0 0 0 / 0.3),
+    0 8px 10px -6px rgb(0 0 0 / 0.2),
+    0 0 0 1px rgb(255 255 255 / 0.05);
+}
+
+.dark .driver-overlay {
+  background: hsl(var(--background) / 0.85) !important;
+}

@@ -43,7 +43,9 @@ export async function getCamara(busId: string, camaraId: string): Promise<Entity
   return {
     id: docSnap.id,
     ...parsed.data,
-    ultimoScreenshotAt: (data as { ultimoScreenshotAt?: unknown }).ultimoScreenshotAt as Camara['ultimoScreenshotAt'] ?? null,
+    ultimoScreenshotAt:
+      ((data as { ultimoScreenshotAt?: unknown })
+        .ultimoScreenshotAt as Camara['ultimoScreenshotAt']) ?? null,
     createdAt: data.createdAt,
     updatedAt: data.updatedAt,
   }
@@ -55,7 +57,7 @@ export async function getCamara(busId: string, camaraId: string): Promise<Entity
 export async function listCamaras(busId: string): Promise<Entity<Camara>[]> {
   const q = query(
     collection(db, BUSES_COLLECTION, busId, CAMARAS_SUBCOLLECTION),
-    where('deleted', '!=', true),
+    where('habilitada', '==', true),
     orderBy('canal')
   )
 
@@ -69,10 +71,14 @@ export async function listCamaras(busId: string): Promise<Entity<Camara>[]> {
       return {
         id: docSnap.id,
         ...parsed.data,
-        ultimoScreenshotAt: (data as { ultimoScreenshotAt?: unknown }).ultimoScreenshotAt as Camara['ultimoScreenshotAt'] ?? null,
-        createdAt: data.createdAt,
-        updatedAt: data.updatedAt,
-      } as Entity<Camara>
+        ultimoScreenshotAt:
+          ((data as { ultimoScreenshotAt?: unknown })
+            .ultimoScreenshotAt as Camara['ultimoScreenshotAt']) ?? null,
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        createdAt: data.createdAt as Camara['createdAt'],
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        updatedAt: data.updatedAt as Camara['updatedAt'],
+      }
     })
     .filter((item): item is Entity<Camara> => item !== null)
   return camaras
@@ -238,7 +244,7 @@ export function subscribeToCamaras(
 ): Unsubscribe {
   const q = query(
     collection(db, BUSES_COLLECTION, busId, CAMARAS_SUBCOLLECTION),
-    where('deleted', '!=', true),
+    where('habilitada', '==', true),
     orderBy('canal')
   )
 
@@ -251,10 +257,12 @@ export function subscribeToCamaras(
         return {
           id: docSnap.id,
           ...parsed.data,
-          ultimoScreenshotAt: (data as { ultimoScreenshotAt?: unknown }).ultimoScreenshotAt as Camara['ultimoScreenshotAt'] ?? null,
+          ultimoScreenshotAt:
+            ((data as { ultimoScreenshotAt?: unknown })
+              .ultimoScreenshotAt as Camara['ultimoScreenshotAt']) ?? null,
           createdAt: data.createdAt,
           updatedAt: data.updatedAt,
-        } as Entity<Camara>
+        }
       })
       .filter((item): item is Entity<Camara> => item !== null)
 

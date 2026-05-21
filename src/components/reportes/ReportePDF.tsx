@@ -291,7 +291,7 @@ function ReporteHeader({
   return (
     <View style={styles.header}>
       <View>
-        <Text style={styles.logoText}>ADN LYNX AI</Text>
+        <Text style={styles.logoText}>ADN VISION AI</Text>
         <Text style={styles.logoSubtext}>Sistema de Monitoreo de Flotas</Text>
       </View>
       <View style={styles.headerRight}>
@@ -315,7 +315,7 @@ function ReporteFooter({
 }) {
   return (
     <View style={styles.footer}>
-      <Text>ADN LYNX AI - Reporte automatizado</Text>
+      <Text>ADN VISION AI - Reporte automatizado</Text>
       <Text>{fechaGeneracion.toLocaleDateString('es-CO')}</Text>
       {pageNumber && <Text style={styles.pageNumber}>Pagina {pageNumber}</Text>}
     </View>

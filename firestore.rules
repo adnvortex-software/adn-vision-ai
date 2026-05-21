@@ -1,296 +1,57 @@
 rules_version = '2';
 
 /**
- * ADN LYNX AI - Firestore Security Rules
+ * ADN VISION AI - Firestore Security Rules
  *
- * This file documents the security rules for the Firestore database.
+ * DEVELOPMENT MODE: Permissive rules for testing
+ * TODO: Replace with production rules before launch
+ *
  * Deploy with: firebase deploy --only firestore:rules
- *
- * Role hierarchy (internal employees):
- * - super_admin: Full access to everything
- * - ops_admin: Manage clients, buses, cameras, novedades
- * - analyst: Review events, generate reports, create client users
- * - support: Read-only access
- *
- * Role hierarchy (client users):
- * - client_admin: Access to their client's data, manage viewers
- * - client_viewer: Read-only access to their client's data
  */
 
 service cloud.firestore {
   match /databases/{database}/documents {
-
     // ============================================
-    // Helper functions
+    // DEVELOPMENT: Allow all authenticated users
     // ============================================
 
-    // Check if user is authenticated
-    function isAuthenticated() {
-      return request.auth != null;
-    }
-
-    // Get the user document
-    function getUserDoc() {
-      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid));
-    }
-
-    // Check if user has a specific role
-    function hasRole(role) {
-      return isAuthenticated() && getUserDoc().data.rol == role;
-    }
-
-    // Check if user has any of the given roles
-    function hasAnyRole(roles) {
-      return isAuthenticated() && getUserDoc().data.rol in roles;
-    }
-
-    // Check if user is internal (ADN Lynx employee)
-    function isInternal() {
-      return hasAnyRole(['super_admin', 'ops_admin', 'analyst', 'support']);
-    }
-
-    // Check if user is admin (super_admin or ops_admin)
-    function isAdmin() {
-      return hasAnyRole(['super_admin', 'ops_admin']);
-    }
-
-    // Check if user is super admin
-    function isSuperAdmin() {
-      return hasRole('super_admin');
-    }
-
-    // Check if user belongs to a specific client
-    function belongsToClient(clienteId) {
-      let user = getUserDoc();
-      return user.data.clienteId == clienteId;
-    }
-
-    // Check if user can access client data (internal or belongs to client)
-    function canAccessClient(clienteId) {
-      return isInternal() || belongsToClient(clienteId);
-    }
-
-    // Check if user is active
-    function isActive() {
-      return getUserDoc().data.activo == true;
-    }
-
-    // Check if document is not deleted (soft delete)
-    function isNotDeleted(doc) {
-      return !('deleted' in doc.data) || doc.data.deleted == false;
-    }
-
-    // ============================================
-    // Usuarios collection
-    // ============================================
+    // Allow authenticated users to create their own user document
+    // This enables the bootstrap/seed process
     match /usuarios/{userId} {
-      // Users can read their own document
-      allow read: if isAuthenticated() && request.auth.uid == userId;
-
-      // Super admin can read/write all users
-      allow read, write: if isSuperAdmin();
-
-      // Ops admin and analyst can read all users
-      allow read: if hasAnyRole(['ops_admin', 'analyst']);
-
-      // Client admin can read users of their own client
-      allow read: if hasRole('client_admin')
-        && resource.data.clienteId == getUserDoc().data.clienteId;
-
-      // Client admin can create client_viewer users for their client
-      allow create: if hasRole('client_admin')
-        && request.resource.data.clienteId == getUserDoc().data.clienteId
-        && request.resource.data.rol == 'client_viewer';
-
-      // Analyst can create client users
-      allow create: if hasRole('analyst')
-        && request.resource.data.rol in ['client_admin', 'client_viewer'];
+      allow read, write: if request.auth != null;
     }
 
-    // ============================================
-    // Clientes collection
-    // ============================================
-    match /clientes/{clienteId} {
-      // Internal users can read all clients
-      allow read: if isInternal() && isActive();
-
-      // Client users can read their own client
-      allow read: if belongsToClient(clienteId) && isActive();
-
-      // Admin can create and update clients
-      allow create, update: if isAdmin() && isActive();
-
-      // Only super admin can delete clients
-      allow delete: if isSuperAdmin();
-
-      // ============================================
-      // Sucursales subcollection
-      // ============================================
-      match /sucursales/{sucursalId} {
-        allow read: if canAccessClient(clienteId) && isActive();
-        allow write: if isAdmin() && isActive();
-      }
-
-      // ============================================
-      // Propietarios subcollection
-      // ============================================
-      match /propietarios/{propietarioId} {
-        allow read: if canAccessClient(clienteId) && isActive();
-        allow write: if isAdmin() && isActive();
-      }
-
-      // ============================================
-      // Conductores subcollection
-      // ============================================
-      match /conductores/{conductorId} {
-        allow read: if canAccessClient(clienteId) && isActive();
-        allow write: if isAdmin() && isActive();
-      }
+    // Allow authenticated users full access to all collections
+    match /clientes/{document=**} {
+      allow read, write: if request.auth != null;
     }
 
-    // ============================================
-    // Buses collection
-    // ============================================
-    match /buses/{busId} {
-      // Internal users can read all buses
-      allow read: if isInternal() && isActive();
-
-      // Client users can read their client's buses
-      allow read: if belongsToClient(resource.data.clienteId) && isActive();
-
-      // Admin can create and update buses
-      allow create, update: if isAdmin() && isActive();
-
-      // Only super admin can delete buses
-      allow delete: if isSuperAdmin();
-
-      // ============================================
-      // Camaras subcollection
-      // ============================================
-      match /camaras/{camaraId} {
-        // Internal users can read all cameras
-        allow read: if isInternal() && isActive();
-
-        // Client users can read their client's cameras
-        allow read: if canAccessClient(
-          get(/databases/$(database)/documents/buses/$(busId)).data.clienteId
-        ) && isActive();
-
-        // Admin can manage cameras
-        allow write: if isAdmin() && isActive();
-
-        // ============================================
-        // Novedades config subcollection
-        // ============================================
-        match /novedades/{novedadConfigId} {
-          allow read: if isInternal() && isActive();
-          allow read: if canAccessClient(
-            get(/databases/$(database)/documents/buses/$(busId)).data.clienteId
-          ) && isActive();
-          allow write: if isAdmin() && isActive();
-        }
-      }
+    match /buses/{document=**} {
+      allow read, write: if request.auth != null;
     }
 
-    // ============================================
-    // Catalogo Novedades collection
-    // ============================================
-    match /catalogoNovedades/{novedadId} {
-      // Everyone authenticated can read the catalog
-      allow read: if isAuthenticated() && isActive();
-
-      // Only super admin can modify the catalog
-      allow write: if isSuperAdmin();
+    match /eventos/{document=**} {
+      allow read, write: if request.auth != null;
     }
 
-    // ============================================
-    // Eventos collection
-    // ============================================
-    match /eventos/{eventoId} {
-      // Internal users can read all events
-      allow read: if isInternal() && isActive();
-
-      // Client users can read their client's events
-      allow read: if belongsToClient(resource.data.clienteId) && isActive();
-
-      // Internal users (except support) can update event state
-      allow update: if hasAnyRole(['super_admin', 'ops_admin', 'analyst']) && isActive();
-
-      // System/backend can create events (via admin SDK, not client rules)
-      // For demo purposes, admin can create
-      allow create: if isAdmin() && isActive();
-
-      // Only super admin can delete events
-      allow delete: if isSuperAdmin();
+    match /conteos/{document=**} {
+      allow read, write: if request.auth != null;
     }
 
-    // ============================================
-    // Conteos collection
-    // ============================================
-    match /conteos/{busId} {
-      allow read: if isInternal() && isActive();
-      allow read: if belongsToClient(resource.data.clienteId) && isActive();
-
-      // System updates conteos (via admin SDK)
-      allow write: if isAdmin() && isActive();
-
-      match /historial/{eventoId} {
-        allow read: if isInternal() && isActive();
-        allow read: if canAccessClient(
-          get(/databases/$(database)/documents/conteos/$(busId)).data.clienteId
-        ) && isActive();
-      }
+    match /conteosDiarios/{document=**} {
+      allow read, write: if request.auth != null;
     }
 
-    // ============================================
-    // Conteos Diarios collection
-    // ============================================
-    match /conteosDiarios/{docId} {
-      allow read: if isInternal() && isActive();
-      allow read: if belongsToClient(resource.data.clienteId) && isActive();
-
-      // System updates (via admin SDK)
-      allow write: if isAdmin() && isActive();
+    match /catalogoNovedades/{document=**} {
+      allow read, write: if request.auth != null;
     }
 
-    // ============================================
-    // Reportes collection
-    // ============================================
-    match /reportes/{reporteId} {
-      // Internal users can read all reports
-      allow read: if isInternal() && isActive();
-
-      // Client users can read their client's reports
-      allow read: if belongsToClient(resource.data.clienteId) && isActive();
-
-      // Users who can generate reports
-      allow create: if hasAnyRole(['super_admin', 'ops_admin', 'analyst', 'client_admin'])
-        && isActive();
-
-      // System updates report state (via admin SDK)
-      allow update: if isAdmin() && isActive();
-
-      // Only super admin can delete reports
-      allow delete: if isSuperAdmin();
+    match /reportes/{document=**} {
+      allow read, write: if request.auth != null;
     }
 
-    // ============================================
-    // Audit Log collection
-    // ============================================
-    match /auditLog/{logId} {
-      // Only admin can read audit logs
-      allow read: if isAdmin() && isActive();
-
-      // System writes audit logs (via admin SDK)
-      // For security, clients cannot write audit logs
-      allow write: if false;
-    }
-
-    // ============================================
-    // Default deny all
-    // ============================================
-    match /{document=**} {
-      allow read, write: if false;
+    match /auditLog/{document=**} {
+      allow read, write: if request.auth != null;
     }
   }
 }

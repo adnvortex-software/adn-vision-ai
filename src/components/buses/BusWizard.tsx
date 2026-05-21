@@ -9,6 +9,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Check,
+  Plus,
+  Minus,
 } from 'lucide-react'
 import {
   busWizardStep1Schema,
@@ -19,6 +21,7 @@ import {
 import { VEHICLE_TYPES } from '@/config/constants'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   Form,
   FormControl,
@@ -37,13 +40,25 @@ import {
 } from '@/components/ui/select'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-import type { Sucursal, Propietario } from '@/types/cliente'
-import type { Entity } from '@/types/firestore'
-import type { BusWizardData } from '@/types/bus'
+import type { BusWizardData, CreateCamaraData } from '@/types/bus'
+import type { CameraProfile } from '@/config/constants'
+
+// Opciones predefinidas de tipos de cámara con sus perfiles
+const CAMERA_TYPE_OPTIONS = [
+  { value: 'frontal', label: 'Frontal', perfil: 'frontal' as CameraProfile },
+  { value: 'cabina', label: 'Cabina', perfil: 'cabina' as CameraProfile },
+  { value: 'puerta', label: 'Puerta', perfil: 'puerta' as CameraProfile },
+  { value: 'pasillo_1', label: 'Pasillo 1', perfil: 'pasillo' as CameraProfile },
+  { value: 'pasillo_2', label: 'Pasillo 2', perfil: 'pasillo' as CameraProfile },
+  { value: 'otro', label: 'Otro', perfil: 'otro' as CameraProfile },
+] as const
+
+interface CameraConfig {
+  tipo: string
+  nombrePersonalizado: string
+}
 
 interface BusWizardProps {
-  sucursales: Entity<Sucursal>[]
-  propietarios: Entity<Propietario>[]
   clienteId: string
   onComplete: (data: BusWizardData) => Promise<void>
   onCancel?: () => void
@@ -64,19 +79,16 @@ const VEHICLE_TYPE_LABELS: Record<string, string> = {
   otro: 'Otro',
 }
 
-export function BusWizard({
-  sucursales,
-  propietarios,
-  clienteId,
-  onComplete,
-  onCancel,
-  isLoading = false,
-}: BusWizardProps) {
+export function BusWizard({ clienteId, onComplete, onCancel, isLoading = false }: BusWizardProps) {
   const [currentStep, setCurrentStep] = useState(1)
   const [wizardData, setWizardData] = useState<Partial<BusWizardData>>({
     clienteId,
     camaras: [],
   })
+
+  // Camera configuration state
+  const [numCamaras, setNumCamaras] = useState(0)
+  const [cameraConfigs, setCameraConfigs] = useState<CameraConfig[]>([])
 
   // Step 1 form
   const step1Form = useForm<BusWizardStep1Data>({
@@ -84,10 +96,9 @@ export function BusWizard({
     defaultValues: {
       placa: '',
       clienteId,
-      sucursalId: '',
-      propietarioId: null,
+      deviceId: '',
+      ipVirtual: '',
       tipoVehiculo: 'bus',
-      rutaTexto: null,
       conductorAsignadoId: null,
     },
   })
@@ -101,11 +112,6 @@ export function BusWizard({
     },
   })
 
-  const selectedSucursalId = step1Form.watch('sucursalId')
-  const filteredPropietarios = propietarios.filter(
-    (p) => !selectedSucursalId || p.sucursalId === selectedSucursalId
-  )
-
   const handleStep1Submit = (data: BusWizardStep1Data) => {
     setWizardData((prev) => ({ ...prev, ...data }))
     setCurrentStep(2)
@@ -116,19 +122,79 @@ export function BusWizard({
     setCurrentStep(3)
   }
 
+  // Default camera types to assign based on index
+  const getDefaultCameraType = (index: number): string => {
+    const defaults = [
+      'frontal',
+      'cabina',
+      'puerta',
+      'pasillo_1',
+      'pasillo_2',
+      'otro',
+      'otro',
+      'otro',
+    ]
+    return defaults[index] ?? 'otro'
+  }
+
+  // Handle number of cameras change
+  const handleNumCamarasChange = (value: number) => {
+    const newValue = Math.max(0, Math.min(8, value)) // Limit between 0 and 8
+    setNumCamaras(newValue)
+
+    // Adjust camera configs array
+    if (newValue > cameraConfigs.length) {
+      // Add new configs with default types
+      const newConfigs = [...cameraConfigs]
+      for (let i = cameraConfigs.length; i < newValue; i++) {
+        newConfigs.push({ tipo: getDefaultCameraType(i), nombrePersonalizado: '' })
+      }
+      setCameraConfigs(newConfigs)
+    } else if (newValue < cameraConfigs.length) {
+      // Remove excess configs
+      setCameraConfigs(cameraConfigs.slice(0, newValue))
+    }
+  }
+
+  // Update camera config
+  const updateCameraConfig = (index: number, field: keyof CameraConfig, value: string) => {
+    const newConfigs = [...cameraConfigs]
+    if (newConfigs[index]) {
+      newConfigs[index] = { ...newConfigs[index], [field]: value }
+      setCameraConfigs(newConfigs)
+    }
+  }
+
   const handleStep3Complete = async () => {
-    // For now, skip camera configuration and complete the wizard
+    // Build camera data from configs
+    const camaras: CreateCamaraData[] = cameraConfigs
+      .filter((config) => config.tipo) // Only include cameras with a type selected
+      .map((config, index) => {
+        const option = CAMERA_TYPE_OPTIONS.find((opt) => opt.value === config.tipo)
+        const nombre =
+          config.tipo === 'otro'
+            ? config.nombrePersonalizado || `Camara ${String(index + 1)}`
+            : (option?.label ?? `Camara ${String(index + 1)}`)
+        const perfil = option?.perfil ?? 'otro'
+
+        return {
+          nombre,
+          perfil,
+          canal: index + 1,
+          rtspUrl: '', // Will be configured later
+        }
+      })
+
     const finalData: BusWizardData = {
       placa: wizardData.placa ?? '',
       clienteId: wizardData.clienteId ?? clienteId,
-      sucursalId: wizardData.sucursalId ?? '',
-      propietarioId: wizardData.propietarioId,
+      deviceId: wizardData.deviceId ?? '',
+      ipVirtual: wizardData.ipVirtual ?? '',
       tipoVehiculo: wizardData.tipoVehiculo ?? 'bus',
-      rutaTexto: wizardData.rutaTexto,
       conductorAsignadoId: wizardData.conductorAsignadoId,
       ztIpRouter: wizardData.ztIpRouter ?? '',
       subnetLan: wizardData.subnetLan ?? '',
-      camaras: wizardData.camaras ?? [],
+      camaras,
     }
     await onComplete(finalData)
   }
@@ -252,86 +318,31 @@ export function BusWizard({
 
                 <FormField
                   control={step1Form.control}
-                  name="sucursalId"
+                  name="deviceId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Sucursal</FormLabel>
-                      <Select
-                        onValueChange={(value) => {
-                          field.onChange(value)
-                          step1Form.setValue('propietarioId', null)
-                        }}
-                        defaultValue={field.value}
-                        disabled={isLoading || sucursales.length === 0}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue
-                              placeholder={
-                                sucursales.length === 0
-                                  ? 'No hay sucursales'
-                                  : 'Seleccionar sucursal'
-                              }
-                            />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {sucursales.map((sucursal) => (
-                            <SelectItem key={sucursal.id} value={sucursal.id}>
-                              {sucursal.nombre} - {sucursal.ciudad}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={step1Form.control}
-                  name="propietarioId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Propietario (Opcional)</FormLabel>
-                      <Select
-                        onValueChange={(v) => field.onChange(v === '_none_' ? null : v)}
-                        value={field.value ?? '_none_'}
-                        disabled={isLoading || filteredPropietarios.length === 0}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccionar propietario" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="_none_">Sin propietario</SelectItem>
-                          {filteredPropietarios.map((propietario) => (
-                            <SelectItem key={propietario.id} value={propietario.id}>
-                              {propietario.nombre}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={step1Form.control}
-                  name="rutaTexto"
-                  render={({ field }) => (
-                    <FormItem className="md:col-span-2">
-                      <FormLabel>Ruta (Opcional)</FormLabel>
+                      <FormLabel>Device ID</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="Centro - Norte"
-                          disabled={isLoading}
-                          {...field}
-                          value={field.value ?? ''}
-                        />
+                        <Input placeholder="ID del dispositivo" disabled={isLoading} {...field} />
                       </FormControl>
+                      <FormDescription>
+                        Identificador unico del dispositivo DVR (ZeroTier)
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={step1Form.control}
+                  name="ipVirtual"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>IP Virtual</FormLabel>
+                      <FormControl>
+                        <Input placeholder="10.0.0.1" disabled={isLoading} {...field} />
+                      </FormControl>
+                      <FormDescription>IP generada en OPNsense</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -345,7 +356,7 @@ export function BusWizard({
                   </Button>
                 )}
                 <div className="ml-auto">
-                  <Button type="submit" disabled={isLoading || sucursales.length === 0}>
+                  <Button type="submit" disabled={isLoading}>
                     Siguiente
                     <ChevronRight className="ml-2 h-4 w-4" />
                   </Button>
@@ -405,16 +416,115 @@ export function BusWizard({
           </Form>
         )}
 
-        {/* Step 3: Cameras (placeholder) */}
+        {/* Step 3: Cameras */}
         {currentStep === 3 && (
           <div className="space-y-6">
-            <div className="rounded-lg border border-dashed p-8 text-center">
-              <Video className="mx-auto h-12 w-12 text-muted-foreground/50" />
-              <h3 className="mt-4 text-lg font-medium">Configuracion de camaras</h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Puedes configurar las camaras despues de crear el bus desde la seccion de gestion.
-              </p>
+            {/* Number of cameras input */}
+            <div className="space-y-2">
+              <Label>Cantidad de camaras</Label>
+              <div className="flex items-center gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => {
+                    handleNumCamarasChange(numCamaras - 1)
+                  }}
+                  disabled={isLoading || numCamaras === 0}
+                >
+                  <Minus className="h-4 w-4" />
+                </Button>
+                <Input
+                  type="number"
+                  min={0}
+                  max={8}
+                  value={numCamaras}
+                  onChange={(e) => {
+                    handleNumCamarasChange(parseInt(e.target.value) || 0)
+                  }}
+                  className="w-20 text-center"
+                  disabled={isLoading}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => {
+                    handleNumCamarasChange(numCamaras + 1)
+                  }}
+                  disabled={isLoading || numCamaras === 8}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+                <span className="text-sm text-muted-foreground">Max: 8</span>
+              </div>
             </div>
+
+            {/* Camera configurations */}
+            {numCamaras > 0 && (
+              <div className="space-y-4">
+                <Label>Configurar camaras</Label>
+                <div className="grid gap-4">
+                  {cameraConfigs.map((config, index) => (
+                    <div key={index} className="flex items-start gap-3 rounded-lg border p-3">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                        <Video className="h-4 w-4 text-primary" />
+                      </div>
+                      <div className="flex-1 space-y-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium">Camara {index + 1}</span>
+                        </div>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <div className="space-y-1">
+                            <Label className="text-xs">Tipo</Label>
+                            <Select
+                              value={config.tipo}
+                              onValueChange={(value) => {
+                                updateCameraConfig(index, 'tipo', value)
+                              }}
+                              disabled={isLoading}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Seleccionar tipo" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {CAMERA_TYPE_OPTIONS.map((option) => (
+                                  <SelectItem key={option.value} value={option.value}>
+                                    {option.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          {config.tipo === 'otro' && (
+                            <div className="space-y-1">
+                              <Label className="text-xs">Nombre personalizado</Label>
+                              <Input
+                                placeholder="Ej: Techo, Lateral..."
+                                value={config.nombrePersonalizado}
+                                onChange={(e) => {
+                                  updateCameraConfig(index, 'nombrePersonalizado', e.target.value)
+                                }}
+                                disabled={isLoading}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {numCamaras === 0 && (
+              <div className="rounded-lg border border-dashed p-6 text-center">
+                <Video className="mx-auto h-10 w-10 text-muted-foreground/50" />
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Ingresa la cantidad de camaras para configurarlas
+                </p>
+              </div>
+            )}
 
             <div className="flex justify-between">
               <Button type="button" variant="outline" onClick={goBack} disabled={isLoading}>

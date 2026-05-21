@@ -24,11 +24,11 @@ export function Logo({ className, showText = true, size = 'md' }: LogoProps) {
           size === 'lg' && 'h-10 w-10 text-base'
         )}
       >
-        AL
+        AV
       </div>
       {showText && (
         <span className={cn('font-semibold tracking-tight', sizeClasses[size])}>
-          ADN <span className="text-primary">LYNX</span> AI
+          ADN <span className="text-primary">VISION</span> AI
         </span>
       )}
     </div>

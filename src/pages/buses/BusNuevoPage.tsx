@@ -14,11 +14,12 @@ import {
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import type { BusWizardData } from '@/types/bus'
-import type { Cliente, Sucursal, Propietario } from '@/types/cliente'
+import type { Cliente } from '@/types/cliente'
 import type { Entity } from '@/types/firestore'
 import { useToast } from '@/hooks/use-toast'
-import { listClientes, listSucursales, listPropietarios } from '@/services/clientes.service'
-import { createBus } from '@/services/buses.service'
+import { listClientes } from '@/services/clientes.service'
+import { createBus, updateBus } from '@/services/buses.service'
+import { createCamarasBatch } from '@/services/camaras.service'
 
 export default function BusNuevoPage() {
   const navigate = useNavigate()
@@ -28,8 +29,6 @@ export default function BusNuevoPage() {
 
   // Data from Firebase
   const [clientes, setClientes] = useState<Entity<Cliente>[]>([])
-  const [sucursales, setSucursales] = useState<Entity<Sucursal>[]>([])
-  const [propietarios, setPropietarios] = useState<Entity<Propietario>[]>([])
   const [selectedClienteId, setSelectedClienteId] = useState<string>('')
 
   // Load clientes on mount
@@ -57,29 +56,6 @@ export default function BusNuevoPage() {
     void loadClientes()
   }, [toast])
 
-  // Load sucursales and propietarios when cliente changes
-  useEffect(() => {
-    async function loadClienteData() {
-      if (!selectedClienteId) {
-        setSucursales([])
-        setPropietarios([])
-        return
-      }
-
-      try {
-        const [sucursalesData, propietariosData] = await Promise.all([
-          listSucursales(selectedClienteId),
-          listPropietarios(selectedClienteId),
-        ])
-        setSucursales(sucursalesData)
-        setPropietarios(propietariosData)
-      } catch (error) {
-        console.error('Error loading cliente data:', error)
-      }
-    }
-    void loadClienteData()
-  }, [selectedClienteId])
-
   const handleComplete = async (data: BusWizardData) => {
     setIsLoading(true)
     try {
@@ -87,10 +63,9 @@ export default function BusNuevoPage() {
         {
           placa: data.placa,
           clienteId: data.clienteId,
-          sucursalId: data.sucursalId,
-          propietarioId: data.propietarioId ?? null,
+          deviceId: data.deviceId,
+          ipVirtual: data.ipVirtual,
           tipoVehiculo: data.tipoVehiculo,
-          rutaTexto: data.rutaTexto ?? null,
           conductorAsignadoId: data.conductorAsignadoId ?? null,
           ztIpRouter: data.ztIpRouter,
           subnetLan: data.subnetLan,
@@ -98,13 +73,27 @@ export default function BusNuevoPage() {
         'system' // createdBy - TODO: use actual user
       )
 
+      // Create cameras if any were configured
+      if (data.camaras.length > 0) {
+        try {
+          await createCamarasBatch(busId, data.camaras, 'system')
+
+          // Update bus with camera names
+          const camarasNombres = data.camaras.map((c) => c.nombre)
+          await updateBus(busId, { camarasNombres })
+        } catch (camaraError) {
+          console.error('Error creating cameras:', camaraError)
+        }
+      }
+
       toast({
         title: 'Bus creado',
-        description: `${data.placa} ha sido registrado exitosamente (ID: ${busId})`,
+        description: `${data.placa} ha sido registrado exitosamente${data.camaras.length > 0 ? ` con ${String(data.camaras.length)} cámara(s)` : ''}`,
       })
 
       navigate('/buses')
     } catch (error) {
+      console.error('Error in handleComplete:', error)
       const message = error instanceof Error ? error.message : 'No se pudo crear el bus'
       toast({
         title: 'Error',
@@ -191,8 +180,6 @@ export default function BusNuevoPage() {
       {selectedClienteId && (
         <BusWizard
           clienteId={selectedClienteId}
-          sucursales={sucursales}
-          propietarios={propietarios}
           onComplete={handleComplete}
           onCancel={() => {
             navigate('/buses')

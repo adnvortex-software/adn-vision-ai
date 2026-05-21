@@ -8,11 +8,13 @@ import type { Timestamp as FirestoreTimestamp } from 'firebase/firestore'
 export interface Bus extends BaseEntity {
   placa: string
   clienteId: string
-  sucursalId: string
-  propietarioId: string | null
+  deviceId?: string
+  ipVirtual?: string
+  sucursalId?: string | null
+  propietarioId?: string | null
   tipoVehiculo: VehicleType
-  rutaTexto: string | null
-  conductorAsignadoId: string | null
+  rutaTexto?: string | null
+  conductorAsignadoId?: string | null
 
   // Conectividad
   ztIpRouter: string
@@ -22,6 +24,7 @@ export interface Bus extends BaseEntity {
   estado: BusState
   lastHeartbeat: FirestoreTimestamp | null
   numCamarasConfiguradas: number
+  camarasNombres?: string[] // Array of camera names for display
 
   activo: boolean
 }
@@ -49,10 +52,9 @@ export interface Camara extends BaseEntity {
 export interface CreateBusData {
   placa: string
   clienteId: string
-  sucursalId: string
-  propietarioId?: string
+  deviceId: string
+  ipVirtual: string
   tipoVehiculo: VehicleType
-  rutaTexto?: string
   conductorAsignadoId?: string
   ztIpRouter: string
   subnetLan: string
@@ -96,10 +98,9 @@ export interface BusWizardData {
   // Step 1: Datos generales
   placa: string
   clienteId: string
-  sucursalId: string
-  propietarioId?: string | null
+  deviceId: string
+  ipVirtual: string
   tipoVehiculo: VehicleType
-  rutaTexto?: string | null
   conductorAsignadoId?: string | null
 
   // Step 2: Conectividad

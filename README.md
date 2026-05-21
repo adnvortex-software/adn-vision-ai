@@ -1,4 +1,4 @@
-# ADN LYNX AI
+# ADN VISION AI
 
 Plataforma SaaS multi-tenant para monitoreo automático de flotas de buses urbanos en Colombia mediante visión computacional.
 
