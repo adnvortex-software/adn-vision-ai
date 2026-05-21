@@ -10,6 +10,7 @@ import {
   Settings,
   Building2,
   Users,
+  SlidersHorizontal,
 } from 'lucide-react'
 import { DataTable } from '@/components/common/DataTable'
 import { Button } from '@/components/ui/button'
@@ -30,6 +31,7 @@ import {
 } from '@/components/ui/accordion'
 import { BusStatusIndicator } from './BusStatusIndicator'
 import { BusContadorModal } from './BusContadorModal'
+import { BusCountingConfigModal } from './BusCountingConfigModal'
 import type { BusConDetalles } from '@/types/bus'
 
 const STORAGE_KEY = 'buses-table-expanded-clients'
@@ -142,8 +144,18 @@ export function BusesTable({
     bus: BusConDetalles | null
   }>({ open: false, bus: null })
 
+  // Counting config modal state
+  const [countingConfigModal, setCountingConfigModal] = useState<{
+    open: boolean
+    bus: BusConDetalles | null
+  }>({ open: false, bus: null })
+
   const handleViewContador = useCallback((bus: BusConDetalles) => {
     setContadorModal({ open: true, bus })
+  }, [])
+
+  const handleConfigConteo = useCallback((bus: BusConDetalles) => {
+    setCountingConfigModal({ open: true, bus })
   }, [])
 
   const columns: ColumnDef<BusConDetalles>[] = useMemo(
@@ -153,10 +165,22 @@ export function BusesTable({
         header: 'Vehiculo',
         cell: ({ row }) => {
           const bus = row.original
+          // Check if connected based on lastHeartbeat (within last 2 minutes)
+          const isConnected = bus.lastHeartbeat
+            ? Date.now() - bus.lastHeartbeat.toDate().getTime() < 2 * 60 * 1000
+            : false
+
           return (
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+              <div className="relative flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
                 <BusIcon className="h-4 w-4 text-primary" />
+                {/* Connection indicator */}
+                <span
+                  className={`absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-background ${
+                    isConnected ? 'bg-green-500' : 'bg-red-500'
+                  }`}
+                  title={isConnected ? 'Conectado' : 'Desconectado'}
+                />
               </div>
               <div>
                 <div className="font-medium">{bus.placa}</div>
@@ -282,6 +306,14 @@ export function BusesTable({
                   <Users className="mr-2 h-4 w-4" />
                   Ver Contador
                 </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    handleConfigConteo(bus)
+                  }}
+                >
+                  <SlidersHorizontal className="mr-2 h-4 w-4" />
+                  Configurar conteo
+                </DropdownMenuItem>
                 {onEdit && (
                   <DropdownMenuItem
                     onClick={() => {
@@ -323,7 +355,7 @@ export function BusesTable({
         },
       },
     ],
-    [onView, onEdit, onDelete, onManageCamaras, handleViewContador]
+    [onView, onEdit, onDelete, onManageCamaras, handleViewContador, handleConfigConteo]
   )
 
   // Show grouped tables with accordion
@@ -371,6 +403,15 @@ export function BusesTable({
         open={contadorModal.open}
         onOpenChange={(open) => {
           setContadorModal((prev) => ({ ...prev, open }))
+        }}
+      />
+
+      {/* Counting Config Modal */}
+      <BusCountingConfigModal
+        bus={countingConfigModal.bus}
+        open={countingConfigModal.open}
+        onOpenChange={(open) => {
+          setCountingConfigModal((prev) => ({ ...prev, open }))
         }}
       />
     </>

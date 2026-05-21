@@ -1,7 +1,7 @@
-import { useState, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { CalendarIcon, Users, LogIn, LogOut, Clock } from 'lucide-react'
+import { CalendarIcon, Users, LogIn, LogOut, Clock, Loader2 } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -17,15 +17,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
 import type { BusConDetalles } from '@/types/bus'
-
-interface ContadorEvento {
-  id: string
-  tipo: 'entrada' | 'salida'
-  cantidad: number
-  timestamp: Date
-  camaraId: string
-  camaraNombre: string
-}
+import {
+  subscribeToConteo,
+  subscribeToConteoEventos,
+  type ConteoResumen,
+  type ConteoEvento,
+} from '@/services/conteos.service'
 
 interface BusContadorModalProps {
   bus: BusConDetalles | null
@@ -33,56 +30,50 @@ interface BusContadorModalProps {
   onOpenChange: (open: boolean) => void
 }
 
-// Mock data for demonstration
-function generateMockData(busId: string): ContadorEvento[] {
-  const eventos: ContadorEvento[] = []
-  const now = new Date()
-  const camaras = ['Puerta Frontal', 'Puerta Trasera']
-
-  // Generate events for the last 7 days
-  for (let day = 0; day < 7; day++) {
-    const date = new Date(now)
-    date.setDate(date.getDate() - day)
-
-    // Generate 10-20 events per day
-    const numEvents = Math.floor(Math.random() * 10) + 10
-
-    for (let i = 0; i < numEvents; i++) {
-      const hour = Math.floor(Math.random() * 14) + 5 // 5am to 7pm
-      const minute = Math.floor(Math.random() * 60)
-      const eventDate = new Date(date)
-      eventDate.setHours(hour, minute, 0, 0)
-
-      eventos.push({
-        id: `${busId}-${String(day)}-${String(i)}`,
-        tipo: Math.random() > 0.45 ? 'entrada' : 'salida',
-        cantidad: Math.floor(Math.random() * 3) + 1,
-        timestamp: eventDate,
-        camaraId: `cam-${String(Math.floor(Math.random() * 2))}`,
-        camaraNombre: camaras[Math.floor(Math.random() * camaras.length)] ?? 'Camara',
-      })
-    }
-  }
-
-  // Sort by timestamp descending
-  return eventos.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
-}
-
 export function BusContadorModal({ bus, open, onOpenChange }: BusContadorModalProps) {
   const [fechaInicio, setFechaInicio] = useState<Date | undefined>(undefined)
   const [fechaFin, setFechaFin] = useState<Date | undefined>(undefined)
   const [horaInicio, setHoraInicio] = useState<string>('')
   const [horaFin, setHoraFin] = useState<string>('')
+  const [isLoading, setIsLoading] = useState(true)
+  const [conteoResumen, setConteoResumen] = useState<ConteoResumen | null>(null)
+  const [eventos, setEventos] = useState<ConteoEvento[]>([])
 
-  // Generate mock data when bus changes
-  const allEventos = useMemo(() => {
-    if (!bus) return []
-    return generateMockData(bus.id)
-  }, [bus])
+  // Subscribe to real-time data when modal opens
+  useEffect(() => {
+    if (!bus || !open) {
+      setIsLoading(true)
+      setConteoResumen(null)
+      setEventos([])
+      return
+    }
+
+    setIsLoading(true)
+
+    // Subscribe to conteo resumen (real-time)
+    const unsubConteo = subscribeToConteo(bus.id, (conteo) => {
+      setConteoResumen(conteo)
+      setIsLoading(false)
+    })
+
+    // Subscribe to eventos (real-time)
+    const unsubEventos = subscribeToConteoEventos(
+      bus.id,
+      (eventosData) => {
+        setEventos(eventosData)
+      },
+      500
+    )
+
+    return () => {
+      unsubConteo()
+      unsubEventos()
+    }
+  }, [bus, open])
 
   // Filter events based on date/time range
   const eventosFiltrados = useMemo(() => {
-    let filtered = [...allEventos]
+    let filtered = [...eventos]
 
     if (fechaInicio) {
       const startDate = new Date(fechaInicio)
@@ -92,7 +83,7 @@ export function BusContadorModal({ bus, open, onOpenChange }: BusContadorModalPr
       } else {
         startDate.setHours(0, 0, 0, 0)
       }
-      filtered = filtered.filter((e) => e.timestamp >= startDate)
+      filtered = filtered.filter((e) => e.timestamp.toDate() >= startDate)
     }
 
     if (fechaFin) {
@@ -103,26 +94,32 @@ export function BusContadorModal({ bus, open, onOpenChange }: BusContadorModalPr
       } else {
         endDate.setHours(23, 59, 59, 999)
       }
-      filtered = filtered.filter((e) => e.timestamp <= endDate)
+      filtered = filtered.filter((e) => e.timestamp.toDate() <= endDate)
     }
 
     return filtered
-  }, [allEventos, fechaInicio, fechaFin, horaInicio, horaFin])
+  }, [eventos, fechaInicio, fechaFin, horaInicio, horaFin])
 
-  // Calculate totals
+  // Calculate totals - use real-time data if no filters, otherwise calculate from filtered events
   const totales = useMemo(() => {
-    const entradas = eventosFiltrados
-      .filter((e) => e.tipo === 'entrada')
-      .reduce((sum, e) => sum + e.cantidad, 0)
-    const salidas = eventosFiltrados
-      .filter((e) => e.tipo === 'salida')
-      .reduce((sum, e) => sum + e.cantidad, 0)
+    // If no filters and we have real-time resumen, use it
+    if (!fechaInicio && !fechaFin && conteoResumen) {
+      return {
+        entradas: conteoResumen.entradasDia,
+        salidas: conteoResumen.salidasDia,
+        pasajeros: conteoResumen.aforoActual,
+      }
+    }
+
+    // Otherwise calculate from filtered events
+    const entradas = eventosFiltrados.filter((e) => e.tipo === 'entrada').length
+    const salidas = eventosFiltrados.filter((e) => e.tipo === 'salida').length
     return {
       entradas,
       salidas,
       pasajeros: Math.max(0, entradas - salidas),
     }
-  }, [eventosFiltrados])
+  }, [eventosFiltrados, conteoResumen, fechaInicio, fechaFin])
 
   const clearFilters = () => {
     setFechaInicio(undefined)
@@ -146,8 +143,15 @@ export function BusContadorModal({ bus, open, onOpenChange }: BusContadorModalPr
           </DialogDescription>
         </DialogHeader>
 
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </div>
+        )}
+
         {/* Summary Cards */}
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className={cn('grid gap-4 md:grid-cols-3', isLoading && 'opacity-50')}>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Entradas</CardTitle>
@@ -282,11 +286,18 @@ export function BusContadorModal({ bus, open, onOpenChange }: BusContadorModalPr
 
         {/* History */}
         <div className="space-y-3">
-          <h4 className="text-sm font-medium">Historico de eventos ({eventosFiltrados.length})</h4>
+          <h4 className="text-sm font-medium">
+            Historico de eventos ({eventosFiltrados.length})
+            {conteoResumen?.fechaOperativa && (
+              <span className="ml-2 text-xs text-muted-foreground">
+                - Fecha operativa: {conteoResumen.fechaOperativa}
+              </span>
+            )}
+          </h4>
           <div className="max-h-64 overflow-y-auto rounded-lg border">
             {eventosFiltrados.length === 0 ? (
               <div className="p-4 text-center text-sm text-muted-foreground">
-                No hay eventos en el rango seleccionado
+                {isLoading ? 'Cargando eventos...' : 'No hay eventos en el rango seleccionado'}
               </div>
             ) : (
               <table className="w-full text-sm">
@@ -294,7 +305,7 @@ export function BusContadorModal({ bus, open, onOpenChange }: BusContadorModalPr
                   <tr>
                     <th className="px-3 py-2 text-left font-medium">Fecha/Hora</th>
                     <th className="px-3 py-2 text-left font-medium">Tipo</th>
-                    <th className="px-3 py-2 text-left font-medium">Cantidad</th>
+                    <th className="px-3 py-2 text-left font-medium">Aforo</th>
                     <th className="px-3 py-2 text-left font-medium">Camara</th>
                   </tr>
                 </thead>
@@ -302,15 +313,15 @@ export function BusContadorModal({ bus, open, onOpenChange }: BusContadorModalPr
                   {eventosFiltrados.map((evento) => (
                     <tr key={evento.id} className="hover:bg-muted/50">
                       <td className="px-3 py-2 text-muted-foreground">
-                        {format(evento.timestamp, 'dd/MM/yyyy HH:mm', { locale: es })}
+                        {format(evento.timestamp.toDate(), 'dd/MM/yyyy HH:mm:ss', { locale: es })}
                       </td>
                       <td className="px-3 py-2">
                         <span
                           className={cn(
                             'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium',
                             evento.tipo === 'entrada'
-                              ? 'bg-green-100 text-green-700'
-                              : 'bg-red-100 text-red-700'
+                              ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                              : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
                           )}
                         >
                           {evento.tipo === 'entrada' ? (
@@ -321,8 +332,8 @@ export function BusContadorModal({ bus, open, onOpenChange }: BusContadorModalPr
                           {evento.tipo === 'entrada' ? 'Entrada' : 'Salida'}
                         </span>
                       </td>
-                      <td className="px-3 py-2 font-medium">{evento.cantidad}</td>
-                      <td className="px-3 py-2 text-muted-foreground">{evento.camaraNombre}</td>
+                      <td className="px-3 py-2 font-medium">{evento.aforoTrasEvento}</td>
+                      <td className="px-3 py-2 text-muted-foreground">{evento.camaraId}</td>
                     </tr>
                   ))}
                 </tbody>

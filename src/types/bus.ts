@@ -26,6 +26,14 @@ export interface Bus extends BaseEntity {
   dvrUsuario?: string
   dvrPassword?: string
 
+  // Counting Configuration
+  countingEnabled?: boolean
+  countingCameraChannel?: number // 1, 2, 3, etc.
+  countingLinePosition?: number // Position in pixels
+  countingLineOrientation?: 'horizontal' | 'vertical'
+  countingSnapshotUrl?: string // URL of the last captured frame for configuration
+  aforoMax?: number
+
   // Estado operativo
   estado: BusState
   lastHeartbeat: FirestoreTimestamp | null
