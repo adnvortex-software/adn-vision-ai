@@ -11,3 +11,11 @@ export {
   getReporteTitulo,
   getReporteFilename,
 } from './ReportePDF'
+
+// Informe Disciplinario PDF
+export {
+  type InformeDisciplinarioData,
+  generateInformeDisciplinarioPDF,
+  getInformeDisciplinarioFilename,
+  eventToInformeDisciplinario,
+} from './InformeDisciplinarioPDF'
