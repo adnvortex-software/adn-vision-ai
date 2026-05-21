@@ -11,6 +11,7 @@ import {
   Building2,
   Users,
   SlidersHorizontal,
+  HardDrive,
 } from 'lucide-react'
 import { DataTable } from '@/components/common/DataTable'
 import { Button } from '@/components/ui/button'
@@ -33,6 +34,7 @@ import { BusStatusIndicator } from './BusStatusIndicator'
 import { BusContadorModal } from './BusContadorModal'
 import { BusCountingConfigModal } from './BusCountingConfigModal'
 import { BusLiveStreamModal } from './BusLiveStreamModal'
+import { BusRecordingsModal } from './BusRecordingsModal'
 import type { BusConDetalles } from '@/types/bus'
 
 const STORAGE_KEY = 'buses-table-expanded-clients'
@@ -157,6 +159,12 @@ export function BusesTable({
     bus: BusConDetalles | null
   }>({ open: false, bus: null })
 
+  // Recordings modal state
+  const [recordingsModal, setRecordingsModal] = useState<{
+    open: boolean
+    bus: BusConDetalles | null
+  }>({ open: false, bus: null })
+
   const handleViewContador = useCallback((bus: BusConDetalles) => {
     setContadorModal({ open: true, bus })
   }, [])
@@ -167,6 +175,10 @@ export function BusesTable({
 
   const handleViewLiveStream = useCallback((bus: BusConDetalles) => {
     setLiveStreamModal({ open: true, bus })
+  }, [])
+
+  const handleViewRecordings = useCallback((bus: BusConDetalles) => {
+    setRecordingsModal({ open: true, bus })
   }, [])
 
   const columns: ColumnDef<BusConDetalles>[] = useMemo(
@@ -340,6 +352,14 @@ export function BusesTable({
                   <Video className="mr-2 h-4 w-4" />
                   Ver en vivo
                 </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    handleViewRecordings(bus)
+                  }}
+                >
+                  <HardDrive className="mr-2 h-4 w-4" />
+                  Grabaciones
+                </DropdownMenuItem>
                 {onEdit && (
                   <DropdownMenuItem
                     onClick={() => {
@@ -389,6 +409,7 @@ export function BusesTable({
       handleViewContador,
       handleConfigConteo,
       handleViewLiveStream,
+      handleViewRecordings,
     ]
   )
 
@@ -455,6 +476,15 @@ export function BusesTable({
         open={liveStreamModal.open}
         onOpenChange={(open) => {
           setLiveStreamModal((prev) => ({ ...prev, open }))
+        }}
+      />
+
+      {/* Recordings Modal */}
+      <BusRecordingsModal
+        bus={recordingsModal.bus}
+        open={recordingsModal.open}
+        onOpenChange={(open) => {
+          setRecordingsModal((prev) => ({ ...prev, open }))
         }}
       />
     </>
