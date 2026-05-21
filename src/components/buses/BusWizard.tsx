@@ -295,8 +295,8 @@ export function BusWizard({
                     <FormItem>
                       <FormLabel>Propietario (Opcional)</FormLabel>
                       <Select
-                        onValueChange={field.onChange}
-                        value={field.value ?? ''}
+                        onValueChange={(v) => field.onChange(v === '_none_' ? null : v)}
+                        value={field.value ?? '_none_'}
                         disabled={isLoading || filteredPropietarios.length === 0}
                       >
                         <FormControl>
@@ -305,6 +305,7 @@ export function BusWizard({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
+                          <SelectItem value="_none_">Sin propietario</SelectItem>
                           {filteredPropietarios.map((propietario) => (
                             <SelectItem key={propietario.id} value={propietario.id}>
                               {propietario.nombre}
