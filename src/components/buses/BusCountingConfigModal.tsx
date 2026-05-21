@@ -1,5 +1,13 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
-import { Loader2, Camera, RotateCcw, Save, GripVertical, GripHorizontal } from 'lucide-react'
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
+import {
+  Loader2,
+  Camera,
+  RotateCcw,
+  Save,
+  GripVertical,
+  GripHorizontal,
+  RefreshCw,
+} from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -11,6 +19,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Input } from '@/components/ui/input'
+import { Progress } from '@/components/ui/progress'
 import {
   Select,
   SelectContent,
@@ -34,7 +43,13 @@ interface CaptureResponse {
   snapshotUrl: string
   frameWidth: number
   frameHeight: number
+  cached?: boolean
   error?: string
+}
+
+interface CheckSnapshotResponse {
+  exists: boolean
+  snapshotUrl: string | null
 }
 
 export function BusCountingConfigModal({
@@ -46,7 +61,10 @@ export function BusCountingConfigModal({
   const { toast } = useToast()
   const containerRef = useRef<HTMLDivElement>(null)
   const [isCapturing, setIsCapturing] = useState(false)
+  const [isCheckingCache, setIsCheckingCache] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [captureProgress, setCaptureProgress] = useState(0)
+  const [captureStatus, setCaptureStatus] = useState('')
 
   // Configuration state
   const [enabled, setEnabled] = useState(false)
@@ -57,23 +75,37 @@ export function BusCountingConfigModal({
   const [snapshotUrl, setSnapshotUrl] = useState<string | null>(null)
   const [frameWidth, setFrameWidth] = useState(960)
   const [frameHeight, setFrameHeight] = useState(1080)
+  const [isCached, setIsCached] = useState(false)
 
   // Dragging state
   const [isDragging, setIsDragging] = useState(false)
 
   // Build camera options from bus data
-  const cameraOptions =
-    (bus?.camarasNombres ?? []).length > 0
-      ? (bus?.camarasNombres ?? []).map((nombre, index) => ({
-          value: String(index + 1),
-          label: `Canal ${String(index + 1)} - ${nombre}`,
-        }))
-      : [
-          { value: '1', label: 'Canal 1' },
-          { value: '2', label: 'Canal 2' },
-          { value: '3', label: 'Canal 3' },
-          { value: '4', label: 'Canal 4' },
-        ]
+  const cameraOptions = useMemo(() => {
+    const camaras = bus?.camarasNombres ?? []
+    if (camaras.length > 0) {
+      return camaras.map((nombre, index) => ({
+        value: String(index + 1),
+        label: `Canal ${String(index + 1)} - ${nombre}`,
+        cameraName: nombre,
+      }))
+    }
+    return [
+      { value: '1', label: 'Canal 1', cameraName: 'canal_1' },
+      { value: '2', label: 'Canal 2', cameraName: 'canal_2' },
+      { value: '3', label: 'Canal 3', cameraName: 'canal_3' },
+      { value: '4', label: 'Canal 4', cameraName: 'canal_4' },
+    ]
+  }, [bus?.camarasNombres])
+
+  // Get current camera name
+  const getCurrentCameraName = useCallback(
+    (channelNum: string) => {
+      const option = cameraOptions.find((o) => o.value === channelNum)
+      return option?.cameraName ?? `canal_${channelNum}`
+    },
+    [cameraOptions]
+  )
 
   // Load existing config when bus changes
   useEffect(() => {
@@ -97,74 +129,167 @@ export function BusCountingConfigModal({
     }
   }, [bus])
 
+  // Check if snapshot exists in cache
+  const checkSnapshotCache = useCallback(
+    async (channelNum: string): Promise<string | null> => {
+      if (!bus?.placa) return null
+
+      const cameraName = getCurrentCameraName(channelNum)
+      const captureApiUrl =
+        (import.meta.env.VITE_CAPTURE_API_URL as string) || 'http://localhost:5000'
+
+      try {
+        const response = await fetch(`${captureApiUrl}/snapshot/check`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            placa: bus.placa,
+            cameraName: cameraName,
+          }),
+        })
+
+        if (response.ok) {
+          const data = (await response.json()) as CheckSnapshotResponse
+          if (data.exists && data.snapshotUrl) {
+            return data.snapshotUrl
+          }
+        }
+      } catch (error) {
+        console.error('Error checking cache:', error)
+      }
+      return null
+    },
+    [bus?.placa, getCurrentCameraName]
+  )
+
   // Capture frame function
   const captureFrame = useCallback(
-    async (channelNum: string) => {
-      if (!bus?.dvrIp) {
+    async (channelNum: string, forceCapture: boolean = false) => {
+      if (!bus?.dvrIp || !bus.placa) {
         toast({
           title: 'Error',
-          description: 'El bus no tiene IP de DVR configurada',
+          description: 'El bus no tiene IP de DVR o placa configurada',
           variant: 'destructive',
         })
         return
       }
 
+      // First check cache unless forcing capture
+      if (!forceCapture) {
+        setIsCheckingCache(true)
+        setCaptureStatus('Verificando cache...')
+        setCaptureProgress(10)
+
+        const cachedUrl = await checkSnapshotCache(channelNum)
+        if (cachedUrl) {
+          setSnapshotUrl(cachedUrl)
+          setIsCached(true)
+          setCaptureProgress(100)
+          setCaptureStatus('Imagen cargada desde cache')
+          setIsCheckingCache(false)
+          setTimeout(() => {
+            setCaptureProgress(0)
+            setCaptureStatus('')
+          }, 1500)
+          return
+        }
+        setIsCheckingCache(false)
+      }
+
       setIsCapturing(true)
+      setIsCached(false)
+      setCaptureProgress(20)
+      setCaptureStatus('Conectando al DVR...')
+
       try {
+        const cameraName = getCurrentCameraName(channelNum)
         const captureApiUrl =
           (import.meta.env.VITE_CAPTURE_API_URL as string) || 'http://localhost:5000'
+
+        setCaptureProgress(40)
+        setCaptureStatus(`Capturando canal ${channelNum}...`)
+
         const response = await fetch(`${captureApiUrl}/capture`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             busId: bus.id,
+            placa: bus.placa,
             dvrIp: bus.dvrIp,
             channel: parseInt(channelNum),
+            cameraName: cameraName,
             user: bus.dvrUsuario ?? 'admin',
             password: bus.dvrPassword ?? 'admin',
+            forceCapture: forceCapture,
           }),
         })
 
+        setCaptureProgress(80)
+        setCaptureStatus('Procesando imagen...')
+
         if (!response.ok) {
-          throw new Error('Error al capturar frame')
+          const errorData = (await response.json()) as { error?: string }
+          throw new Error(errorData.error ?? 'Error al capturar frame')
         }
 
         const data = (await response.json()) as CaptureResponse
         setSnapshotUrl(data.snapshotUrl)
         setFrameWidth(data.frameWidth)
         setFrameHeight(data.frameHeight)
+        setIsCached(data.cached ?? false)
+
+        setCaptureProgress(100)
+        setCaptureStatus(data.cached ? 'Imagen cargada desde cache' : 'Captura exitosa')
 
         toast({
-          title: 'Captura exitosa',
-          description: `Frame del canal ${channelNum} capturado`,
+          title: data.cached ? 'Imagen cargada' : 'Captura exitosa',
+          description: data.cached
+            ? `Imagen del canal ${channelNum} cargada desde cache`
+            : `Frame del canal ${channelNum} capturado y guardado`,
         })
+
+        setTimeout(() => {
+          setCaptureProgress(0)
+          setCaptureStatus('')
+        }, 2000)
       } catch (error) {
         console.error('Capture error:', error)
+        setCaptureProgress(0)
+        setCaptureStatus('')
         toast({
-          title: 'Error',
-          description: 'No se pudo capturar el frame. Verifica la conexion al DVR.',
+          title: 'Error de captura',
+          description:
+            error instanceof Error
+              ? error.message
+              : 'No se pudo capturar el frame. Verifica la conexion al DVR.',
           variant: 'destructive',
         })
       } finally {
         setIsCapturing(false)
       }
     },
-    [bus, toast]
+    [bus, toast, checkSnapshotCache, getCurrentCameraName]
   )
 
-  // Handle channel change - capture new frame automatically
+  // Handle channel change - load cached or capture new frame
   const handleChannelChange = useCallback(
     (newChannel: string) => {
       setChannel(newChannel)
-      setSnapshotUrl(null) // Clear current snapshot
-      void captureFrame(newChannel)
+      setSnapshotUrl(null)
+      setIsCached(false)
+      void captureFrame(newChannel, false) // Don't force, check cache first
     },
     [captureFrame]
   )
 
-  // Manual capture button handler
-  const handleCapture = useCallback(() => {
-    void captureFrame(channel)
+  // Force recapture button handler
+  const handleRecapture = useCallback(() => {
+    void captureFrame(channel, true) // Force capture, ignore cache
+  }, [captureFrame, channel])
+
+  // Initial capture when modal opens with existing channel
+  const handleInitialCapture = useCallback(() => {
+    void captureFrame(channel, false)
   }, [captureFrame, channel])
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -245,6 +370,8 @@ export function BusCountingConfigModal({
 
   if (!bus) return null
 
+  const isLoading = isCapturing || isCheckingCache
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
@@ -273,7 +400,7 @@ export function BusCountingConfigModal({
             {/* Camera Channel */}
             <div className="space-y-2">
               <Label>Camara de conteo</Label>
-              <Select value={channel} onValueChange={handleChannelChange} disabled={isCapturing}>
+              <Select value={channel} onValueChange={handleChannelChange} disabled={isLoading}>
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar camara" />
                 </SelectTrigger>
@@ -358,29 +485,60 @@ export function BusCountingConfigModal({
               </p>
             </div>
 
-            {/* Capture Button */}
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={handleCapture}
-              disabled={isCapturing || !bus.dvrIp}
-            >
-              {isCapturing ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Capturando canal {channel}...
-                </>
-              ) : (
-                <>
-                  <RotateCcw className="mr-2 h-4 w-4" />
-                  Recapturar frame
-                </>
-              )}
-            </Button>
+            {/* Capture Buttons */}
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1"
+                onClick={handleInitialCapture}
+                disabled={isLoading || !bus.dvrIp}
+              >
+                {isLoading && !isCapturing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Verificando...
+                  </>
+                ) : (
+                  <>
+                    <Camera className="mr-2 h-4 w-4" />
+                    Cargar imagen
+                  </>
+                )}
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={handleRecapture}
+                disabled={isLoading || !bus.dvrIp}
+                title="Forzar nueva captura desde el DVR"
+              >
+                {isCapturing ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+
+            {/* Progress bar */}
+            {captureProgress > 0 && (
+              <div className="space-y-2">
+                <Progress value={captureProgress} className="h-2" />
+                <p className="text-center text-xs text-muted-foreground">{captureStatus}</p>
+              </div>
+            )}
+
             {!bus.dvrIp && (
               <p className="text-xs text-destructive">
                 Configura la IP del DVR en la edicion del vehiculo
+              </p>
+            )}
+
+            {isCached && snapshotUrl && (
+              <p className="text-xs text-muted-foreground">
+                <RotateCcw className="mr-1 inline h-3 w-3" />
+                Imagen cargada desde cache. Usa el boton de refrescar para tomar una nueva.
               </p>
             )}
           </div>
@@ -395,6 +553,14 @@ export function BusCountingConfigModal({
               onMouseUp={handleMouseUp}
               onMouseLeave={handleMouseUp}
             >
+              {isLoading && (
+                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-background/80">
+                  <Loader2 className="mb-3 h-10 w-10 animate-spin text-primary" />
+                  <p className="text-sm font-medium">{captureStatus || 'Cargando...'}</p>
+                  <Progress value={captureProgress} className="mt-3 h-2 w-3/4" />
+                </div>
+              )}
+
               {snapshotUrl ? (
                 <img
                   src={snapshotUrl}
@@ -406,12 +572,12 @@ export function BusCountingConfigModal({
                 <div className="flex h-full flex-col items-center justify-center text-muted-foreground">
                   <Camera className="mb-2 h-12 w-12 opacity-50" />
                   <p className="text-sm">Sin captura</p>
-                  <p className="text-xs">Captura un frame para configurar la linea</p>
+                  <p className="text-xs">Selecciona una camara para cargar la imagen</p>
                 </div>
               )}
 
               {/* Draggable counting line */}
-              {snapshotUrl && (
+              {snapshotUrl && !isLoading && (
                 <div
                   className={`absolute cursor-move ${
                     orientation === 'vertical' ? 'top-0 h-full w-1' : 'left-0 h-1 w-full'
