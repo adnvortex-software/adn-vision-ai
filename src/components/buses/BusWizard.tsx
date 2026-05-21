@@ -98,6 +98,7 @@ export function BusWizard({ clienteId, onComplete, onCancel, isLoading = false }
       clienteId,
       deviceId: '',
       ipVirtual: '',
+      numeroInterno: undefined,
       tipoVehiculo: 'bus',
       conductorAsignadoId: null,
     },
@@ -190,6 +191,7 @@ export function BusWizard({ clienteId, onComplete, onCancel, isLoading = false }
       clienteId: wizardData.clienteId ?? clienteId,
       deviceId: wizardData.deviceId ?? '',
       ipVirtual: wizardData.ipVirtual ?? '',
+      numeroInterno: wizardData.numeroInterno,
       tipoVehiculo: wizardData.tipoVehiculo ?? 'bus',
       conductorAsignadoId: wizardData.conductorAsignadoId,
       ztIpRouter: wizardData.ztIpRouter ?? '',
@@ -343,6 +345,33 @@ export function BusWizard({ clienteId, onComplete, onCancel, isLoading = false }
                         <Input placeholder="10.0.0.1" disabled={isLoading} {...field} />
                       </FormControl>
                       <FormDescription>IP generada en OPNsense</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={step1Form.control}
+                  name="numeroInterno"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Numero Interno</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="001"
+                          disabled={isLoading}
+                          {...field}
+                          value={field.value ?? ''}
+                          onChange={(e) => {
+                            const val = e.target.value
+                            field.onChange(val === '' ? undefined : parseInt(val, 10))
+                          }}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Numero de identificacion interna del vehiculo
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}

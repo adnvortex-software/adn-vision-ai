@@ -40,6 +40,7 @@ export const createBusSchema = z.object({
   }),
   deviceId: z.string().min(1, 'Device ID es requerido'),
   ipVirtual: z.string().min(1, 'IP Virtual es requerida'),
+  numeroInterno: z.number().int().positive().optional(),
   conductorAsignadoId: z.string().nullable().optional(),
   ztIpRouter: ipSchema,
   subnetLan: subnetSchema,
@@ -62,6 +63,7 @@ export const busWizardStep1Schema = z.object({
   tipoVehiculo: z.enum(VEHICLE_TYPES),
   deviceId: z.string().min(1, 'Device ID es requerido'),
   ipVirtual: z.string().min(1, 'IP Virtual es requerida'),
+  numeroInterno: z.number().int().positive().optional(),
   conductorAsignadoId: z.string().nullable().optional(),
 })
 
@@ -81,6 +83,7 @@ export const busFirestoreSchema = z.object({
   clienteId: z.string(),
   deviceId: z.string().optional().default(''),
   ipVirtual: z.string().optional().default(''),
+  numeroInterno: z.number().optional(),
   sucursalId: z.string().nullable().optional(),
   propietarioId: z.string().nullable().optional(),
   tipoVehiculo: z.enum(VEHICLE_TYPES),

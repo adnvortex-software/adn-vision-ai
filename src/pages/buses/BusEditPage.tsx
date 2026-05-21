@@ -45,6 +45,7 @@ const editBusSchema = z.object({
     .transform((val) => val.toUpperCase().replace(/\s/g, '')),
   deviceId: z.string().min(1, 'Device ID es requerido'),
   ipVirtual: z.string().min(1, 'IP Virtual es requerida'),
+  numeroInterno: z.number().int().positive().optional(),
   tipoVehiculo: z.enum(VEHICLE_TYPES),
   ztIpRouter: z
     .string()
@@ -77,6 +78,7 @@ export default function BusEditPage() {
       placa: '',
       deviceId: '',
       ipVirtual: '',
+      numeroInterno: undefined,
       tipoVehiculo: 'bus',
       ztIpRouter: '',
       subnetLan: '',
@@ -94,6 +96,7 @@ export default function BusEditPage() {
             placa: bus.placa,
             deviceId: bus.deviceId ?? '',
             ipVirtual: bus.ipVirtual ?? '',
+            numeroInterno: bus.numeroInterno,
             tipoVehiculo: bus.tipoVehiculo,
             ztIpRouter: bus.ztIpRouter,
             subnetLan: bus.subnetLan,
@@ -130,6 +133,7 @@ export default function BusEditPage() {
         placa: data.placa,
         deviceId: data.deviceId,
         ipVirtual: data.ipVirtual,
+        numeroInterno: data.numeroInterno,
         tipoVehiculo: data.tipoVehiculo,
         ztIpRouter: data.ztIpRouter,
         subnetLan: data.subnetLan,
@@ -270,6 +274,33 @@ export default function BusEditPage() {
                         <Input placeholder="10.0.0.100" disabled={isSaving} {...field} />
                       </FormControl>
                       <FormDescription>IP generada en OPNsense</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="numeroInterno"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Numero Interno</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          placeholder="001"
+                          disabled={isSaving}
+                          {...field}
+                          value={field.value ?? ''}
+                          onChange={(e) => {
+                            const val = e.target.value
+                            field.onChange(val === '' ? undefined : parseInt(val, 10))
+                          }}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        Numero de identificacion interna del vehiculo
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}

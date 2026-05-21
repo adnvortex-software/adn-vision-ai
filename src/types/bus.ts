@@ -10,6 +10,7 @@ export interface Bus extends BaseEntity {
   clienteId: string
   deviceId?: string
   ipVirtual?: string
+  numeroInterno?: number
   sucursalId?: string | null
   propietarioId?: string | null
   tipoVehiculo: VehicleType
@@ -54,6 +55,7 @@ export interface CreateBusData {
   clienteId: string
   deviceId: string
   ipVirtual: string
+  numeroInterno?: number
   tipoVehiculo: VehicleType
   conductorAsignadoId?: string
   ztIpRouter: string
@@ -100,6 +102,7 @@ export interface BusWizardData {
   clienteId: string
   deviceId: string
   ipVirtual: string
+  numeroInterno?: number
   tipoVehiculo: VehicleType
   conductorAsignadoId?: string | null
 

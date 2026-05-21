@@ -224,19 +224,14 @@ export function BusesTable({
         },
       },
       {
-        accessorKey: 'novedadesHoy',
-        header: 'Novedades',
+        accessorKey: 'numeroInterno',
+        header: 'No. Interno',
         cell: ({ row }) => {
-          const novedades = row.original.novedadesHoy
-          if (novedades === undefined)
+          const numeroInterno = row.original.numeroInterno
+          if (numeroInterno === undefined) {
             return <span className="text-sm text-muted-foreground">-</span>
-          if (novedades === 0)
-            return <span className="text-sm text-muted-foreground">{novedades}</span>
-          return (
-            <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
-              {novedades}
-            </span>
-          )
+          }
+          return <span className="font-medium">{numeroInterno}</span>
         },
       },
       {

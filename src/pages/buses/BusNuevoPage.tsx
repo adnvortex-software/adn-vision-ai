@@ -65,6 +65,7 @@ export default function BusNuevoPage() {
           clienteId: data.clienteId,
           deviceId: data.deviceId,
           ipVirtual: data.ipVirtual,
+          numeroInterno: data.numeroInterno,
           tipoVehiculo: data.tipoVehiculo,
           conductorAsignadoId: data.conductorAsignadoId ?? null,
           ztIpRouter: data.ztIpRouter,
