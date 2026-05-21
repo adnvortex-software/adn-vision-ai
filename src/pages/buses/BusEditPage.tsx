@@ -36,6 +36,10 @@ const VEHICLE_TYPE_LABELS: Record<string, string> = {
   otro: 'Otro',
 }
 
+// IP regex for validation
+const ipRegex =
+  /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/
+
 // Schema for editing bus
 const editBusSchema = z.object({
   placa: z
@@ -47,13 +51,7 @@ const editBusSchema = z.object({
   ipVirtual: z.string().min(1, 'IP Virtual es requerida'),
   numeroInterno: z.number().int().positive().optional(),
   tipoVehiculo: z.enum(VEHICLE_TYPES),
-  ztIpRouter: z
-    .string()
-    .min(7, 'IP inválida')
-    .regex(
-      /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/,
-      'Formato de IP inválido'
-    ),
+  ztIpRouter: z.string().min(7, 'IP inválida').regex(ipRegex, 'Formato de IP inválido'),
   subnetLan: z
     .string()
     .min(9, 'Subnet inválida')
@@ -61,6 +59,9 @@ const editBusSchema = z.object({
       /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/(?:[0-9]|[1-2][0-9]|3[0-2])$/,
       'Formato de subnet inválido (ej: 192.168.1.0/24)'
     ),
+  dvrIp: z.string().regex(ipRegex, 'Formato de IP inválido').optional().or(z.literal('')),
+  dvrUsuario: z.string().optional(),
+  dvrPassword: z.string().optional(),
 })
 
 type EditBusFormData = z.infer<typeof editBusSchema>
@@ -82,6 +83,9 @@ export default function BusEditPage() {
       tipoVehiculo: 'bus',
       ztIpRouter: '',
       subnetLan: '',
+      dvrIp: '',
+      dvrUsuario: '',
+      dvrPassword: '',
     },
   })
 
@@ -100,6 +104,9 @@ export default function BusEditPage() {
             tipoVehiculo: bus.tipoVehiculo,
             ztIpRouter: bus.ztIpRouter,
             subnetLan: bus.subnetLan,
+            dvrIp: bus.dvrIp ?? '',
+            dvrUsuario: bus.dvrUsuario ?? '',
+            dvrPassword: bus.dvrPassword ?? '',
           })
         } else {
           toast({
@@ -137,6 +144,9 @@ export default function BusEditPage() {
         tipoVehiculo: data.tipoVehiculo,
         ztIpRouter: data.ztIpRouter,
         subnetLan: data.subnetLan,
+        dvrIp: data.dvrIp,
+        dvrUsuario: data.dvrUsuario,
+        dvrPassword: data.dvrPassword,
       })
 
       toast({
@@ -331,6 +341,56 @@ export default function BusEditPage() {
                         <Input placeholder="192.168.1.0/24" disabled={isSaving} {...field} />
                       </FormControl>
                       <FormDescription>Red local del DVR</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="dvrIp"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>IP del DVR</FormLabel>
+                      <FormControl>
+                        <Input placeholder="192.168.29.135" disabled={isSaving} {...field} />
+                      </FormControl>
+                      <FormDescription>IP local del dispositivo DVR</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="dvrUsuario"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Usuario DVR</FormLabel>
+                      <FormControl>
+                        <Input placeholder="admin" disabled={isSaving} {...field} />
+                      </FormControl>
+                      <FormDescription>Usuario para acceder al DVR</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="dvrPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Contraseña DVR</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="password"
+                          placeholder="********"
+                          disabled={isSaving}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>Contraseña para acceder al DVR</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}

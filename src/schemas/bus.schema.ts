@@ -73,6 +73,9 @@ export type BusWizardStep1Data = z.infer<typeof busWizardStep1Schema>
 export const busWizardStep2Schema = z.object({
   ztIpRouter: ipSchema,
   subnetLan: subnetSchema,
+  dvrIp: ipSchema,
+  dvrUsuario: z.string().min(1, 'Usuario DVR es requerido'),
+  dvrPassword: z.string().min(1, 'Contraseña DVR es requerida'),
 })
 
 export type BusWizardStep2Data = z.infer<typeof busWizardStep2Schema>
@@ -91,6 +94,9 @@ export const busFirestoreSchema = z.object({
   conductorAsignadoId: z.string().nullable().optional(),
   ztIpRouter: z.string(),
   subnetLan: z.string(),
+  dvrIp: z.string().optional().default(''),
+  dvrUsuario: z.string().optional().default(''),
+  dvrPassword: z.string().optional().default(''),
   estado: z.enum(BUS_STATES).optional().default('sin_conexion'),
   lastHeartbeat: z.unknown().nullable().optional(),
   numCamarasConfiguradas: z.number().optional().default(0),

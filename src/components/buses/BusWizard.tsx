@@ -110,6 +110,9 @@ export function BusWizard({ clienteId, onComplete, onCancel, isLoading = false }
     defaultValues: {
       ztIpRouter: '',
       subnetLan: '',
+      dvrIp: '',
+      dvrUsuario: 'admin',
+      dvrPassword: '',
     },
   })
 
@@ -196,6 +199,9 @@ export function BusWizard({ clienteId, onComplete, onCancel, isLoading = false }
       conductorAsignadoId: wizardData.conductorAsignadoId,
       ztIpRouter: wizardData.ztIpRouter ?? '',
       subnetLan: wizardData.subnetLan ?? '',
+      dvrIp: wizardData.dvrIp ?? '',
+      dvrUsuario: wizardData.dvrUsuario ?? '',
+      dvrPassword: wizardData.dvrPassword ?? '',
       camaras,
     }
     await onComplete(finalData)
@@ -425,6 +431,56 @@ export function BusWizard({ clienteId, onComplete, onCancel, isLoading = false }
                         <Input placeholder="192.168.1.0/24" disabled={isLoading} {...field} />
                       </FormControl>
                       <FormDescription>Red local del DVR</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={step2Form.control}
+                  name="dvrIp"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>IP del DVR</FormLabel>
+                      <FormControl>
+                        <Input placeholder="192.168.29.135" disabled={isLoading} {...field} />
+                      </FormControl>
+                      <FormDescription>IP local del dispositivo DVR</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={step2Form.control}
+                  name="dvrUsuario"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Usuario DVR</FormLabel>
+                      <FormControl>
+                        <Input placeholder="admin" disabled={isLoading} {...field} />
+                      </FormControl>
+                      <FormDescription>Usuario para acceder al DVR</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={step2Form.control}
+                  name="dvrPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Contraseña DVR</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="password"
+                          placeholder="********"
+                          disabled={isLoading}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>Contraseña para acceder al DVR</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}

@@ -70,6 +70,9 @@ export default function BusNuevoPage() {
           conductorAsignadoId: data.conductorAsignadoId ?? null,
           ztIpRouter: data.ztIpRouter,
           subnetLan: data.subnetLan,
+          dvrIp: data.dvrIp,
+          dvrUsuario: data.dvrUsuario,
+          dvrPassword: data.dvrPassword,
         },
         'system' // createdBy - TODO: use actual user
       )

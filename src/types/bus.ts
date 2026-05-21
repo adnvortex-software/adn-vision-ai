@@ -21,6 +21,11 @@ export interface Bus extends BaseEntity {
   ztIpRouter: string
   subnetLan: string
 
+  // DVR Configuration
+  dvrIp?: string
+  dvrUsuario?: string
+  dvrPassword?: string
+
   // Estado operativo
   estado: BusState
   lastHeartbeat: FirestoreTimestamp | null
@@ -60,6 +65,9 @@ export interface CreateBusData {
   conductorAsignadoId?: string
   ztIpRouter: string
   subnetLan: string
+  dvrIp?: string
+  dvrUsuario?: string
+  dvrPassword?: string
 }
 
 /**
@@ -109,6 +117,9 @@ export interface BusWizardData {
   // Step 2: Conectividad
   ztIpRouter: string
   subnetLan: string
+  dvrIp: string
+  dvrUsuario: string
+  dvrPassword: string
 
   // Step 3: Cámaras
   camaras: CreateCamaraData[]
