@@ -32,6 +32,7 @@ import {
 import { BusStatusIndicator } from './BusStatusIndicator'
 import { BusContadorModal } from './BusContadorModal'
 import { BusCountingConfigModal } from './BusCountingConfigModal'
+import { BusLiveStreamModal } from './BusLiveStreamModal'
 import type { BusConDetalles } from '@/types/bus'
 
 const STORAGE_KEY = 'buses-table-expanded-clients'
@@ -150,12 +151,22 @@ export function BusesTable({
     bus: BusConDetalles | null
   }>({ open: false, bus: null })
 
+  // Live stream modal state
+  const [liveStreamModal, setLiveStreamModal] = useState<{
+    open: boolean
+    bus: BusConDetalles | null
+  }>({ open: false, bus: null })
+
   const handleViewContador = useCallback((bus: BusConDetalles) => {
     setContadorModal({ open: true, bus })
   }, [])
 
   const handleConfigConteo = useCallback((bus: BusConDetalles) => {
     setCountingConfigModal({ open: true, bus })
+  }, [])
+
+  const handleViewLiveStream = useCallback((bus: BusConDetalles) => {
+    setLiveStreamModal({ open: true, bus })
   }, [])
 
   const columns: ColumnDef<BusConDetalles>[] = useMemo(
@@ -321,6 +332,14 @@ export function BusesTable({
                   <SlidersHorizontal className="mr-2 h-4 w-4" />
                   Configurar conteo
                 </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    handleViewLiveStream(bus)
+                  }}
+                >
+                  <Video className="mr-2 h-4 w-4" />
+                  Ver en vivo
+                </DropdownMenuItem>
                 {onEdit && (
                   <DropdownMenuItem
                     onClick={() => {
@@ -362,7 +381,15 @@ export function BusesTable({
         },
       },
     ],
-    [onView, onEdit, onDelete, onManageCamaras, handleViewContador, handleConfigConteo]
+    [
+      onView,
+      onEdit,
+      onDelete,
+      onManageCamaras,
+      handleViewContador,
+      handleConfigConteo,
+      handleViewLiveStream,
+    ]
   )
 
   // Show grouped tables with accordion
@@ -419,6 +446,15 @@ export function BusesTable({
         open={countingConfigModal.open}
         onOpenChange={(open) => {
           setCountingConfigModal((prev) => ({ ...prev, open }))
+        }}
+      />
+
+      {/* Live Stream Modal */}
+      <BusLiveStreamModal
+        bus={liveStreamModal.bus}
+        open={liveStreamModal.open}
+        onOpenChange={(open) => {
+          setLiveStreamModal((prev) => ({ ...prev, open }))
         }}
       />
     </>
