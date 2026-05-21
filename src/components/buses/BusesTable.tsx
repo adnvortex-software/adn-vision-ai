@@ -170,18 +170,14 @@ export function BusesTable({
         },
       },
       {
-        accessorKey: 'deviceId',
-        header: 'Device ID',
+        accessorKey: 'numeroInterno',
+        header: 'No. Interno',
         cell: ({ row }) => {
-          const deviceId = row.original.deviceId
-          return <code className="text-xs">{deviceId ?? '-'}</code>
-        },
-      },
-      {
-        accessorKey: 'estado',
-        header: 'Estado',
-        cell: ({ row }) => {
-          return <BusStatusIndicator estado={row.original.estado} size="sm" />
+          const numeroInterno = row.original.numeroInterno
+          if (numeroInterno === undefined) {
+            return <span className="text-sm text-muted-foreground">-</span>
+          }
+          return <span className="font-medium">{numeroInterno}</span>
         },
       },
       {
@@ -224,28 +220,32 @@ export function BusesTable({
         },
       },
       {
-        accessorKey: 'numeroInterno',
-        header: 'No. Interno',
+        accessorKey: 'estado',
+        header: 'Estado',
         cell: ({ row }) => {
-          const numeroInterno = row.original.numeroInterno
-          if (numeroInterno === undefined) {
-            return <span className="text-sm text-muted-foreground">-</span>
-          }
-          return <span className="font-medium">{numeroInterno}</span>
+          return <BusStatusIndicator estado={row.original.estado} size="sm" />
         },
       },
       {
-        accessorKey: 'ipVirtual',
-        header: 'IP Virtual',
-        cell: ({ row }) => (
-          <code className="text-xs text-muted-foreground">{row.original.ipVirtual ?? '-'}</code>
-        ),
+        accessorKey: 'deviceId',
+        header: 'Device ID',
+        cell: ({ row }) => {
+          const deviceId = row.original.deviceId
+          return <code className="text-xs">{deviceId ?? '-'}</code>
+        },
       },
       {
         accessorKey: 'ztIpRouter',
         header: 'IP Router',
         cell: ({ row }) => (
           <code className="text-xs text-muted-foreground">{row.original.ztIpRouter}</code>
+        ),
+      },
+      {
+        accessorKey: 'ipVirtual',
+        header: 'IP Virtual',
+        cell: ({ row }) => (
+          <code className="text-xs text-muted-foreground">{row.original.ipVirtual ?? '-'}</code>
         ),
       },
       {
