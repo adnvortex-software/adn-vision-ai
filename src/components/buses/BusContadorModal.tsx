@@ -218,12 +218,7 @@ export function BusContadorModal({ bus, open, onOpenChange }: BusContadorModalPr
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={fechaInicio}
-                      onSelect={setFechaInicio}
-                      initialFocus
-                    />
+                    <Calendar mode="single" selected={fechaInicio} onSelect={setFechaInicio} />
                   </PopoverContent>
                 </Popover>
                 <div className="relative w-28">
@@ -259,12 +254,7 @@ export function BusContadorModal({ bus, open, onOpenChange }: BusContadorModalPr
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={fechaFin}
-                      onSelect={setFechaFin}
-                      initialFocus
-                    />
+                    <Calendar mode="single" selected={fechaFin} onSelect={setFechaFin} />
                   </PopoverContent>
                 </Popover>
                 <div className="relative w-28">

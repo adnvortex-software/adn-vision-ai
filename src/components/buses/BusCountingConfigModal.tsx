@@ -204,6 +204,7 @@ export function BusCountingConfigModal({
         window.removeEventListener('mouseup', handleGlobalMouseUp)
       }
     }
+    return undefined
   }, [isDragging])
 
   const handleSave = async () => {
