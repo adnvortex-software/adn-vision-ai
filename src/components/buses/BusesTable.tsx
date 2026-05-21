@@ -273,6 +273,13 @@ export function BusesTable({
         ),
       },
       {
+        accessorKey: 'dvrIp',
+        header: 'IP DVR',
+        cell: ({ row }) => (
+          <code className="text-xs text-muted-foreground">{row.original.dvrIp ?? '-'}</code>
+        ),
+      },
+      {
         id: 'actions',
         header: '',
         cell: ({ row }) => {
