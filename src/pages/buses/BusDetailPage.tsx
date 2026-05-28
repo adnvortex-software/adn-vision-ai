@@ -7,7 +7,6 @@ import {
   AlertTriangle,
   Users,
   Pencil,
-  Settings,
   Wifi,
   WifiOff,
   Loader2,
@@ -104,15 +103,6 @@ export default function BusDetailPage() {
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Volver
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => {
-                navigate(`/buses/${busId ?? ''}/camaras`)
-              }}
-            >
-              <Camera className="mr-2 h-4 w-4" />
-              Camaras
             </Button>
             <Button
               onClick={() => {
@@ -233,24 +223,12 @@ export default function BusDetailPage() {
 
       {/* Camaras */}
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <Camera className="h-5 w-5" />
-              Camaras Configuradas
-            </CardTitle>
-            <CardDescription>{camaras.length} camara(s) configurada(s)</CardDescription>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              navigate(`/buses/${busId ?? ''}/camaras`)
-            }}
-          >
-            <Settings className="mr-2 h-4 w-4" />
-            Configurar
-          </Button>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Camera className="h-5 w-5" />
+            Camaras Configuradas
+          </CardTitle>
+          <CardDescription>{camaras.length} camara(s) configurada(s)</CardDescription>
         </CardHeader>
         <CardContent>
           {camaras.length === 0 ? (

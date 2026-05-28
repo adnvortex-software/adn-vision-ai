@@ -6,8 +6,6 @@ import {
   addDoc,
   updateDoc,
   query,
-  where,
-  orderBy,
   serverTimestamp,
   onSnapshot,
   type Unsubscribe,
@@ -55,11 +53,8 @@ export async function getCamara(busId: string, camaraId: string): Promise<Entity
  * Lista cámaras de un bus
  */
 export async function listCamaras(busId: string): Promise<Entity<Camara>[]> {
-  const q = query(
-    collection(db, BUSES_COLLECTION, busId, CAMARAS_SUBCOLLECTION),
-    where('habilitada', '==', true),
-    orderBy('canal')
-  )
+  // Simple query without composite index - filter and sort in JavaScript
+  const q = query(collection(db, BUSES_COLLECTION, busId, CAMARAS_SUBCOLLECTION))
 
   const snapshot = await getDocs(q)
 
@@ -80,7 +75,9 @@ export async function listCamaras(busId: string): Promise<Entity<Camara>[]> {
         updatedAt: data.updatedAt as Camara['updatedAt'],
       }
     })
-    .filter((item): item is Entity<Camara> => item !== null)
+    .filter((item): item is Entity<Camara> => item?.habilitada === true)
+    .sort((a, b) => a.canal - b.canal)
+
   return camaras
 }
 
@@ -242,11 +239,8 @@ export function subscribeToCamaras(
   busId: string,
   callback: (camaras: Entity<Camara>[]) => void
 ): Unsubscribe {
-  const q = query(
-    collection(db, BUSES_COLLECTION, busId, CAMARAS_SUBCOLLECTION),
-    where('habilitada', '==', true),
-    orderBy('canal')
-  )
+  // Simple query without composite index - filter and sort in JavaScript
+  const q = query(collection(db, BUSES_COLLECTION, busId, CAMARAS_SUBCOLLECTION))
 
   return onSnapshot(q, (snapshot) => {
     const camaras = snapshot.docs
@@ -260,11 +254,14 @@ export function subscribeToCamaras(
           ultimoScreenshotAt:
             ((data as { ultimoScreenshotAt?: unknown })
               .ultimoScreenshotAt as Camara['ultimoScreenshotAt']) ?? null,
-          createdAt: data.createdAt,
-          updatedAt: data.updatedAt,
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          createdAt: data.createdAt as Camara['createdAt'],
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          updatedAt: data.updatedAt as Camara['updatedAt'],
         }
       })
-      .filter((item): item is Entity<Camara> => item !== null)
+      .filter((item): item is Entity<Camara> => item?.habilitada === true)
+      .sort((a, b) => a.canal - b.canal)
 
     callback(camaras)
   })

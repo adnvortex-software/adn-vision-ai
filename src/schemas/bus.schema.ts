@@ -80,6 +80,21 @@ export const busWizardStep2Schema = z.object({
 
 export type BusWizardStep2Data = z.infer<typeof busWizardStep2Schema>
 
+// Schema para configuración de novedad (lenient para compatibilidad)
+const noveltyConfigSchema = z
+  .object({
+    id: z.string(),
+    tipoNovedad: z.enum(['pasajero_cabina', 'sobrecupo_pasillo']),
+    cameraChannel: z.number(),
+    cameraId: z.string(),
+    maxPersonas: z.number().optional().default(1),
+    tiempoMinimoMin: z.number().optional().default(1),
+    tiempoMinimoSeg: z.number().optional(), // Legacy field for backwards compatibility
+    zonaPoligono: z.array(z.object({ x: z.number(), y: z.number() })).optional(),
+    activa: z.boolean().optional().default(true),
+  })
+  .passthrough()
+
 // Schema para validar bus de Firestore
 export const busFirestoreSchema = z.object({
   placa: z.string(),
@@ -103,6 +118,7 @@ export const busFirestoreSchema = z.object({
   countingLineOrientation: z.enum(['horizontal', 'vertical']).optional(),
   countingSnapshotUrl: z.string().optional(),
   aforoMax: z.number().optional().default(45),
+  noveltyConfigs: z.array(noveltyConfigSchema).optional().default([]),
   estado: z.enum(BUS_STATES).optional().default('sin_conexion'),
   lastHeartbeat: z.unknown().nullable().optional(),
   numCamarasConfiguradas: z.number().optional().default(0),

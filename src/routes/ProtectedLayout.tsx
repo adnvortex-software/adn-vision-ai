@@ -1,4 +1,5 @@
 import { Outlet, Navigate, useLocation } from 'react-router-dom'
+import { useMemo, useCallback } from 'react'
 import { AppShell } from '@/components/layout/AppShell'
 import { LoadingState } from '@/components/common/LoadingState'
 import { OnboardingTour } from '@/components/onboarding'
@@ -13,6 +14,13 @@ export function ProtectedLayout() {
   const location = useLocation()
   const { usuario, isLoading, isAuthenticated } = useAuthStore()
 
+  // Memoize the redirect state to prevent infinite re-renders
+  const redirectState = useMemo(() => ({ from: location.pathname }), [location.pathname])
+
+  const handleLogout = useCallback(() => {
+    void logout()
+  }, [])
+
   // Show loading while checking auth state
   if (isLoading) {
     return <LoadingState fullScreen message="Verificando autenticacion..." />
@@ -20,16 +28,12 @@ export function ProtectedLayout() {
 
   // Redirect to login if not authenticated
   if (!isAuthenticated || !usuario) {
-    return <Navigate to="/login" state={{ from: location.pathname }} replace />
+    return <Navigate to="/login" state={redirectState} replace />
   }
 
-  // Check if user is active
+  // Check if user is active - redirect to login with message instead of separate page
   if (!usuario.activo) {
-    return <Navigate to="/cuenta-desactivada" replace />
-  }
-
-  const handleLogout = () => {
-    void logout()
+    return <Navigate to="/login" state={{ error: 'cuenta_desactivada' }} replace />
   }
 
   return (

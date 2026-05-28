@@ -1,9 +1,11 @@
 // Re-export all buses components
 export * from './BusCard'
+export * from './BusCameraConfigModal'
 export * from './BusContadorModal'
 export * from './BusCountingConfigModal'
 export * from './BusForm'
 export * from './BusLiveStreamModal'
+export * from './BusNoveltyConfigModal'
 export * from './BusRecordingsModal'
 export * from './BusStatusIndicator'
 export * from './BusesTable'

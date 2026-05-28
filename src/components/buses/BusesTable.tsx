@@ -12,6 +12,7 @@ import {
   Users,
   SlidersHorizontal,
   HardDrive,
+  AlertTriangle,
 } from 'lucide-react'
 import { DataTable } from '@/components/common/DataTable'
 import { Button } from '@/components/ui/button'
@@ -32,7 +33,7 @@ import {
 } from '@/components/ui/accordion'
 import { BusStatusIndicator } from './BusStatusIndicator'
 import { BusContadorModal } from './BusContadorModal'
-import { BusCountingConfigModal } from './BusCountingConfigModal'
+import { BusCameraConfigModal } from './BusCameraConfigModal'
 import { BusLiveStreamModal } from './BusLiveStreamModal'
 import { BusRecordingsModal } from './BusRecordingsModal'
 import type { BusConDetalles } from '@/types/bus'
@@ -147,11 +148,12 @@ export function BusesTable({
     bus: BusConDetalles | null
   }>({ open: false, bus: null })
 
-  // Counting config modal state
-  const [countingConfigModal, setCountingConfigModal] = useState<{
+  // Camera config modal state (unified for counting + novelties)
+  const [cameraConfigModal, setCameraConfigModal] = useState<{
     open: boolean
     bus: BusConDetalles | null
-  }>({ open: false, bus: null })
+    initialTab: 'counting' | 'novelty'
+  }>({ open: false, bus: null, initialTab: 'counting' })
 
   // Live stream modal state
   const [liveStreamModal, setLiveStreamModal] = useState<{
@@ -169,9 +171,12 @@ export function BusesTable({
     setContadorModal({ open: true, bus })
   }, [])
 
-  const handleConfigConteo = useCallback((bus: BusConDetalles) => {
-    setCountingConfigModal({ open: true, bus })
-  }, [])
+  const handleConfigCameras = useCallback(
+    (bus: BusConDetalles, tab: 'counting' | 'novelty' = 'counting') => {
+      setCameraConfigModal({ open: true, bus, initialTab: tab })
+    },
+    []
+  )
 
   const handleViewLiveStream = useCallback((bus: BusConDetalles) => {
     setLiveStreamModal({ open: true, bus })
@@ -338,7 +343,7 @@ export function BusesTable({
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => {
-                    handleConfigConteo(bus)
+                    handleConfigCameras(bus, 'counting')
                   }}
                 >
                   <SlidersHorizontal className="mr-2 h-4 w-4" />
@@ -359,6 +364,14 @@ export function BusesTable({
                 >
                   <HardDrive className="mr-2 h-4 w-4" />
                   Grabaciones
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    handleConfigCameras(bus, 'novelty')
+                  }}
+                >
+                  <AlertTriangle className="mr-2 h-4 w-4" />
+                  Configurar novedades
                 </DropdownMenuItem>
                 {onEdit && (
                   <DropdownMenuItem
@@ -407,7 +420,7 @@ export function BusesTable({
       onDelete,
       onManageCamaras,
       handleViewContador,
-      handleConfigConteo,
+      handleConfigCameras,
       handleViewLiveStream,
       handleViewRecordings,
     ]
@@ -461,13 +474,14 @@ export function BusesTable({
         }}
       />
 
-      {/* Counting Config Modal */}
-      <BusCountingConfigModal
-        bus={countingConfigModal.bus}
-        open={countingConfigModal.open}
+      {/* Camera Config Modal (Counting + Novelties) */}
+      <BusCameraConfigModal
+        bus={cameraConfigModal.bus}
+        open={cameraConfigModal.open}
         onOpenChange={(open) => {
-          setCountingConfigModal((prev) => ({ ...prev, open }))
+          setCameraConfigModal((prev) => ({ ...prev, open }))
         }}
+        initialTab={cameraConfigModal.initialTab}
       />
 
       {/* Live Stream Modal */}

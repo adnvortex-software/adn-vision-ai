@@ -34,6 +34,9 @@ export interface Bus extends BaseEntity {
   countingSnapshotUrl?: string // URL of the last captured frame for configuration
   aforoMax?: number
 
+  // Novelty Detection Configuration
+  noveltyConfigs?: NoveltyConfig[]
+
   // Estado operativo
   estado: BusState
   lastHeartbeat: FirestoreTimestamp | null
@@ -132,3 +135,39 @@ export interface BusWizardData {
   // Step 3: Cámaras
   camaras: CreateCamaraData[]
 }
+
+/**
+ * Configuración de novedad para detección
+ */
+export interface NoveltyConfig {
+  id: string
+  tipoNovedad: 'pasajero_cabina' | 'sobrecupo_pasillo'
+  cameraChannel: number
+  cameraId: string
+  maxPersonas: number // Solo aplica para pasajero_cabina
+  tiempoMinimoMin: number // Tiempo en minutos
+  zonaPoligono?: Array<{ x: number; y: number }> // Normalized 0-1 coordinates
+  activa: boolean
+}
+
+/**
+ * Tipos de novedades disponibles
+ */
+export const NOVELTY_TYPES = {
+  pasajero_cabina: {
+    nombre: 'Pasajero en cabina',
+    descripcion: 'Detecta personas no autorizadas en la cabina del conductor',
+    defaultMaxPersonas: 1,
+    defaultTiempoMin: 1, // 1 minuto
+    showMaxPersonas: true,
+  },
+  sobrecupo_pasillo: {
+    nombre: 'Sobrecupo en pasillo',
+    descripcion: 'Detecta pasajeros de pie en el pasillo',
+    defaultMaxPersonas: 0, // Siempre 0, cualquier persona es sobrecupo
+    defaultTiempoMin: 2, // 2 minutos
+    showMaxPersonas: false,
+  },
+} as const
+
+export type NoveltyType = keyof typeof NOVELTY_TYPES
