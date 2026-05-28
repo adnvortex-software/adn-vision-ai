@@ -1,22 +1,19 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus, Bus as BusIcon, Loader2 } from 'lucide-react'
 import { PageHeader } from '@/components/common/PageHeader'
 import { Button } from '@/components/ui/button'
 import { BusesTable } from '@/components/buses'
 import { ConfirmDialog } from '@/components/common/ConfirmDialog'
-import type { BusConDetalles, Bus } from '@/types/bus'
-import type { Entity } from '@/types/firestore'
-import { listBuses, deleteBus, canDeleteBus } from '@/services/buses.service'
-import { listClientes } from '@/services/clientes.service'
-import type { Cliente } from '@/types/cliente'
+import type { BusConDetalles } from '@/types/bus'
+import { deleteBus, canDeleteBus } from '@/services/buses.service'
+import { useDataStore } from '@/stores/data.store'
 import { useToast } from '@/hooks/use-toast'
 
 export default function BusesListPage() {
   const navigate = useNavigate()
   const { toast } = useToast()
-  const [buses, setBuses] = useState<BusConDetalles[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const { buses, busesLoading, loadBuses } = useDataStore()
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean
     bus: BusConDetalles | null
@@ -24,48 +21,6 @@ export default function BusesListPage() {
     canDelete: boolean
     reason?: string
   }>({ open: false, bus: null, isDeleting: false, canDelete: true })
-
-  const loadBuses = async () => {
-    try {
-      // Load buses and clients in parallel
-      const [busesResult, clientesResult] = await Promise.all([
-        listBuses({ limit: 100 }),
-        listClientes({ limit: 100 }),
-      ])
-
-      // Create a map of client IDs to names
-      const clientesMap = new Map<string, string>()
-      clientesResult.data.forEach((cliente: Entity<Cliente>) => {
-        clientesMap.set(cliente.id, cliente.nombre)
-      })
-
-      // Enrich buses with client names
-      const busesConDetalles: BusConDetalles[] = busesResult.data.map((bus: Entity<Bus>) => ({
-        ...bus,
-        clienteNombre: clientesMap.get(bus.clienteId) ?? 'Cliente desconocido',
-        sucursalNombre: '',
-      }))
-
-      // Sort by client name for better grouping
-      busesConDetalles.sort((a, b) => (a.clienteNombre ?? '').localeCompare(b.clienteNombre ?? ''))
-
-      setBuses(busesConDetalles)
-    } catch (error) {
-      console.error('Error loading buses:', error)
-      toast({
-        title: 'Error',
-        description: 'No se pudieron cargar los buses',
-        variant: 'destructive',
-      })
-    }
-  }
-
-  useEffect(() => {
-    void loadBuses().finally(() => {
-      setIsLoading(false)
-    })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   const handleView = (bus: BusConDetalles) => {
     navigate(`/buses/${bus.id}`)
@@ -98,7 +53,7 @@ export default function BusesListPage() {
         description: `${deleteDialog.bus.placa} ha sido eliminado`,
       })
       setDeleteDialog({ open: false, bus: null, isDeleting: false, canDelete: true })
-      await loadBuses()
+      await loadBuses(true) // Force refresh
     } catch (error) {
       const message = error instanceof Error ? error.message : 'No se pudo eliminar el bus'
       toast({
@@ -127,7 +82,7 @@ export default function BusesListPage() {
         }
       />
 
-      {isLoading ? (
+      {busesLoading ? (
         <div className="flex h-64 items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
@@ -151,7 +106,7 @@ export default function BusesListPage() {
       ) : (
         <BusesTable
           buses={buses}
-          isLoading={isLoading}
+          isLoading={busesLoading}
           onView={handleView}
           onEdit={handleEdit}
           onDelete={(bus) => void handleDeleteClick(bus)}

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus, Building2, Loader2 } from 'lucide-react'
 import { PageHeader } from '@/components/common/PageHeader'
@@ -7,14 +7,14 @@ import { ClientesTable } from '@/components/clientes'
 import { ConfirmDialog } from '@/components/common/ConfirmDialog'
 import type { Cliente } from '@/types/cliente'
 import type { Entity } from '@/types/firestore'
-import { listClientes, deleteCliente, canDeleteCliente } from '@/services/clientes.service'
+import { deleteCliente, canDeleteCliente } from '@/services/clientes.service'
+import { useDataStore } from '@/stores/data.store'
 import { useToast } from '@/hooks/use-toast'
 
 export default function ClientesListPage() {
   const navigate = useNavigate()
   const { toast } = useToast()
-  const [clientes, setClientes] = useState<Entity<Cliente>[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const { clientes, clientesLoading, loadClientes } = useDataStore()
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean
     cliente: Entity<Cliente> | null
@@ -22,27 +22,6 @@ export default function ClientesListPage() {
     canDelete: boolean
     reason?: string
   }>({ open: false, cliente: null, isDeleting: false, canDelete: true })
-
-  const loadClientes = async () => {
-    try {
-      const result = await listClientes({ limit: 100 })
-      setClientes(result.data)
-    } catch (error) {
-      console.error('Error loading clientes:', error)
-      toast({
-        title: 'Error',
-        description: 'No se pudieron cargar los clientes',
-        variant: 'destructive',
-      })
-    }
-  }
-
-  useEffect(() => {
-    void loadClientes().finally(() => {
-      setIsLoading(false)
-    })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   const handleView = (cliente: Entity<Cliente>) => {
     navigate(`/clientes/${cliente.id}`)
@@ -84,7 +63,7 @@ export default function ClientesListPage() {
         description: `${deleteDialog.cliente.nombre} ha sido eliminado`,
       })
       setDeleteDialog({ open: false, cliente: null, isDeleting: false, canDelete: true })
-      await loadClientes()
+      await loadClientes(true) // Force refresh
     } catch (error) {
       const message = error instanceof Error ? error.message : 'No se pudo eliminar el cliente'
       toast({
@@ -113,7 +92,7 @@ export default function ClientesListPage() {
         }
       />
 
-      {isLoading ? (
+      {clientesLoading ? (
         <div className="flex h-64 items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
@@ -135,7 +114,7 @@ export default function ClientesListPage() {
       ) : (
         <ClientesTable
           clientes={clientes}
-          isLoading={isLoading}
+          isLoading={clientesLoading}
           onView={handleView}
           onEdit={handleEdit}
           onDelete={(cliente) => void handleDeleteClick(cliente)}

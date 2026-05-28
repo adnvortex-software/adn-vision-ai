@@ -1,9 +1,10 @@
 import { Outlet, Navigate, useLocation } from 'react-router-dom'
-import { useMemo, useCallback } from 'react'
+import { useMemo, useCallback, useEffect } from 'react'
 import { AppShell } from '@/components/layout/AppShell'
 import { LoadingState } from '@/components/common/LoadingState'
 import { OnboardingTour } from '@/components/onboarding'
 import { useAuthStore } from '@/stores/auth.store'
+import { useDataStore } from '@/stores/data.store'
 import { logout } from '@/services/auth.service'
 
 /**
@@ -13,13 +14,26 @@ import { logout } from '@/services/auth.service'
 export function ProtectedLayout() {
   const location = useLocation()
   const { usuario, isLoading, isAuthenticated } = useAuthStore()
+  const { loadClientes, loadBuses, subscribeBuses, clearCache } = useDataStore()
 
   // Memoize the redirect state to prevent infinite re-renders
   const redirectState = useMemo(() => ({ from: location.pathname }), [location.pathname])
 
   const handleLogout = useCallback(() => {
+    clearCache()
     void logout()
-  }, [])
+  }, [clearCache])
+
+  // Load and cache data when authenticated
+  useEffect(() => {
+    if (isAuthenticated && usuario) {
+      // Load clientes first, then buses (buses need cliente names)
+      void loadClientes().then(() => {
+        void loadBuses()
+        subscribeBuses() // Subscribe to real-time updates
+      })
+    }
+  }, [isAuthenticated, usuario, loadClientes, loadBuses, subscribeBuses])
 
   // Show loading while checking auth state
   if (isLoading) {
