@@ -75,10 +75,6 @@ export default function BusesListPage() {
     navigate(`/buses/${bus.id}/editar`)
   }
 
-  const handleConfigCamaras = (bus: BusConDetalles) => {
-    navigate(`/buses/${bus.id}/camaras`)
-  }
-
   const handleDeleteClick = async (bus: BusConDetalles) => {
     const { canDelete, reason } = await canDeleteBus(bus.id)
     setDeleteDialog({
@@ -158,7 +154,6 @@ export default function BusesListPage() {
           isLoading={isLoading}
           onView={handleView}
           onEdit={handleEdit}
-          onManageCamaras={handleConfigCamaras}
           onDelete={(bus) => void handleDeleteClick(bus)}
         />
       )}

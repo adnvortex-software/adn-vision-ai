@@ -10,9 +10,6 @@ import {
   Settings,
   Building2,
   Users,
-  SlidersHorizontal,
-  HardDrive,
-  AlertTriangle,
 } from 'lucide-react'
 import { DataTable } from '@/components/common/DataTable'
 import { Button } from '@/components/ui/button'
@@ -20,11 +17,9 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import {
   Accordion,
   AccordionContent,
@@ -35,7 +30,6 @@ import { BusStatusIndicator } from './BusStatusIndicator'
 import { BusContadorModal } from './BusContadorModal'
 import { BusCameraConfigModal } from './BusCameraConfigModal'
 import { BusLiveStreamModal } from './BusLiveStreamModal'
-import { BusRecordingsModal } from './BusRecordingsModal'
 import type { BusConDetalles } from '@/types/bus'
 
 const STORAGE_KEY = 'buses-table-expanded-clients'
@@ -52,7 +46,6 @@ interface BusesTableProps {
   onView?: (bus: BusConDetalles) => void
   onEdit?: (bus: BusConDetalles) => void
   onDelete?: (bus: BusConDetalles) => void
-  onManageCamaras?: (bus: BusConDetalles) => void
 }
 
 const VEHICLE_TYPE_LABELS: Record<string, string> = {
@@ -113,7 +106,6 @@ export function BusesTable({
   onView,
   onEdit,
   onDelete,
-  onManageCamaras,
 }: BusesTableProps) {
   const busGroups = useMemo(() => groupBusesByClient(buses), [buses])
 
@@ -161,12 +153,6 @@ export function BusesTable({
     bus: BusConDetalles | null
   }>({ open: false, bus: null })
 
-  // Recordings modal state
-  const [recordingsModal, setRecordingsModal] = useState<{
-    open: boolean
-    bus: BusConDetalles | null
-  }>({ open: false, bus: null })
-
   const handleViewContador = useCallback((bus: BusConDetalles) => {
     setContadorModal({ open: true, bus })
   }, [])
@@ -180,10 +166,6 @@ export function BusesTable({
 
   const handleViewLiveStream = useCallback((bus: BusConDetalles) => {
     setLiveStreamModal({ open: true, bus })
-  }, [])
-
-  const handleViewRecordings = useCallback((bus: BusConDetalles) => {
-    setRecordingsModal({ open: true, bus })
   }, [])
 
   const columns: ColumnDef<BusConDetalles>[] = useMemo(
@@ -233,45 +215,6 @@ export function BusesTable({
         },
       },
       {
-        accessorKey: 'numCamarasConfiguradas',
-        header: 'Camaras',
-        cell: ({ row }) => {
-          const numCamaras = row.original.numCamarasConfiguradas
-          const camarasNombres = row.original.camarasNombres ?? []
-
-          if (numCamaras === 0 || camarasNombres.length === 0) {
-            return (
-              <div className="flex items-center gap-1.5">
-                <Video className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">{numCamaras}</span>
-              </div>
-            )
-          }
-
-          return (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="flex cursor-help items-center gap-1.5">
-                    <Video className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm underline decoration-dotted">{numCamaras}</span>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent side="top" className="max-w-xs">
-                  <div className="space-y-1">
-                    {camarasNombres.map((nombre, index) => (
-                      <div key={index} className="text-xs">
-                        Camara {index + 1}: {nombre}
-                      </div>
-                    ))}
-                  </div>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )
-        },
-      },
-      {
         accessorKey: 'estado',
         header: 'Estado',
         cell: ({ row }) => {
@@ -279,36 +222,59 @@ export function BusesTable({
         },
       },
       {
-        accessorKey: 'deviceId',
-        header: 'Device ID',
-        cell: ({ row }) => {
-          const deviceId = row.original.deviceId
-          return <code className="text-xs">{deviceId ?? '-'}</code>
-        },
-      },
-      {
-        accessorKey: 'ztIpRouter',
-        header: 'IP Router',
+        id: 'conteo',
+        header: 'Conteo',
         cell: ({ row }) => (
-          <code className="text-xs text-muted-foreground">{row.original.ztIpRouter}</code>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              handleViewContador(row.original)
+            }}
+            className="h-8 px-2"
+          >
+            <Users className="mr-1 h-4 w-4" />
+            Ver
+          </Button>
         ),
       },
       {
-        accessorKey: 'ipVirtual',
-        header: 'IP Virtual',
+        id: 'envivo',
+        header: 'En vivo',
         cell: ({ row }) => (
-          <code className="text-xs text-muted-foreground">{row.original.ipVirtual ?? '-'}</code>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              handleViewLiveStream(row.original)
+            }}
+            className="h-8 px-2"
+          >
+            <Video className="mr-1 h-4 w-4" />
+            Ver
+          </Button>
         ),
       },
       {
-        accessorKey: 'dvrIp',
-        header: 'IP DVR',
-        cell: ({ row }) => (
-          <code className="text-xs text-muted-foreground">{row.original.dvrIp ?? '-'}</code>
-        ),
+        id: 'detalles',
+        header: 'Detalles',
+        cell: ({ row }) =>
+          onView ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                onView(row.original)
+              }}
+              className="h-8 px-2"
+            >
+              <Eye className="mr-1 h-4 w-4" />
+              Ver
+            </Button>
+          ) : null,
       },
       {
-        id: 'actions',
+        id: 'menu',
         header: '',
         cell: ({ row }) => {
           const bus = row.original
@@ -317,61 +283,18 @@ export function BusesTable({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <span className="sr-only">Abrir menu</span>
+                  <span className="sr-only">Mas opciones</span>
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                {onView && (
-                  <DropdownMenuItem
-                    onClick={() => {
-                      onView(bus)
-                    }}
-                  >
-                    <Eye className="mr-2 h-4 w-4" />
-                    Ver detalles
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuItem
-                  onClick={() => {
-                    handleViewContador(bus)
-                  }}
-                >
-                  <Users className="mr-2 h-4 w-4" />
-                  Ver Contador
-                </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => {
                     handleConfigCameras(bus, 'counting')
                   }}
                 >
-                  <SlidersHorizontal className="mr-2 h-4 w-4" />
-                  Configurar conteo
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => {
-                    handleViewLiveStream(bus)
-                  }}
-                >
-                  <Video className="mr-2 h-4 w-4" />
-                  Ver en vivo
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => {
-                    handleViewRecordings(bus)
-                  }}
-                >
-                  <HardDrive className="mr-2 h-4 w-4" />
-                  Grabaciones
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => {
-                    handleConfigCameras(bus, 'novelty')
-                  }}
-                >
-                  <AlertTriangle className="mr-2 h-4 w-4" />
-                  Configurar novedades
+                  <Settings className="mr-2 h-4 w-4" />
+                  Configurar camaras
                 </DropdownMenuItem>
                 {onEdit && (
                   <DropdownMenuItem
@@ -381,17 +304,6 @@ export function BusesTable({
                   >
                     <Pencil className="mr-2 h-4 w-4" />
                     Editar
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuSeparator />
-                {onManageCamaras && (
-                  <DropdownMenuItem
-                    onClick={() => {
-                      onManageCamaras(bus)
-                    }}
-                  >
-                    <Settings className="mr-2 h-4 w-4" />
-                    Configurar camaras
                   </DropdownMenuItem>
                 )}
                 {onDelete && (
@@ -414,16 +326,7 @@ export function BusesTable({
         },
       },
     ],
-    [
-      onView,
-      onEdit,
-      onDelete,
-      onManageCamaras,
-      handleViewContador,
-      handleConfigCameras,
-      handleViewLiveStream,
-      handleViewRecordings,
-    ]
+    [onView, onEdit, onDelete, handleViewContador, handleConfigCameras, handleViewLiveStream]
   )
 
   // Show grouped tables with accordion
@@ -490,15 +393,6 @@ export function BusesTable({
         open={liveStreamModal.open}
         onOpenChange={(open) => {
           setLiveStreamModal((prev) => ({ ...prev, open }))
-        }}
-      />
-
-      {/* Recordings Modal */}
-      <BusRecordingsModal
-        bus={recordingsModal.bus}
-        open={recordingsModal.open}
-        onOpenChange={(open) => {
-          setRecordingsModal((prev) => ({ ...prev, open }))
         }}
       />
     </>
