@@ -10,6 +10,7 @@ import {
   Settings,
   Building2,
   Users,
+  AlertTriangle,
 } from 'lucide-react'
 import { DataTable } from '@/components/common/DataTable'
 import { Button } from '@/components/ui/button'
@@ -28,7 +29,8 @@ import {
 } from '@/components/ui/accordion'
 import { BusStatusIndicator } from './BusStatusIndicator'
 import { BusContadorModal } from './BusContadorModal'
-import { BusCameraConfigModal } from './BusCameraConfigModal'
+import { BusCountingConfigModal } from './BusCountingConfigModal'
+import { BusNoveltyConfigModal } from './BusNoveltyConfigModal'
 import { BusLiveStreamModal } from './BusLiveStreamModal'
 import type { BusConDetalles } from '@/types/bus'
 
@@ -140,12 +142,17 @@ export function BusesTable({
     bus: BusConDetalles | null
   }>({ open: false, bus: null })
 
-  // Camera config modal state (unified for counting + novelties)
-  const [cameraConfigModal, setCameraConfigModal] = useState<{
+  // Counting config modal state
+  const [countingConfigModal, setCountingConfigModal] = useState<{
     open: boolean
     bus: BusConDetalles | null
-    initialTab: 'counting' | 'novelty'
-  }>({ open: false, bus: null, initialTab: 'counting' })
+  }>({ open: false, bus: null })
+
+  // Novelty config modal state
+  const [noveltyConfigModal, setNoveltyConfigModal] = useState<{
+    open: boolean
+    bus: BusConDetalles | null
+  }>({ open: false, bus: null })
 
   // Live stream modal state
   const [liveStreamModal, setLiveStreamModal] = useState<{
@@ -157,12 +164,13 @@ export function BusesTable({
     setContadorModal({ open: true, bus })
   }, [])
 
-  const handleConfigCameras = useCallback(
-    (bus: BusConDetalles, tab: 'counting' | 'novelty' = 'counting') => {
-      setCameraConfigModal({ open: true, bus, initialTab: tab })
-    },
-    []
-  )
+  const handleConfigCounting = useCallback((bus: BusConDetalles) => {
+    setCountingConfigModal({ open: true, bus })
+  }, [])
+
+  const handleConfigNovelty = useCallback((bus: BusConDetalles) => {
+    setNoveltyConfigModal({ open: true, bus })
+  }, [])
 
   const handleViewLiveStream = useCallback((bus: BusConDetalles) => {
     setLiveStreamModal({ open: true, bus })
@@ -290,11 +298,19 @@ export function BusesTable({
               <DropdownMenuContent align="end">
                 <DropdownMenuItem
                   onClick={() => {
-                    handleConfigCameras(bus, 'counting')
+                    handleConfigCounting(bus)
                   }}
                 >
                   <Settings className="mr-2 h-4 w-4" />
-                  Configurar camaras
+                  Configurar conteo
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    handleConfigNovelty(bus)
+                  }}
+                >
+                  <AlertTriangle className="mr-2 h-4 w-4" />
+                  Configurar novedades
                 </DropdownMenuItem>
                 {onEdit && (
                   <DropdownMenuItem
@@ -326,7 +342,15 @@ export function BusesTable({
         },
       },
     ],
-    [onView, onEdit, onDelete, handleViewContador, handleConfigCameras, handleViewLiveStream]
+    [
+      onView,
+      onEdit,
+      onDelete,
+      handleViewContador,
+      handleConfigCounting,
+      handleConfigNovelty,
+      handleViewLiveStream,
+    ]
   )
 
   // Show grouped tables with accordion
@@ -377,14 +401,22 @@ export function BusesTable({
         }}
       />
 
-      {/* Camera Config Modal (Counting + Novelties) */}
-      <BusCameraConfigModal
-        bus={cameraConfigModal.bus}
-        open={cameraConfigModal.open}
+      {/* Counting Config Modal */}
+      <BusCountingConfigModal
+        bus={countingConfigModal.bus}
+        open={countingConfigModal.open}
         onOpenChange={(open) => {
-          setCameraConfigModal((prev) => ({ ...prev, open }))
+          setCountingConfigModal((prev) => ({ ...prev, open }))
         }}
-        initialTab={cameraConfigModal.initialTab}
+      />
+
+      {/* Novelty Config Modal */}
+      <BusNoveltyConfigModal
+        bus={noveltyConfigModal.bus}
+        open={noveltyConfigModal.open}
+        onOpenChange={(open) => {
+          setNoveltyConfigModal((prev) => ({ ...prev, open }))
+        }}
       />
 
       {/* Live Stream Modal */}

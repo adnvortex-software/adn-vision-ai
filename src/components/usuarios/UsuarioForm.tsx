@@ -56,6 +56,10 @@ interface UsuarioFormProps {
   clientOnly?: boolean
   /** Pre-selected client ID (for client admins) */
   defaultClienteId?: string
+  /** Callback when client selection changes */
+  onClienteChange?: (clienteId: string) => void
+  /** Callback when sucursales selection changes */
+  onSucursalesChange?: (clienteId: string, sucursalIds: string[]) => void
 }
 
 export function UsuarioForm({
@@ -68,6 +72,8 @@ export function UsuarioForm({
   isLoading = false,
   clientOnly = false,
   defaultClienteId,
+  onClienteChange,
+  onSucursalesChange,
 }: UsuarioFormProps) {
   const isEditing = !!usuario
 
@@ -255,6 +261,7 @@ export function UsuarioForm({
                           field.onChange(value)
                           form.setValue('sucursalIds', [])
                           form.setValue('propietarioId', null)
+                          onClienteChange?.(value)
                         }}
                         value={field.value ?? ''}
                         disabled={isLoading || clientes.length === 0}
@@ -342,6 +349,9 @@ export function UsuarioForm({
                                         ? [...currentValue, sucursal.id]
                                         : currentValue.filter((id: string) => id !== sucursal.id)
                                       field.onChange(newValue)
+                                      if (selectedClienteId) {
+                                        onSucursalesChange?.(selectedClienteId, newValue)
+                                      }
                                     }}
                                     disabled={isLoading}
                                   />

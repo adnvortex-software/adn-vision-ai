@@ -80,16 +80,31 @@ export const busWizardStep2Schema = z.object({
 
 export type BusWizardStep2Data = z.infer<typeof busWizardStep2Schema>
 
-// Schema para configuración de novedad (lenient para compatibilidad)
+// Schema para configuración de novedad (with migration for legacy types)
 const noveltyConfigSchema = z
   .object({
     id: z.string(),
-    tipoNovedad: z.enum(['pasajero_cabina', 'sobrecupo_pasillo']),
+    tipoNovedad: z
+      .enum([
+        'pasajero_en_cabina',
+        'sobrecupo',
+        'conductor_sin_cinturon',
+        'conductor_fumando',
+        // Legacy types accepted for parsing
+        'pasajero_cabina',
+        'sobrecupo_pasillo',
+      ])
+      .transform((val) => {
+        // Migrate legacy types
+        if (val === 'pasajero_cabina') return 'pasajero_en_cabina' as const
+        if (val === 'sobrecupo_pasillo') return 'sobrecupo' as const
+        return val
+      }),
     cameraChannel: z.number(),
     cameraId: z.string(),
-    maxPersonas: z.number().optional().default(1),
-    tiempoMinimoMin: z.number().optional().default(1),
-    tiempoMinimoSeg: z.number().optional(), // Legacy field for backwards compatibility
+    maxPersonas: z.number().optional().default(0),
+    tiempoMinimoSeg: z.number().optional().default(5),
+    tiempoMinimoMin: z.number().optional(), // Legacy field
     zonaPoligono: z.array(z.object({ x: z.number(), y: z.number() })).optional(),
     activa: z.boolean().optional().default(true),
   })

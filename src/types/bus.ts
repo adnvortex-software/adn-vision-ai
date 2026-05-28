@@ -141,31 +141,49 @@ export interface BusWizardData {
  */
 export interface NoveltyConfig {
   id: string
-  tipoNovedad: 'pasajero_cabina' | 'sobrecupo_pasillo'
+  tipoNovedad: NoveltyType
   cameraChannel: number
   cameraId: string
-  maxPersonas: number // Solo aplica para pasajero_cabina
-  tiempoMinimoMin: number // Tiempo en minutos
+  maxPersonas: number
+  tiempoMinimoSeg: number // Tiempo en segundos
   zonaPoligono?: Array<{ x: number; y: number }> // Normalized 0-1 coordinates
   activa: boolean
 }
 
 /**
- * Tipos de novedades disponibles
+ * Tipos de novedades disponibles (códigos del catálogo)
  */
 export const NOVELTY_TYPES = {
-  pasajero_cabina: {
+  pasajero_en_cabina: {
+    codigo: 'pasajero_en_cabina',
     nombre: 'Pasajero en cabina',
     descripcion: 'Detecta personas no autorizadas en la cabina del conductor',
-    defaultMaxPersonas: 1,
-    defaultTiempoMin: 1, // 1 minuto
+    defaultMaxPersonas: 0,
+    defaultTiempoSeg: 5,
     showMaxPersonas: true,
   },
-  sobrecupo_pasillo: {
+  sobrecupo: {
+    codigo: 'sobrecupo',
     nombre: 'Sobrecupo en pasillo',
     descripcion: 'Detecta pasajeros de pie en el pasillo',
-    defaultMaxPersonas: 0, // Siempre 0, cualquier persona es sobrecupo
-    defaultTiempoMin: 2, // 2 minutos
+    defaultMaxPersonas: 0,
+    defaultTiempoSeg: 10,
+    showMaxPersonas: true,
+  },
+  conductor_sin_cinturon: {
+    codigo: 'conductor_sin_cinturon',
+    nombre: 'Conductor sin cinturon',
+    descripcion: 'Detecta cuando el conductor no tiene puesto el cinturon',
+    defaultMaxPersonas: 0,
+    defaultTiempoSeg: 10,
+    showMaxPersonas: false,
+  },
+  conductor_fumando: {
+    codigo: 'conductor_fumando',
+    nombre: 'Conductor fumando',
+    descripcion: 'Detecta cuando el conductor esta fumando',
+    defaultMaxPersonas: 0,
+    defaultTiempoSeg: 5,
     showMaxPersonas: false,
   },
 } as const

@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { type User } from 'firebase/auth'
 import type { Usuario } from '@/types/auth'
 import type { Role } from '@/config/constants'
+import { getUsuarioById } from '@/services/usuarios.service'
 
 interface AuthState {
   // Estado de autenticación
@@ -17,6 +18,7 @@ interface AuthState {
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
   reset: () => void
+  refreshUsuario: () => Promise<void>
 
   // Helpers computados
   getRole: () => Role | null
@@ -62,6 +64,20 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
 
   reset: () => {
     set(initialState)
+  },
+
+  refreshUsuario: async () => {
+    const { usuario } = get()
+    if (!usuario) return
+
+    try {
+      const updatedUsuario = await getUsuarioById(usuario.uid)
+      if (updatedUsuario) {
+        set({ usuario: updatedUsuario })
+      }
+    } catch (error) {
+      console.error('Error refreshing usuario:', error)
+    }
   },
 
   // Helpers computados

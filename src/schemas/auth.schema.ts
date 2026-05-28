@@ -46,15 +46,39 @@ export const usuarioFirestoreSchema = z.object({
   email: z.string().email(),
   nombre: z.string(),
   rol: z.enum(ALL_ROLES),
-  clienteId: z.string().nullable(),
-  sucursalIds: z.array(z.string()).nullable(),
-  propietarioId: z.string().nullable(),
-  activo: z.boolean(),
-  createdAt: z.unknown(), // Firestore Timestamp
-  updatedAt: z.unknown(),
-  createdBy: z.string(),
-  deleted: z.boolean().optional(),
-  onboardingCompleted: z.boolean().optional(),
+  clienteId: z.string().nullable().default(null),
+  sucursalIds: z.array(z.string()).nullable().default(null),
+  propietarioId: z.string().nullable().default(null),
+  activo: z.boolean().default(true),
+  createdAt: z.unknown().optional(), // Firestore Timestamp
+  updatedAt: z.unknown().optional(),
+  createdBy: z.string().default('system'),
+  deleted: z.boolean().default(false),
+  onboardingCompleted: z.boolean().default(false),
+  fotoUrl: z.string().nullable().default(null),
+  telefono: z.string().nullable().default(null),
 })
+
+// Schema para actualizar perfil
+export const updateProfileSchema = z.object({
+  nombre: z.string().min(2, 'Minimo 2 caracteres').max(100, 'Maximo 100 caracteres'),
+  telefono: z.string().optional().nullable(),
+})
+
+export type UpdateProfileFormData = z.infer<typeof updateProfileSchema>
+
+// Schema para cambiar contraseña
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, 'La contraseña actual es requerida'),
+    newPassword: z.string().min(6, 'Minimo 6 caracteres'),
+    confirmPassword: z.string().min(6, 'Minimo 6 caracteres'),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: 'Las contraseñas no coinciden',
+    path: ['confirmPassword'],
+  })
+
+export type ChangePasswordFormData = z.infer<typeof changePasswordSchema>
 
 export type UsuarioFirestore = z.infer<typeof usuarioFirestoreSchema>

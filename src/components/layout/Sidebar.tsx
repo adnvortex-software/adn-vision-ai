@@ -44,12 +44,6 @@ const NAV_ITEMS: NavItem[] = [
     permission: 'buses.read',
   },
   {
-    label: 'Conductores',
-    href: '/conductores',
-    icon: Users,
-    permission: 'conductores.read',
-  },
-  {
     label: 'Novedades',
     href: '/novedades',
     icon: AlertTriangle,

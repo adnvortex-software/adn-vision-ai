@@ -49,22 +49,22 @@ export async function listNovedadesCatalogo(): Promise<Entity<NovedadCatalogo>[]
   )
 
   const snapshot = await getDocs(q)
+  const catalogo: Entity<NovedadCatalogo>[] = []
 
-  const catalogo = snapshot.docs
-    .map((docSnap) => {
-      const data = docSnap.data() as FirestoreDocData
-      const parsed = novedadCatalogoSchema.safeParse(data)
-      if (!parsed.success) return null
-      return {
-        id: docSnap.id,
-        ...parsed.data,
-        createdBy: typeof data.createdBy === 'string' ? data.createdBy : 'system',
-        deleted: typeof data.deleted === 'boolean' ? data.deleted : false,
-        createdAt: data.createdAt,
-        updatedAt: data.updatedAt,
-      }
+  for (const docSnap of snapshot.docs) {
+    const data = docSnap.data() as FirestoreDocData
+    const parsed = novedadCatalogoSchema.safeParse(data)
+    if (!parsed.success) continue
+    catalogo.push({
+      id: docSnap.id,
+      ...parsed.data,
+      createdBy: typeof data.createdBy === 'string' ? data.createdBy : 'system',
+      deleted: typeof data.deleted === 'boolean' ? data.deleted : false,
+      createdAt: data.createdAt,
+      updatedAt: data.updatedAt,
     })
-    .filter((item): item is Entity<NovedadCatalogo> => item !== null)
+  }
+
   return catalogo
 }
 
@@ -283,22 +283,21 @@ export async function listEventos(
   const docs = snapshot.docs.slice(0, pageLimit)
   const hasMore = snapshot.docs.length > pageLimit
 
-  const data = docs
-    .map((docSnap) => {
-      const docData = docSnap.data() as FirestoreDocData
-      const parsed = eventoFirestoreSchema.safeParse(docData)
-      if (!parsed.success) return null
-      return {
-        id: docSnap.id,
-        ...parsed.data,
-        timestamp: (docData as unknown as { timestamp: unknown }).timestamp as Evento['timestamp'],
-        revisadoAt: ((docData as { revisadoAt?: unknown }).revisadoAt ??
-          null) as Evento['revisadoAt'],
-        createdAt: docData.createdAt,
-        updatedAt: docData.updatedAt,
-      }
+  const data: Entity<Evento>[] = []
+  for (const docSnap of docs) {
+    const docData = docSnap.data() as FirestoreDocData
+    const parsed = eventoFirestoreSchema.safeParse(docData)
+    if (!parsed.success) continue
+    data.push({
+      id: docSnap.id,
+      ...parsed.data,
+      timestamp: (docData as unknown as { timestamp: unknown }).timestamp as Evento['timestamp'],
+      revisadoAt: ((docData as { revisadoAt?: unknown }).revisadoAt ??
+        null) as Evento['revisadoAt'],
+      createdAt: docData.createdAt,
+      updatedAt: docData.updatedAt,
     })
-    .filter((item): item is Entity<Evento> => item !== null)
+  }
 
   return {
     data,
@@ -380,23 +379,21 @@ export function subscribeToEventos(
   }
 
   return onSnapshot(q, (snapshot) => {
-    const eventos = snapshot.docs
-      .map((docSnap) => {
-        const data = docSnap.data() as FirestoreDocData
-        const parsed = eventoFirestoreSchema.safeParse(data)
-        if (!parsed.success) return null
-        return {
-          id: docSnap.id,
-          ...parsed.data,
-          timestamp: (data as unknown as { timestamp: unknown }).timestamp as Evento['timestamp'],
-          revisadoAt: ((data as unknown as { revisadoAt?: unknown }).revisadoAt ??
-            null) as Evento['revisadoAt'],
-          createdAt: data.createdAt,
-          updatedAt: data.updatedAt,
-        }
+    const eventos: Entity<Evento>[] = []
+    for (const docSnap of snapshot.docs) {
+      const data = docSnap.data() as FirestoreDocData
+      const parsed = eventoFirestoreSchema.safeParse(data)
+      if (!parsed.success) continue
+      eventos.push({
+        id: docSnap.id,
+        ...parsed.data,
+        timestamp: (data as unknown as { timestamp: unknown }).timestamp as Evento['timestamp'],
+        revisadoAt: ((data as unknown as { revisadoAt?: unknown }).revisadoAt ??
+          null) as Evento['revisadoAt'],
+        createdAt: data.createdAt,
+        updatedAt: data.updatedAt,
       })
-      .filter((item): item is Entity<Evento> => item !== null)
-
+    }
     callback(eventos)
   })
 }

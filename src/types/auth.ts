@@ -14,6 +14,8 @@ export interface Usuario extends BaseEntity {
   propietarioId: string | null
   activo: boolean
   onboardingCompleted?: boolean
+  fotoUrl?: string | null
+  telefono?: string | null
 }
 
 /**

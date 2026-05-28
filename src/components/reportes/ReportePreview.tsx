@@ -44,16 +44,14 @@ export function ReportePreview({
     setIsDownloading(true)
     try {
       const blob = await generateReportePDF(data)
-      if (blob) {
-        const url = URL.createObjectURL(blob)
-        const link = document.createElement('a')
-        link.href = url
-        link.download = getReporteFilename(data)
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-        URL.revokeObjectURL(url)
-      }
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = getReporteFilename(data)
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
     } finally {
       setIsDownloading(false)
     }

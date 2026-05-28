@@ -116,31 +116,27 @@ export async function listBuses(
   const docs = snapshot.docs.slice(0, pageLimit)
   const hasMore = snapshot.docs.length > pageLimit
 
-  const data = docs
-    .map((docSnap) => {
-      const docData = docSnap.data() as FirestoreDocData
-      const parsed = busFirestoreSchema.safeParse(docData)
-      if (!parsed.success) {
-        console.warn('Failed to parse bus:', docSnap.id, parsed.error.errors)
-        return null
-      }
-      return {
-        id: docSnap.id,
-        ...parsed.data,
-        lastHeartbeat:
-          ((docData as { lastHeartbeat?: unknown }).lastHeartbeat as Bus['lastHeartbeat']) ?? null,
-        createdAt: docData.createdAt,
-        updatedAt: docData.updatedAt,
-      }
-    })
-    .filter((item): item is Entity<Bus> => {
-      // Filter out null items and deleted/inactive buses
-      if (item === null) return false
-      if (item.deleted) return false
-      // Allow items where activo is true or undefined (for backwards compatibility)
-      if (!item.activo) return false
-      return true
-    })
+  const data: Entity<Bus>[] = []
+  for (const docSnap of docs) {
+    const docData = docSnap.data() as FirestoreDocData
+    const parsed = busFirestoreSchema.safeParse(docData)
+    if (!parsed.success) {
+      console.warn('Failed to parse bus:', docSnap.id, parsed.error.errors)
+      continue
+    }
+    const item: Entity<Bus> = {
+      id: docSnap.id,
+      ...parsed.data,
+      lastHeartbeat:
+        ((docData as { lastHeartbeat?: unknown }).lastHeartbeat as Bus['lastHeartbeat']) ?? null,
+      createdAt: docData.createdAt,
+      updatedAt: docData.updatedAt,
+    }
+    // Filter out deleted/inactive buses
+    if (item.deleted) continue
+    if (!item.activo) continue
+    data.push(item)
+  }
 
   return {
     data,
@@ -260,30 +256,26 @@ export function subscribeToBuses(
   }
 
   return onSnapshot(q, (snapshot) => {
-    const buses = snapshot.docs
-      .map((docSnap) => {
-        const data = docSnap.data() as FirestoreDocData
-        const parsed = busFirestoreSchema.safeParse(data)
-        if (!parsed.success) {
-          console.warn('Failed to parse bus:', docSnap.id, parsed.error.errors)
-          return null
-        }
-        return {
-          id: docSnap.id,
-          ...parsed.data,
-          lastHeartbeat:
-            ((data as { lastHeartbeat?: unknown }).lastHeartbeat as Bus['lastHeartbeat']) ?? null,
-          createdAt: data.createdAt,
-          updatedAt: data.updatedAt,
-        }
-      })
-      .filter((item): item is Entity<Bus> => {
-        if (item === null) return false
-        if (item.deleted) return false
-        if (!item.activo) return false
-        return true
-      })
-
+    const buses: Entity<Bus>[] = []
+    for (const docSnap of snapshot.docs) {
+      const data = docSnap.data() as FirestoreDocData
+      const parsed = busFirestoreSchema.safeParse(data)
+      if (!parsed.success) {
+        console.warn('Failed to parse bus:', docSnap.id, parsed.error.errors)
+        continue
+      }
+      const item: Entity<Bus> = {
+        id: docSnap.id,
+        ...parsed.data,
+        lastHeartbeat:
+          ((data as { lastHeartbeat?: unknown }).lastHeartbeat as Bus['lastHeartbeat']) ?? null,
+        createdAt: data.createdAt,
+        updatedAt: data.updatedAt,
+      }
+      if (item.deleted) continue
+      if (!item.activo) continue
+      buses.push(item)
+    }
     callback(buses)
   })
 }

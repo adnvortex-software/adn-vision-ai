@@ -42,6 +42,7 @@ const ReporteNovedadesPage = lazy(() => import('@/pages/reportes/ReporteNovedade
 
 // Usuarios pages
 const UsuariosListPage = lazy(() => import('@/pages/usuarios/UsuariosListPage'))
+const UsuarioCreatePage = lazy(() => import('@/pages/usuarios/UsuarioCreatePage'))
 const UsuarioDetailPage = lazy(() => import('@/pages/usuarios/UsuarioDetailPage'))
 
 // Configuracion pages
@@ -265,7 +266,7 @@ export const router = createBrowserRouter([
         path: '/usuarios/nuevo',
         element: (
           <Suspense fallback={<LoadingState fullScreen />}>
-            <UsuarioDetailPage />
+            <UsuarioCreatePage />
           </Suspense>
         ),
       },

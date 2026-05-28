@@ -1,17 +1,58 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus, Users } from 'lucide-react'
 import { PageHeader } from '@/components/common/PageHeader'
 import { Button } from '@/components/ui/button'
 import { UsuariosTable, type UsuarioConDetalles } from '@/components/usuarios'
-
-// Mock data - replace with actual data fetching
-const mockUsuarios: UsuarioConDetalles[] = []
-const mockCurrentUserId = 'current-user-id'
+import { useAuthStore } from '@/stores/auth.store'
+import { listUsuarios } from '@/services/usuarios.service'
+import { getCliente } from '@/services/clientes.service'
+import { useToast } from '@/hooks/use-toast'
 
 export default function UsuariosListPage() {
   const navigate = useNavigate()
-  const [isLoading] = useState(false)
+  const { toast } = useToast()
+  const { usuario: currentUser } = useAuthStore()
+  const [usuarios, setUsuarios] = useState<UsuarioConDetalles[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const loadUsuarios = async () => {
+      try {
+        setIsLoading(true)
+        const result = await listUsuarios({ limit: 100 })
+
+        // Enrich users with client names
+        const enrichedUsuarios = await Promise.all(
+          result.data.map(async (user) => {
+            let clienteNombre: string | undefined
+            if (user.clienteId) {
+              const cliente = await getCliente(user.clienteId)
+              clienteNombre = cliente?.nombre
+            }
+            return {
+              ...user,
+              clienteNombre,
+              sucursalesNombres: [],
+            }
+          })
+        )
+
+        setUsuarios(enrichedUsuarios)
+      } catch (error) {
+        console.error('Error loading usuarios:', error)
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'No se pudieron cargar los usuarios',
+        })
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    void loadUsuarios()
+  }, [toast])
 
   const handleView = (usuario: UsuarioConDetalles) => {
     navigate(`/usuarios/${usuario.id}`)
@@ -38,7 +79,7 @@ export default function UsuariosListPage() {
         }
       />
 
-      {mockUsuarios.length === 0 && !isLoading ? (
+      {usuarios.length === 0 && !isLoading ? (
         <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-12">
           <Users className="h-12 w-12 text-muted-foreground/30" />
           <h3 className="mt-4 text-lg font-semibold">Sin usuarios</h3>
@@ -55,9 +96,9 @@ export default function UsuariosListPage() {
         </div>
       ) : (
         <UsuariosTable
-          usuarios={mockUsuarios}
+          usuarios={usuarios}
           isLoading={isLoading}
-          currentUserId={mockCurrentUserId}
+          currentUserId={currentUser?.uid ?? ''}
           onView={handleView}
           onEdit={handleEdit}
         />

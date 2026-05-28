@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import type { Usuario } from '@/types/auth'
 
 interface UserMenuProps {
@@ -41,11 +41,14 @@ function getRoleLabel(role: string): string {
 }
 
 export function UserMenu({ usuario, onLogout, onProfileClick, onSettingsClick }: UserMenuProps) {
+  const fotoUrl = (usuario as { fotoUrl?: string }).fotoUrl
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
           <Avatar className="h-10 w-10">
+            <AvatarImage src={fotoUrl ?? undefined} alt={usuario.nombre} />
             <AvatarFallback className="bg-primary text-primary-foreground">
               {getInitials(usuario.nombre)}
             </AvatarFallback>

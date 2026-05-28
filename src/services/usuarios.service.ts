@@ -5,11 +5,11 @@ import {
   getDocs,
   setDoc,
   updateDoc,
+  addDoc,
   query,
   where,
   orderBy,
   limit,
-  startAfter,
   serverTimestamp,
 } from 'firebase/firestore'
 import { db } from '@/config/firebase'
@@ -87,55 +87,50 @@ export async function listUsuarios(
     activo?: boolean
   } = {}
 ): Promise<PaginatedResult<Entity<Usuario>>> {
-  const { limit: pageLimit = 20, startAfter: startAfterId, clienteId, rol, activo } = options
+  const { limit: pageLimit = 20, clienteId, rol, activo } = options
 
-  // Use provided activo filter, default to true if not specified
-  const activoFilter = activo ?? true
-
-  let q = query(
-    collection(db, COLLECTION),
-    where('activo', '==', activoFilter),
-    orderBy('nombre'),
-    limit(pageLimit + 1)
-  )
-
-  if (clienteId) {
-    q = query(q, where('clienteId', '==', clienteId))
-  }
-
-  if (rol) {
-    q = query(q, where('rol', '==', rol))
-  }
-
-  if (startAfterId) {
-    const startDoc = await getDoc(doc(db, COLLECTION, startAfterId))
-    if (startDoc.exists()) {
-      q = query(q, startAfter(startDoc))
-    }
-  }
+  // Simple query - filter and sort in JavaScript to avoid composite index requirements
+  const q = query(collection(db, COLLECTION))
 
   const snapshot = await getDocs(q)
-  const docs = snapshot.docs.slice(0, pageLimit)
-  const hasMore = snapshot.docs.length > pageLimit
 
-  const data = docs
-    .map((docSnap) => {
-      const docData = docSnap.data() as FirestoreDocData
-      const parsed = usuarioFirestoreSchema.safeParse(docData)
-      if (!parsed.success) return null
-      return {
-        id: docSnap.id,
-        ...parsed.data,
-        createdAt: docData.createdAt,
-        updatedAt: docData.updatedAt,
-      }
-    })
-    .filter((item): item is Entity<Usuario> => item !== null)
+  const usuarios: Entity<Usuario>[] = []
+
+  for (const docSnap of snapshot.docs) {
+    const docData = docSnap.data() as FirestoreDocData
+    const parsed = usuarioFirestoreSchema.safeParse(docData)
+    if (!parsed.success) {
+      console.warn('Failed to parse usuario:', docSnap.id, parsed.error.errors)
+      continue
+    }
+    const item: Entity<Usuario> = {
+      id: docSnap.id,
+      ...parsed.data,
+      createdAt: docData.createdAt,
+      updatedAt: docData.updatedAt,
+    }
+    // Filter by activo (default to showing active users)
+    const activoFilter = activo ?? true
+    if (item.activo !== activoFilter) continue
+    // Filter by clienteId if provided
+    if (clienteId && item.clienteId !== clienteId) continue
+    // Filter by rol if provided
+    if (rol && item.rol !== rol) continue
+    // Exclude deleted users
+    if (item.deleted) continue
+    usuarios.push(item)
+  }
+
+  usuarios.sort((a, b) => a.nombre.localeCompare(b.nombre))
+  let data = usuarios
+
+  const hasMore = data.length > pageLimit
+  data = data.slice(0, pageLimit)
 
   return {
     data,
     hasMore,
-    lastDoc: docs[docs.length - 1]?.id,
+    lastDoc: data[data.length - 1]?.id,
   }
 }
 
@@ -221,26 +216,25 @@ export async function listUsuariosBySucursal(sucursalId: string): Promise<Entity
   const q = query(
     collection(db, COLLECTION),
     where('activo', '==', true),
-    where('activo', '==', true),
     where('sucursalIds', 'array-contains', sucursalId),
     orderBy('nombre')
   )
 
   const snapshot = await getDocs(q)
+  const usuarios: Entity<Usuario>[] = []
 
-  const usuarios = snapshot.docs
-    .map((docSnap) => {
-      const data = docSnap.data() as FirestoreDocData
-      const parsed = usuarioFirestoreSchema.safeParse(data)
-      if (!parsed.success) return null
-      return {
-        id: docSnap.id,
-        ...parsed.data,
-        createdAt: data.createdAt,
-        updatedAt: data.updatedAt,
-      }
+  for (const docSnap of snapshot.docs) {
+    const data = docSnap.data() as FirestoreDocData
+    const parsed = usuarioFirestoreSchema.safeParse(data)
+    if (!parsed.success) continue
+    usuarios.push({
+      id: docSnap.id,
+      ...parsed.data,
+      createdAt: data.createdAt,
+      updatedAt: data.updatedAt,
     })
-    .filter((item): item is Entity<Usuario> => item !== null)
+  }
+
   return usuarios
 }
 
@@ -251,25 +245,67 @@ export async function listUsuariosByRol(rol: Role): Promise<Entity<Usuario>[]> {
   const q = query(
     collection(db, COLLECTION),
     where('activo', '==', true),
-    where('activo', '==', true),
     where('rol', '==', rol),
     orderBy('nombre')
   )
 
   const snapshot = await getDocs(q)
+  const usuarios: Entity<Usuario>[] = []
 
-  const usuarios = snapshot.docs
-    .map((docSnap) => {
-      const data = docSnap.data() as FirestoreDocData
-      const parsed = usuarioFirestoreSchema.safeParse(data)
-      if (!parsed.success) return null
-      return {
-        id: docSnap.id,
-        ...parsed.data,
-        createdAt: data.createdAt,
-        updatedAt: data.updatedAt,
-      }
+  for (const docSnap of snapshot.docs) {
+    const data = docSnap.data() as FirestoreDocData
+    const parsed = usuarioFirestoreSchema.safeParse(data)
+    if (!parsed.success) continue
+    usuarios.push({
+      id: docSnap.id,
+      ...parsed.data,
+      createdAt: data.createdAt,
+      updatedAt: data.updatedAt,
     })
-    .filter((item): item is Entity<Usuario> => item !== null)
+  }
+
   return usuarios
+}
+
+/**
+ * Crea una invitacion de usuario
+ * Esto crea un documento en la coleccion 'invitaciones' que sera procesado
+ * por una Cloud Function para crear el usuario en Firebase Auth
+ */
+export async function createUsuarioInvitation(
+  data: CreateUsuarioData,
+  createdBy: string
+): Promise<string> {
+  // Verificar si ya existe un usuario con este email
+  const existingUser = await getUsuarioByEmail(data.email)
+  if (existingUser) {
+    throw new Error('Ya existe un usuario con este email')
+  }
+
+  // Verificar si ya existe una invitacion pendiente
+  const invitacionesQuery = query(
+    collection(db, 'invitaciones'),
+    where('email', '==', data.email.toLowerCase()),
+    where('estado', '==', 'pendiente'),
+    limit(1)
+  )
+  const existingInvitation = await getDocs(invitacionesQuery)
+  if (!existingInvitation.empty) {
+    throw new Error('Ya existe una invitacion pendiente para este email')
+  }
+
+  // Crear la invitacion
+  const docRef = await addDoc(collection(db, 'invitaciones'), {
+    email: data.email.toLowerCase(),
+    nombre: data.nombre,
+    rol: data.rol,
+    clienteId: data.clienteId ?? null,
+    sucursalIds: data.sucursalIds ?? null,
+    propietarioId: data.propietarioId ?? null,
+    estado: 'pendiente',
+    createdAt: serverTimestamp(),
+    createdBy,
+  })
+
+  return docRef.id
 }

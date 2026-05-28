@@ -73,29 +73,25 @@ export async function listClientes(
   const docs = snapshot.docs.slice(0, pageLimit)
   const hasMore = snapshot.docs.length > pageLimit
 
-  const data = docs
-    .map((docSnap) => {
-      const docData = docSnap.data() as FirestoreDocData
-      const parsed = clienteFirestoreSchema.safeParse(docData)
-      if (!parsed.success) {
-        console.warn('Failed to parse cliente:', docSnap.id, parsed.error.errors)
-        return null
-      }
-      return {
-        id: docSnap.id,
-        ...parsed.data,
-        createdAt: docData.createdAt,
-        updatedAt: docData.updatedAt,
-      }
-    })
-    .filter((item): item is Entity<Cliente> => {
-      // Filter out null items and deleted/inactive clients
-      if (item === null) return false
-      if (item.deleted) return false
-      // Allow items where activo is true or undefined (for backwards compatibility)
-      if (!item.activo) return false
-      return true
-    })
+  const data: Entity<Cliente>[] = []
+  for (const docSnap of docs) {
+    const docData = docSnap.data() as FirestoreDocData
+    const parsed = clienteFirestoreSchema.safeParse(docData)
+    if (!parsed.success) {
+      console.warn('Failed to parse cliente:', docSnap.id, parsed.error.errors)
+      continue
+    }
+    const item: Entity<Cliente> = {
+      id: docSnap.id,
+      ...parsed.data,
+      createdAt: docData.createdAt,
+      updatedAt: docData.updatedAt,
+    }
+    // Filter out deleted/inactive clients
+    if (item.deleted) continue
+    if (!item.activo) continue
+    data.push(item)
+  }
 
   return {
     data,

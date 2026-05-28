@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Logo } from '@/components/common/Logo'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useUIStore } from '@/stores/ui.store'
 import { usePermissions } from '@/hooks/usePermissions'
 import type { Usuario } from '@/types/auth'
@@ -44,12 +44,6 @@ const NAV_ITEMS: NavItem[] = [
     href: '/buses',
     icon: Bus,
     permission: 'buses.read',
-  },
-  {
-    label: 'Conductores',
-    href: '/conductores',
-    icon: Users,
-    permission: 'conductores.read',
   },
   {
     label: 'Novedades',
@@ -124,6 +118,10 @@ export function MobileMenu({ usuario, onLogout }: MobileMenuProps) {
           <div className="border-b p-4">
             <div className="flex items-center gap-3">
               <Avatar className="h-10 w-10">
+                <AvatarImage
+                  src={(usuario as { fotoUrl?: string }).fotoUrl ?? undefined}
+                  alt={usuario.nombre}
+                />
                 <AvatarFallback className="bg-primary text-primary-foreground">
                   {getInitials(usuario.nombre)}
                 </AvatarFallback>
