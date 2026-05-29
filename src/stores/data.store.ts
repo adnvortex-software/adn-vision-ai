@@ -2,23 +2,11 @@ import { create } from 'zustand'
 import { listClientes } from '@/services/clientes.service'
 import { listBuses, subscribeToBuses } from '@/services/buses.service'
 import { listUsuarios } from '@/services/usuarios.service'
-import { useAuthStore } from '@/stores/auth.store'
-import { isClientRole } from '@/lib/permissions'
 import type { Entity } from '@/types/firestore'
 import type { Cliente } from '@/types/cliente'
 import type { BusConDetalles } from '@/types/bus'
 import type { Usuario } from '@/types/auth'
 import type { Unsubscribe } from 'firebase/firestore'
-
-// Helper to get clienteId filter for client users
-function getClienteIdFilter(): string | undefined {
-  const usuario = useAuthStore.getState().usuario
-  if (!usuario?.rol) return undefined
-  if (isClientRole(usuario.rol)) {
-    return usuario.clienteId ?? undefined
-  }
-  return undefined
-}
 
 interface DataState {
   // Clientes
@@ -42,8 +30,8 @@ interface DataState {
 
   // Actions
   loadClientes: (force?: boolean) => Promise<void>
-  loadBuses: (force?: boolean) => Promise<void>
-  subscribeBuses: () => void
+  loadBuses: (force?: boolean, clienteId?: string) => Promise<void>
+  subscribeBuses: (clienteId?: string) => void
   unsubscribeBuses: () => void
   loadUsuarios: (force?: boolean) => Promise<void>
   refreshAll: () => Promise<void>
@@ -95,16 +83,14 @@ export const useDataStore = create<DataState>((set, get) => ({
     }
   },
 
-  // Load buses (filtered by clienteId for client users)
-  loadBuses: async (force = false) => {
+  // Load buses (optionally filtered by clienteId for client users)
+  loadBuses: async (force = false, clienteId?: string) => {
     const state = get()
     if (state.busesLoaded && !force) return
     if (state.busesLoading) return
 
     set({ busesLoading: true, busesError: null })
     try {
-      // Filter by clienteId for client users
-      const clienteId = getClienteIdFilter()
       const result = await listBuses({ limit: 500, clienteId })
       // Enrich with client names
       const clientes = get().clientes
@@ -128,13 +114,11 @@ export const useDataStore = create<DataState>((set, get) => ({
     }
   },
 
-  // Subscribe to real-time bus updates (filtered by clienteId for client users)
-  subscribeBuses: () => {
+  // Subscribe to real-time bus updates (optionally filtered by clienteId)
+  subscribeBuses: (clienteId?: string) => {
     const state = get()
     if (state.busesUnsubscribe) return // Already subscribed
 
-    // Filter by clienteId for client users
-    const clienteId = getClienteIdFilter()
     const unsubscribe = subscribeToBuses(
       (buses) => {
         const clientes = get().clientes

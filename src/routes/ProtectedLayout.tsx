@@ -6,6 +6,7 @@ import { OnboardingTour } from '@/components/onboarding'
 import { useAuthStore } from '@/stores/auth.store'
 import { useDataStore } from '@/stores/data.store'
 import { logout } from '@/services/auth.service'
+import { isClientRole } from '@/lib/permissions'
 
 /**
  * Layout for authenticated routes.
@@ -27,10 +28,15 @@ export function ProtectedLayout() {
   // Load and cache data when authenticated
   useEffect(() => {
     if (isAuthenticated && usuario) {
+      // For client users, filter data by their clienteId
+      const clienteIdFilter = isClientRole(usuario.rol)
+        ? (usuario.clienteId ?? undefined)
+        : undefined
+
       // Load clientes first, then buses (buses need cliente names)
       void loadClientes().then(() => {
-        void loadBuses()
-        subscribeBuses() // Subscribe to real-time updates
+        void loadBuses(false, clienteIdFilter)
+        subscribeBuses(clienteIdFilter) // Subscribe to real-time updates
       })
     }
   }, [isAuthenticated, usuario, loadClientes, loadBuses, subscribeBuses])
