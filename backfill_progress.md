@@ -126,6 +126,18 @@ conteosDiarios/
 3. [ ] Verificar que el dashboard muestre los datos históricos
 4. [ ] Limpiar datos incorrectos del día actual en conteos/{busId}
 
+### [2026-05-29 - Fase 4: Backend modificado para auto-actualizar]
+
+- [x] Modificado `adn-lynx-back/multi_counter.py`
+- [x] Nuevo método `update_conteo_diario()` que actualiza `conteosDiarios` en tiempo real
+- [x] Usa transacciones Firestore para actualizaciones atómicas
+- [x] Cada evento (entrada/salida) ahora actualiza automáticamente:
+  - `totalEntradas` / `totalSalidas`
+  - `aforoMaximoDia`
+  - `franjasHorarias` (por hora)
+
+**Ya no es necesario ejecutar backfill manualmente.** Los datos históricos se mantienen automáticamente.
+
 ### Cómo Ejecutar el Backfill
 
 1. Ir a `/admin/backfill-conteos` (solo super_admin)
