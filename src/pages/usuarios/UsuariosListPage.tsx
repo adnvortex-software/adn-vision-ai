@@ -9,6 +9,10 @@ import { useAuthStore } from '@/stores/auth.store'
 import { listUsuarios } from '@/services/usuarios.service'
 import { getCliente } from '@/services/clientes.service'
 import { useToast } from '@/hooks/use-toast'
+import { isClientRole } from '@/lib/permissions'
+
+// Internal roles that should never be visible to client users
+const INTERNAL_ROLES = ['super_admin', 'ops_admin', 'analyst']
 
 export default function UsuariosListPage() {
   const navigate = useNavigate()
@@ -18,15 +22,32 @@ export default function UsuariosListPage() {
   const [usuarios, setUsuarios] = useState<UsuarioConDetalles[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
+  // Check if current user is a client user
+  const isClient = currentUser?.rol ? isClientRole(currentUser.rol) : false
+  const userClienteId = isClient ? currentUser?.clienteId : undefined
+
   useEffect(() => {
     const loadUsuarios = async () => {
       try {
         setIsLoading(true)
-        const result = await listUsuarios({ limit: 100 })
+
+        // For client users, only fetch users from their client
+        const result = await listUsuarios({
+          limit: 100,
+          clienteId: userClienteId ?? undefined,
+        })
+
+        // Filter out internal users for client users
+        let filteredData = result.data
+        if (isClient) {
+          filteredData = result.data.filter(
+            (user) => !INTERNAL_ROLES.includes(user.rol) && user.clienteId === userClienteId
+          )
+        }
 
         // Enrich users with client names
         const enrichedUsuarios = await Promise.all(
-          result.data.map(async (user) => {
+          filteredData.map(async (user) => {
             let clienteNombre: string | undefined
             if (user.clienteId) {
               const cliente = await getCliente(user.clienteId)
@@ -54,7 +75,7 @@ export default function UsuariosListPage() {
     }
 
     void loadUsuarios()
-  }, [toast])
+  }, [toast, isClient, userClienteId, t])
 
   const handleView = (usuario: UsuarioConDetalles) => {
     navigate(`/usuarios/${usuario.id}`)
