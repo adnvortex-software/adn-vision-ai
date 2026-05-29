@@ -307,6 +307,7 @@ export function OnboardingTour({ onComplete }: OnboardingTourProps) {
         showProgress: true,
         animate: true,
         allowClose: true,
+        allowKeyboardControl: true,
         stagePadding: 10,
         stageRadius: 8,
         popoverClass: 'adn-lynx-popover',
@@ -314,6 +315,10 @@ export function OnboardingTour({ onComplete }: OnboardingTourProps) {
         nextBtnText: 'Siguiente →',
         prevBtnText: '← Anterior',
         doneBtnText: '✓ Finalizar',
+        showButtons: ['next', 'previous', 'close'],
+        onCloseClick: () => {
+          void markOnboardingComplete()
+        },
         onDestroyStarted: () => {
           void markOnboardingComplete()
         },

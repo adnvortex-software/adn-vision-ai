@@ -119,27 +119,35 @@
   background: hsl(var(--primary) / 0.9);
 }
 
-/* Close button */
+/* Close/Skip button */
 .driver-popover.adn-lynx-popover .driver-popover-close-btn {
   position: absolute;
   top: 12px;
   right: 12px;
-  width: 28px;
+  width: auto;
   height: 28px;
-  padding: 0;
+  padding: 0 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
+  gap: 4px;
+  background: hsl(var(--muted) / 0.5);
   color: hsl(var(--muted-foreground));
   border-radius: 6px;
-  font-size: 1.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
   line-height: 1;
+  border: 1px solid hsl(var(--border));
+}
+
+.driver-popover.adn-lynx-popover .driver-popover-close-btn::before {
+  content: 'Saltar';
 }
 
 .driver-popover.adn-lynx-popover .driver-popover-close-btn:hover {
   background: hsl(var(--accent));
   color: hsl(var(--foreground));
+  border-color: hsl(var(--accent));
 }
 
 /* Overlay - NO blur to prevent text blurriness */
