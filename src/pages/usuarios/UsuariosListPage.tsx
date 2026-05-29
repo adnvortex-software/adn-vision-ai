@@ -9,10 +9,7 @@ import { useAuthStore } from '@/stores/auth.store'
 import { listUsuarios } from '@/services/usuarios.service'
 import { getCliente } from '@/services/clientes.service'
 import { useToast } from '@/hooks/use-toast'
-import { isClientRole } from '@/lib/permissions'
-
-// Internal roles that should never be visible to client users
-const INTERNAL_ROLES = ['super_admin', 'ops_admin', 'analyst']
+import { isClientRole, isInternalRole } from '@/lib/permissions'
 
 export default function UsuariosListPage() {
   const navigate = useNavigate()
@@ -41,7 +38,7 @@ export default function UsuariosListPage() {
         let filteredData = result.data
         if (isClient) {
           filteredData = result.data.filter(
-            (user) => !INTERNAL_ROLES.includes(user.rol) && user.clienteId === userClienteId
+            (user) => !isInternalRole(user.rol) && user.clienteId === userClienteId
           )
         }
 
