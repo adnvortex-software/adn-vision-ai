@@ -71,6 +71,7 @@ export default function UsuariosListPage() {
         description={t('usuarios.description')}
         actions={
           <Button
+            data-tour="new-user-btn"
             onClick={() => {
               navigate('/usuarios/nuevo')
             }}
@@ -97,13 +98,15 @@ export default function UsuariosListPage() {
           </Button>
         </div>
       ) : (
-        <UsuariosTable
-          usuarios={usuarios}
-          isLoading={isLoading}
-          currentUserId={currentUser?.uid ?? ''}
-          onView={handleView}
-          onEdit={handleEdit}
-        />
+        <div data-tour="users-table">
+          <UsuariosTable
+            usuarios={usuarios}
+            isLoading={isLoading}
+            currentUserId={currentUser?.uid ?? ''}
+            onView={handleView}
+            onEdit={handleEdit}
+          />
+        </div>
       )}
     </div>
   )

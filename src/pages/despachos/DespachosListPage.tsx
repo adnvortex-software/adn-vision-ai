@@ -146,6 +146,7 @@ export default function DespachosListPage() {
         description={t('despachos.description')}
         actions={
           <Button
+            data-tour="new-despacho-btn"
             onClick={() => {
               navigate('/despachos/nuevo')
             }}

@@ -104,13 +104,15 @@ export default function BusesListPage() {
           </Button>
         </div>
       ) : (
-        <BusesTable
-          buses={buses}
-          isLoading={busesLoading}
-          onView={handleView}
-          onEdit={handleEdit}
-          onDelete={(bus) => void handleDeleteClick(bus)}
-        />
+        <div data-tour="buses-table">
+          <BusesTable
+            buses={buses}
+            isLoading={busesLoading}
+            onView={handleView}
+            onEdit={handleEdit}
+            onDelete={(bus) => void handleDeleteClick(bus)}
+          />
+        </div>
       )}
 
       {/* Delete Confirmation Dialog */}

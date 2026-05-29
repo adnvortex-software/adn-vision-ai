@@ -225,7 +225,7 @@ export function BusesTable({
       },
       {
         id: 'conteo',
-        header: t('buses.count'),
+        header: () => <span data-tour="bus-count-column">{t('buses.count')}</span>,
         cell: ({ row }) => (
           <Button
             variant="ghost"
@@ -242,7 +242,7 @@ export function BusesTable({
       },
       {
         id: 'envivo',
-        header: t('buses.live'),
+        header: () => <span data-tour="bus-live-btn">{t('buses.live')}</span>,
         cell: ({ row }) => (
           <Button
             variant="ghost"

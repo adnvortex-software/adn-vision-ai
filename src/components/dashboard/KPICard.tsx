@@ -75,18 +75,21 @@ export function KPICard({
   )
 }
 
-interface KPIGridProps {
+interface KPIGridProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode
   columns?: 2 | 3 | 4
-  className?: string
 }
 
-export function KPIGrid({ children, columns = 4, className }: KPIGridProps) {
+export function KPIGrid({ children, columns = 4, className, ...props }: KPIGridProps) {
   const gridClass = {
     2: 'grid-cols-1 sm:grid-cols-2',
     3: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
     4: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4',
   }[columns]
 
-  return <div className={cn('grid gap-4', gridClass, className)}>{children}</div>
+  return (
+    <div className={cn('grid gap-4', gridClass, className)} {...props}>
+      {children}
+    </div>
+  )
 }

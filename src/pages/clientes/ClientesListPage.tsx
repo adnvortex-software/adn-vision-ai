@@ -84,6 +84,7 @@ export default function ClientesListPage() {
         description={t('clientes.description')}
         actions={
           <Button
+            data-tour="new-client-btn"
             onClick={() => {
               navigate('/clientes/nuevo')
             }}
@@ -116,15 +117,17 @@ export default function ClientesListPage() {
           </Button>
         </div>
       ) : (
-        <ClientesTable
-          clientes={clientes}
-          isLoading={clientesLoading}
-          onView={handleView}
-          onEdit={handleEdit}
-          onDelete={(cliente) => void handleDeleteClick(cliente)}
-          onManageSucursales={handleManageSucursales}
-          onManagePropietarios={handleManagePropietarios}
-        />
+        <div data-tour="clients-table">
+          <ClientesTable
+            clientes={clientes}
+            isLoading={clientesLoading}
+            onView={handleView}
+            onEdit={handleEdit}
+            onDelete={(cliente) => void handleDeleteClick(cliente)}
+            onManageSucursales={handleManageSucursales}
+            onManagePropietarios={handleManagePropietarios}
+          />
+        </div>
       )}
 
       {/* Delete Confirmation Dialog */}

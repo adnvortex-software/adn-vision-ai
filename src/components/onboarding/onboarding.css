@@ -12,8 +12,14 @@
     0 8px 10px -6px rgb(0 0 0 / 0.1),
     0 0 0 1px rgb(0 0 0 / 0.05);
   padding: 0;
-  max-width: 360px;
+  max-width: 400px;
   font-family: inherit;
+  /* Ensure crisp text rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 /* Popover arrow */
@@ -136,10 +142,10 @@
   color: hsl(var(--foreground));
 }
 
-/* Overlay */
+/* Overlay - NO blur to prevent text blurriness */
 .driver-overlay {
-  background: hsl(var(--background) / 0.8) !important;
-  backdrop-filter: blur(4px);
+  background: hsl(0 0% 0% / 0.6) !important;
+  /* Removed backdrop-filter: blur() - causes text blurriness in popover */
 }
 
 /* Highlighted element stage */
@@ -196,11 +202,17 @@
 /* Dark mode adjustments (inherits from CSS variables) */
 .dark .driver-popover.adn-lynx-popover {
   box-shadow:
-    0 20px 25px -5px rgb(0 0 0 / 0.3),
-    0 8px 10px -6px rgb(0 0 0 / 0.2),
-    0 0 0 1px rgb(255 255 255 / 0.05);
+    0 20px 25px -5px rgb(0 0 0 / 0.4),
+    0 8px 10px -6px rgb(0 0 0 / 0.3),
+    0 0 0 1px rgb(255 255 255 / 0.1);
+  background: hsl(var(--card));
 }
 
 .dark .driver-overlay {
-  background: hsl(var(--background) / 0.85) !important;
+  background: hsl(0 0% 0% / 0.75) !important;
+}
+
+/* Ensure stage highlight doesn't blur content */
+.driver-active-element {
+  isolation: isolate;
 }

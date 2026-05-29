@@ -70,7 +70,7 @@ export default function NovedadesEventosPage() {
               <RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
               Actualizar
             </Button>
-            <Button variant="outline">
+            <Button variant="outline" data-tour="novedades-filters">
               <Filter className="mr-2 h-4 w-4" />
               Filtros
             </Button>

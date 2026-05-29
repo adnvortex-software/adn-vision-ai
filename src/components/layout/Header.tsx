@@ -60,7 +60,9 @@ export function Header({ usuario, onLogout, showBreadcrumbs = true }: HeaderProp
           <ThemeToggle />
 
           {/* User menu */}
-          <UserMenu usuario={usuario} onLogout={onLogout} />
+          <div data-tour="header-user-menu">
+            <UserMenu usuario={usuario} onLogout={onLogout} />
+          </div>
         </div>
       </div>
     </header>

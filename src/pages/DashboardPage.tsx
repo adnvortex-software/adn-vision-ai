@@ -384,7 +384,7 @@ export default function DashboardPage() {
                 setDateRange(v as DateRange)
               }}
             >
-              <SelectTrigger className="w-[160px]">
+              <SelectTrigger className="w-[160px]" data-tour="date-filter">
                 <Calendar className="mr-2 h-4 w-4" />
                 <SelectValue />
               </SelectTrigger>
@@ -405,7 +405,7 @@ export default function DashboardPage() {
       />
 
       {/* KPIs */}
-      <KPIGrid columns={4}>
+      <KPIGrid columns={4} data-tour="kpi-grid">
         <KPICard
           title={t('dashboard.activeBuses')}
           value={kpis.busesActivos}
@@ -457,13 +457,15 @@ export default function DashboardPage() {
 
       {/* Charts Row 1 */}
       <div className="grid gap-6 lg:grid-cols-2">
-        <PassengerChart
-          data={passengerChartData.data}
-          clients={passengerChartData.clients}
-          totalPassengers={passengerChartData.totalPassengers}
-          title={t('dashboard.passengerCount')}
-          description={`${t('dashboard.trendOf')} ${dateRange === 'today' ? t('dashboard.today').toLowerCase() : `${String(getDateRange(dateRange).days)} ${t('common.days')}`}`}
-        />
+        <div data-tour="passenger-chart">
+          <PassengerChart
+            data={passengerChartData.data}
+            clients={passengerChartData.clients}
+            totalPassengers={passengerChartData.totalPassengers}
+            title={t('dashboard.passengerCount')}
+            description={`${t('dashboard.trendOf')} ${dateRange === 'today' ? t('dashboard.today').toLowerCase() : `${String(getDateRange(dateRange).days)} ${t('common.days')}`}`}
+          />
+        </div>
         <FlotaDonutChart
           data={flotaChartData}
           total={buses.length}
