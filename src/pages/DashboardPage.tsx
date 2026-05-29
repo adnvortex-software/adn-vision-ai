@@ -245,12 +245,11 @@ export default function DashboardPage() {
       const dayConteos = conteos.filter((c) => c.fechaOperativa === dateStr)
       const totalEntradas = dayConteos.reduce((sum, c) => sum + c.entradasDia, 0)
       const totalSalidas = dayConteos.reduce((sum, c) => sum + c.salidasDia, 0)
-      // Promedio entre entradas y salidas
-      const totalPasajeros = Math.round((totalEntradas + totalSalidas) / 2)
 
       data.push({
         fecha: format(date, 'dd MMM', { locale: dateLocale }),
-        totalPasajeros,
+        entradas: totalEntradas,
+        salidas: totalSalidas,
       })
     }
     return data
@@ -462,12 +461,12 @@ export default function DashboardPage() {
                 <div className="text-sm text-muted-foreground">
                   {t('dashboard.totalPassengers')}
                 </div>
-                <div className="mt-1 text-2xl font-bold text-blue-600">
-                  {passengerChartData
-                    .reduce((sum, d) => sum + d.totalPasajeros, 0)
-                    .toLocaleString()}
+                <div className="mt-1 text-2xl font-bold text-emerald-600">
+                  {passengerChartData.reduce((sum, d) => sum + d.entradas, 0).toLocaleString()}
                 </div>
-                <div className="text-xs text-muted-foreground">{t('dashboard.inPeriod')}</div>
+                <div className="text-xs text-muted-foreground">
+                  {t('dashboard.entriesRegistered')}
+                </div>
               </div>
               <div className="rounded-lg border p-4">
                 <div className="text-sm text-muted-foreground">{t('dashboard.completionRate')}</div>
@@ -486,7 +485,7 @@ export default function DashboardPage() {
                 <div className="mt-1 text-2xl font-bold">
                   {passengerChartData.length > 0
                     ? Math.round(
-                        passengerChartData.reduce((sum, d) => sum + d.totalPasajeros, 0) /
+                        passengerChartData.reduce((sum, d) => sum + d.entradas, 0) /
                           passengerChartData.length
                       ).toLocaleString()
                     : 0}
