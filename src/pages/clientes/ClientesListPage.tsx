@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Plus, Building2, Loader2 } from 'lucide-react'
 import { PageHeader } from '@/components/common/PageHeader'
 import { Button } from '@/components/ui/button'
@@ -12,6 +13,7 @@ import { useDataStore } from '@/stores/data.store'
 import { useToast } from '@/hooks/use-toast'
 
 export default function ClientesListPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { toast } = useToast()
   const { clientes, clientesLoading, loadClientes } = useDataStore()
@@ -59,15 +61,15 @@ export default function ClientesListPage() {
     try {
       await deleteCliente(deleteDialog.cliente.id)
       toast({
-        title: 'Cliente eliminado',
-        description: `${deleteDialog.cliente.nombre} ha sido eliminado`,
+        title: t('clientes.deleteSuccess'),
+        description: t('clientes.deleteSuccessDescription', { name: deleteDialog.cliente.nombre }),
       })
       setDeleteDialog({ open: false, cliente: null, isDeleting: false, canDelete: true })
       await loadClientes(true) // Force refresh
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'No se pudo eliminar el cliente'
+      const message = error instanceof Error ? error.message : t('clientes.deleteError')
       toast({
-        title: 'Error',
+        title: t('common.error'),
         description: message,
         variant: 'destructive',
       })
@@ -78,8 +80,8 @@ export default function ClientesListPage() {
   return (
     <div className="container mx-auto space-y-6 py-6">
       <PageHeader
-        title="Clientes"
-        description="Administra los clientes de la plataforma"
+        title={t('clientes.title')}
+        description={t('clientes.description')}
         actions={
           <Button
             onClick={() => {
@@ -87,7 +89,7 @@ export default function ClientesListPage() {
             }}
           >
             <Plus className="mr-2 h-4 w-4" />
-            Nuevo Cliente
+            {t('clientes.nuevo')}
           </Button>
         }
       />
@@ -99,8 +101,10 @@ export default function ClientesListPage() {
       ) : clientes.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-12">
           <Building2 className="h-12 w-12 text-muted-foreground/30" />
-          <h3 className="mt-4 text-lg font-semibold">Sin clientes</h3>
-          <p className="mt-1 text-sm text-muted-foreground">Comienza agregando tu primer cliente</p>
+          <h3 className="mt-4 text-lg font-semibold">{t('clientes.noClientes')}</h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {t('clientes.noClientesDescription')}
+          </p>
           <Button
             className="mt-4"
             onClick={() => {
@@ -108,7 +112,7 @@ export default function ClientesListPage() {
             }}
           >
             <Plus className="mr-2 h-4 w-4" />
-            Agregar Cliente
+            {t('clientes.addCliente')}
           </Button>
         </div>
       ) : (
@@ -130,13 +134,13 @@ export default function ClientesListPage() {
           if (!open)
             setDeleteDialog({ open: false, cliente: null, isDeleting: false, canDelete: true })
         }}
-        title={deleteDialog.canDelete ? 'Eliminar Cliente' : 'No se puede eliminar'}
+        title={deleteDialog.canDelete ? t('clientes.confirmDelete') : t('clientes.cannotDelete')}
         description={
           deleteDialog.canDelete
-            ? `¿Estás seguro de eliminar "${deleteDialog.cliente?.nombre ?? ''}"? Esta acción se puede deshacer desde la base de datos.`
+            ? t('clientes.confirmDeleteDescription', { name: deleteDialog.cliente?.nombre ?? '' })
             : deleteDialog.reason
         }
-        confirmLabel={deleteDialog.canDelete ? 'Eliminar' : 'Entendido'}
+        confirmLabel={deleteDialog.canDelete ? t('common.delete') : t('common.understood')}
         variant={deleteDialog.canDelete ? 'destructive' : 'default'}
         onConfirm={() => {
           if (deleteDialog.canDelete) {

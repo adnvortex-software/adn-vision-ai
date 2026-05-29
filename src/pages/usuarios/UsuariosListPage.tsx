@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Plus, Users } from 'lucide-react'
 import { PageHeader } from '@/components/common/PageHeader'
 import { Button } from '@/components/ui/button'
@@ -11,6 +12,7 @@ import { useToast } from '@/hooks/use-toast'
 
 export default function UsuariosListPage() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const { toast } = useToast()
   const { usuario: currentUser } = useAuthStore()
   const [usuarios, setUsuarios] = useState<UsuarioConDetalles[]>([])
@@ -43,8 +45,8 @@ export default function UsuariosListPage() {
         console.error('Error loading usuarios:', error)
         toast({
           variant: 'destructive',
-          title: 'Error',
-          description: 'No se pudieron cargar los usuarios',
+          title: t('common.error'),
+          description: t('usuarios.loadError'),
         })
       } finally {
         setIsLoading(false)
@@ -65,8 +67,8 @@ export default function UsuariosListPage() {
   return (
     <div className="container mx-auto space-y-6 py-6">
       <PageHeader
-        title="Usuarios"
-        description="Administra los usuarios del sistema"
+        title={t('usuarios.title')}
+        description={t('usuarios.description')}
         actions={
           <Button
             onClick={() => {
@@ -74,7 +76,7 @@ export default function UsuariosListPage() {
             }}
           >
             <Plus className="mr-2 h-4 w-4" />
-            Nuevo Usuario
+            {t('usuarios.nuevo')}
           </Button>
         }
       />
@@ -82,8 +84,8 @@ export default function UsuariosListPage() {
       {usuarios.length === 0 && !isLoading ? (
         <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-12">
           <Users className="h-12 w-12 text-muted-foreground/30" />
-          <h3 className="mt-4 text-lg font-semibold">Sin usuarios</h3>
-          <p className="mt-1 text-sm text-muted-foreground">Comienza invitando al primer usuario</p>
+          <h3 className="mt-4 text-lg font-semibold">{t('usuarios.noUsuarios')}</h3>
+          <p className="mt-1 text-sm text-muted-foreground">{t('usuarios.noUsuariosHint')}</p>
           <Button
             className="mt-4"
             onClick={() => {
@@ -91,7 +93,7 @@ export default function UsuariosListPage() {
             }}
           >
             <Plus className="mr-2 h-4 w-4" />
-            Invitar Usuario
+            {t('usuarios.invitar')}
           </Button>
         </div>
       ) : (

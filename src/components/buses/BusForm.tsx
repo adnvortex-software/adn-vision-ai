@@ -1,5 +1,6 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useTranslation } from 'react-i18next'
 import { Loader2, Bus as BusIcon, Network } from 'lucide-react'
 import { createBusSchema, type CreateBusFormData } from '@/schemas/bus.schema'
 import { VEHICLE_TYPES } from '@/config/constants'
@@ -33,15 +34,8 @@ interface BusFormProps {
   isLoading?: boolean
 }
 
-const VEHICLE_TYPE_LABELS: Record<string, string> = {
-  bus: 'Bus',
-  buseta: 'Buseta',
-  van: 'Van',
-  microbus: 'Microbus',
-  otro: 'Otro',
-}
-
 export function BusForm({ bus, clienteId, onSubmit, onCancel, isLoading = false }: BusFormProps) {
+  const { t } = useTranslation()
   const form = useForm<CreateBusFormData>({
     resolver: zodResolver(createBusSchema),
     defaultValues: {
@@ -64,10 +58,10 @@ export function BusForm({ bus, clienteId, onSubmit, onCancel, isLoading = false 
       <CardHeader>
         <div className="flex items-center gap-2">
           <BusIcon className="h-5 w-5" />
-          <CardTitle>{bus ? 'Editar Bus' : 'Nuevo Bus'}</CardTitle>
+          <CardTitle>{bus ? t('buses.editBus') : t('buses.nuevo')}</CardTitle>
         </div>
         <CardDescription>
-          {bus ? 'Modifica los datos del vehiculo' : 'Ingresa los datos del nuevo vehiculo'}
+          {bus ? t('buses.editDescription') : t('buses.newDescription')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -75,14 +69,16 @@ export function BusForm({ bus, clienteId, onSubmit, onCancel, isLoading = false 
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
             {/* Datos del vehiculo */}
             <div className="space-y-4">
-              <h3 className="text-sm font-medium text-muted-foreground">Datos del vehiculo</h3>
+              <h3 className="text-sm font-medium text-muted-foreground">
+                {t('buses.vehicleData')}
+              </h3>
               <div className="grid gap-4 md:grid-cols-2">
                 <FormField
                   control={form.control}
                   name="placa"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Placa</FormLabel>
+                      <FormLabel>{t('buses.placa')}</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="ABC123"
@@ -95,7 +91,7 @@ export function BusForm({ bus, clienteId, onSubmit, onCancel, isLoading = false 
                           }}
                         />
                       </FormControl>
-                      <FormDescription>Formato colombiano (ej: ABC123)</FormDescription>
+                      <FormDescription>{t('buses.plateFormat')}</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -106,7 +102,7 @@ export function BusForm({ bus, clienteId, onSubmit, onCancel, isLoading = false 
                   name="tipoVehiculo"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Tipo de vehiculo</FormLabel>
+                      <FormLabel>{t('buses.tipo')}</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
@@ -114,13 +110,13 @@ export function BusForm({ bus, clienteId, onSubmit, onCancel, isLoading = false 
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Seleccionar tipo" />
+                            <SelectValue placeholder={t('buses.selectType')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           {VEHICLE_TYPES.map((type) => (
                             <SelectItem key={type} value={type}>
-                              {VEHICLE_TYPE_LABELS[type] ?? type}
+                              {t(`buses.tipos.${type}`)}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -135,13 +131,11 @@ export function BusForm({ bus, clienteId, onSubmit, onCancel, isLoading = false 
                   name="deviceId"
                   render={({ field }) => (
                     <FormItem className="md:col-span-2">
-                      <FormLabel>Device ID</FormLabel>
+                      <FormLabel>{t('buses.deviceId')}</FormLabel>
                       <FormControl>
-                        <Input placeholder="ID del dispositivo" disabled={isLoading} {...field} />
+                        <Input placeholder="ID" disabled={isLoading} {...field} />
                       </FormControl>
-                      <FormDescription>
-                        Identificador unico del dispositivo DVR (ZeroTier)
-                      </FormDescription>
+                      <FormDescription>{t('buses.deviceDescription')}</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -153,7 +147,9 @@ export function BusForm({ bus, clienteId, onSubmit, onCancel, isLoading = false 
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <Network className="h-4 w-4 text-muted-foreground" />
-                <h3 className="text-sm font-medium text-muted-foreground">Conectividad</h3>
+                <h3 className="text-sm font-medium text-muted-foreground">
+                  {t('buses.conectividad')}
+                </h3>
               </div>
               <div className="grid gap-4 md:grid-cols-2">
                 <FormField
@@ -161,11 +157,11 @@ export function BusForm({ bus, clienteId, onSubmit, onCancel, isLoading = false 
                   name="ztIpRouter"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>IP ZeroTier del Router</FormLabel>
+                      <FormLabel>{t('buses.ipRouter')}</FormLabel>
                       <FormControl>
                         <Input placeholder="10.147.20.100" disabled={isLoading} {...field} />
                       </FormControl>
-                      <FormDescription>IP asignada en la VPN ZeroTier</FormDescription>
+                      <FormDescription>{t('buses.ipDescription')}</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -176,11 +172,11 @@ export function BusForm({ bus, clienteId, onSubmit, onCancel, isLoading = false 
                   name="subnetLan"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Subnet LAN</FormLabel>
+                      <FormLabel>{t('buses.subnetLan')}</FormLabel>
                       <FormControl>
                         <Input placeholder="192.168.1.0/24" disabled={isLoading} {...field} />
                       </FormControl>
-                      <FormDescription>Red local del DVR</FormDescription>
+                      <FormDescription>{t('buses.lanDescription')}</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -191,19 +187,19 @@ export function BusForm({ bus, clienteId, onSubmit, onCancel, isLoading = false 
             <div className="flex justify-end gap-3">
               {onCancel && (
                 <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
-                  Cancelar
+                  {t('common.cancel')}
                 </Button>
               )}
               <Button type="submit" disabled={isLoading}>
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Guardando...
+                    {t('common.saving')}
                   </>
                 ) : bus ? (
-                  'Guardar Cambios'
+                  t('common.saveChanges')
                 ) : (
-                  'Crear Bus'
+                  t('buses.createBus')
                 )}
               </Button>
             </div>

@@ -1,20 +1,35 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import { ArrowLeft, Copy, Check } from 'lucide-react'
 import { PageHeader } from '@/components/common/PageHeader'
 import { LoadingState } from '@/components/common/LoadingState'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { UsuarioForm } from '@/components/usuarios'
 import { useToast } from '@/hooks/use-toast'
 import { useAuthStore } from '@/stores/auth.store'
 import { listClientes, listSucursales, listPropietarios } from '@/services/clientes.service'
-import { createUsuarioInvitation } from '@/services/usuarios.service'
+import { createUsuarioDirecto } from '@/services/usuarios.service'
 import type { CreateUsuarioFormData, UpdateUsuarioFormData } from '@/schemas/auth.schema'
 import type { Cliente, Sucursal, Propietario } from '@/types/cliente'
 import type { Entity } from '@/types/firestore'
 
+interface Credentials {
+  email: string
+  password: string
+}
+
 export default function UsuarioCreatePage() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const { toast } = useToast()
   const { usuario: currentUser } = useAuthStore()
 
@@ -24,18 +39,22 @@ export default function UsuarioCreatePage() {
   const [sucursales, setSucursales] = useState<Entity<Sucursal>[]>([])
   const [propietarios, setPropietarios] = useState<Entity<Propietario>[]>([])
 
+  // Credentials modal
+  const [credentials, setCredentials] = useState<Credentials | null>(null)
+  const [copiedField, setCopiedField] = useState<'email' | 'password' | null>(null)
+
   // Load clientes on mount
   useEffect(() => {
     const loadClientes = async () => {
       try {
         const result = await listClientes({ limit: 100 })
         setClientes(result.data)
-      } catch (error) {
-        console.error('Error loading clientes:', error)
+      } catch (err) {
+        console.error('Error loading clientes:', err)
         toast({
           variant: 'destructive',
-          title: 'Error',
-          description: 'No se pudieron cargar los clientes',
+          title: t('common.error'),
+          description: t('usuarios.loadClientesError'),
         })
       } finally {
         setIsLoading(false)
@@ -45,7 +64,7 @@ export default function UsuarioCreatePage() {
     void loadClientes()
   }, [toast])
 
-  // Load sucursales when a client is selected (handled by form watching)
+  // Load sucursales when a client is selected
   const loadSucursalesForClient = async (clienteId: string) => {
     if (!clienteId) {
       setSucursales([])
@@ -56,8 +75,8 @@ export default function UsuarioCreatePage() {
     try {
       const sucursalesData = await listSucursales(clienteId)
       setSucursales(sucursalesData)
-    } catch (error) {
-      console.error('Error loading sucursales:', error)
+    } catch (err) {
+      console.error('Error loading sucursales:', err)
     }
   }
 
@@ -69,7 +88,6 @@ export default function UsuarioCreatePage() {
     }
 
     try {
-      // Load propietarios for all selected sucursales
       const propietariosPromises = sucursalIds.map((sucursalId) =>
         listPropietarios(clienteId, sucursalId)
       )
@@ -82,79 +100,96 @@ export default function UsuarioCreatePage() {
       )
 
       setPropietarios(uniquePropietarios)
-    } catch (error) {
-      console.error('Error loading propietarios:', error)
+    } catch (err) {
+      console.error('Error loading propietarios:', err)
     }
   }
 
   const handleSubmit = async (data: CreateUsuarioFormData | UpdateUsuarioFormData) => {
-    // For create, we need all required fields
     if (!('email' in data) || !data.email) {
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: 'Email es requerido para crear un usuario',
+        title: t('common.error'),
+        description: t('usuarios.emailRequired'),
       })
       return
     }
-    // After the check above, we know data has email, nombre, and rol
-    const createData = data
+
     if (!currentUser) {
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: 'Debes estar autenticado para crear usuarios',
+        title: t('common.error'),
+        description: t('usuarios.authRequired'),
       })
       return
     }
 
     setIsSubmitting(true)
     try {
-      await createUsuarioInvitation(
+      const result = await createUsuarioDirecto(
         {
-          email: createData.email,
-          nombre: createData.nombre,
-          rol: createData.rol,
-          clienteId: createData.clienteId ?? undefined,
-          sucursalIds: createData.sucursalIds ?? undefined,
-          propietarioId: createData.propietarioId ?? undefined,
+          email: data.email,
+          nombre: data.nombre,
+          rol: data.rol,
+          clienteId: data.clienteId ?? undefined,
+          sucursalIds: data.sucursalIds ?? undefined,
+          propietarioId: data.propietarioId ?? undefined,
         },
         currentUser.uid
       )
 
-      toast({
-        title: 'Invitacion enviada',
-        description: `Se ha enviado una invitacion a ${createData.email}`,
+      // Show credentials modal
+      setCredentials({
+        email: result.email,
+        password: result.password,
       })
 
-      navigate('/usuarios')
-    } catch (error) {
-      console.error('Error creating usuario:', error)
+      toast({
+        title: t('usuarios.created'),
+        description: t('usuarios.createdDesc', { name: data.nombre }),
+      })
+    } catch (err) {
+      console.error('Error creating usuario:', err)
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'No se pudo crear el usuario',
+        title: t('common.error'),
+        description: err instanceof Error ? err.message : t('usuarios.createError'),
       })
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  // Watch for client changes to load sucursales
-  useEffect(() => {
-    // This effect will be triggered by the form's onChange
-    // For now, we expose the load functions to be called by the form
-  }, [])
+  const copyToClipboard = async (text: string, field: 'email' | 'password') => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopiedField(field)
+      setTimeout(() => {
+        setCopiedField(null)
+      }, 2000)
+    } catch {
+      toast({
+        variant: 'destructive',
+        title: t('common.error'),
+        description: t('usuarios.copyError'),
+      })
+    }
+  }
+
+  const handleCloseCredentials = () => {
+    setCredentials(null)
+    navigate('/usuarios')
+  }
 
   if (isLoading) {
-    return <LoadingState fullScreen message="Cargando datos..." />
+    return <LoadingState fullScreen message={t('common.loading')} />
   }
 
   return (
     <div className="container mx-auto max-w-3xl space-y-6 py-6">
       <PageHeader
-        title="Nuevo Usuario"
-        description="Invita a un nuevo usuario al sistema"
+        title={t('usuarios.nuevo')}
+        description={t('usuarios.nuevoDesc')}
         actions={
           <Button
             variant="outline"
@@ -163,7 +198,7 @@ export default function UsuarioCreatePage() {
             }}
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Volver
+            {t('common.back')}
           </Button>
         }
       />
@@ -182,6 +217,71 @@ export default function UsuarioCreatePage() {
           void loadPropietariosForSucursales(clienteId, sucursalIds)
         }}
       />
+
+      {/* Credentials Modal */}
+      <Dialog
+        open={!!credentials}
+        onOpenChange={(open) => {
+          if (!open) handleCloseCredentials()
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t('usuarios.createdSuccess')}</DialogTitle>
+            <DialogDescription>{t('usuarios.saveCredentials')}</DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            {/* Email */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">{t('usuarios.email')}</label>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 rounded bg-muted px-3 py-2 text-sm">
+                  {credentials?.email}
+                </code>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => credentials && copyToClipboard(credentials.email, 'email')}
+                >
+                  {copiedField === 'email' ? (
+                    <Check className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            {/* Password */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">{t('usuarios.temporaryPassword')}</label>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 rounded bg-muted px-3 py-2 font-mono text-sm">
+                  {credentials?.password}
+                </code>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => credentials && copyToClipboard(credentials.password, 'password')}
+                >
+                  {copiedField === 'password' ? (
+                    <Check className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            <p className="text-sm text-muted-foreground">{t('usuarios.mustChangePassword')}</p>
+          </div>
+
+          <DialogFooter>
+            <Button onClick={handleCloseCredentials}>{t('usuarios.understood')}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

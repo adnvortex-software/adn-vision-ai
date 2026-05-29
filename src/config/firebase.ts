@@ -1,4 +1,4 @@
-import { initializeApp, getApps, type FirebaseApp } from 'firebase/app'
+import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app'
 import { getAuth, type Auth } from 'firebase/auth'
 import { getFirestore, type Firestore } from 'firebase/firestore'
 import { getStorage, type FirebaseStorage } from 'firebase/storage'
@@ -17,8 +17,21 @@ const firebaseConfig = {
 const app: FirebaseApp =
   getApps().length === 0 ? initializeApp(firebaseConfig) : (getApps()[0] as FirebaseApp)
 
+// Secondary app for creating users without affecting current session
+let secondaryApp: FirebaseApp | null = null
+function getSecondaryApp(): FirebaseApp {
+  if (!secondaryApp) {
+    try {
+      secondaryApp = getApp('secondary')
+    } catch {
+      secondaryApp = initializeApp(firebaseConfig, 'secondary')
+    }
+  }
+  return secondaryApp
+}
+
 const auth: Auth = getAuth(app)
 const db: Firestore = getFirestore(app)
 const storage: FirebaseStorage = getStorage(app)
 
-export { app, auth, db, storage }
+export { app, auth, db, storage, getSecondaryApp }

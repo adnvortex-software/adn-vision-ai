@@ -1,5 +1,6 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useTranslation } from 'react-i18next'
 import { Loader2, UserPlus, Shield, Building2 } from 'lucide-react'
 import {
   createUsuarioSchema,
@@ -34,16 +35,6 @@ import type { Usuario } from '@/types/auth'
 import type { Cliente, Sucursal, Propietario } from '@/types/cliente'
 import type { Entity } from '@/types/firestore'
 
-// Role display configuration
-const ROLE_CONFIG: Record<Role, { label: string; description: string }> = {
-  super_admin: { label: 'Super Admin', description: 'Acceso total al sistema' },
-  ops_admin: { label: 'Admin Operaciones', description: 'Gestiona operaciones y clientes' },
-  analyst: { label: 'Analista', description: 'Visualiza datos y genera reportes' },
-  support: { label: 'Soporte', description: 'Atiende casos de soporte' },
-  client_admin: { label: 'Admin Cliente', description: 'Administra su empresa' },
-  client_viewer: { label: 'Visor Cliente', description: 'Solo visualiza datos' },
-}
-
 interface UsuarioFormProps {
   usuario?: Entity<Usuario>
   clientes: Entity<Cliente>[]
@@ -75,6 +66,7 @@ export function UsuarioForm({
   onClienteChange,
   onSucursalesChange,
 }: UsuarioFormProps) {
+  const { t } = useTranslation()
   const isEditing = !!usuario
 
   // Choose schema based on whether editing or creating
@@ -129,12 +121,10 @@ export function UsuarioForm({
       <CardHeader>
         <div className="flex items-center gap-2">
           <UserPlus className="h-5 w-5" />
-          <CardTitle>{isEditing ? 'Editar Usuario' : 'Nuevo Usuario'}</CardTitle>
+          <CardTitle>{isEditing ? t('usuarios.editUsuario') : t('usuarios.nuevo')}</CardTitle>
         </div>
         <CardDescription>
-          {isEditing
-            ? 'Modifica los datos y permisos del usuario'
-            : 'Crea un nuevo usuario del sistema'}
+          {isEditing ? t('usuarios.editDescription') : t('usuarios.formDescription')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -153,7 +143,7 @@ export function UsuarioForm({
                   name="email"
                   render={({ field }) => (
                     <FormItem className="md:col-span-2">
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>{t('usuarios.email')}</FormLabel>
                       <FormControl>
                         <Input
                           type="email"
@@ -162,7 +152,7 @@ export function UsuarioForm({
                           {...field}
                         />
                       </FormControl>
-                      <FormDescription>Se enviara invitacion a este email</FormDescription>
+                      <FormDescription>{t('usuarios.emailInvitation')}</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -175,7 +165,7 @@ export function UsuarioForm({
                 name="nombre"
                 render={({ field }) => (
                   <FormItem className="md:col-span-2">
-                    <FormLabel>Nombre Completo</FormLabel>
+                    <FormLabel>{t('usuarios.nombreCompleto')}</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Juan Perez Rodriguez"
@@ -197,7 +187,7 @@ export function UsuarioForm({
                   <FormItem>
                     <FormLabel className="flex items-center gap-2">
                       <Shield className="h-4 w-4" />
-                      Rol
+                      {t('usuarios.rol')}
                     </FormLabel>
                     <Select
                       onValueChange={field.onChange}
@@ -206,19 +196,19 @@ export function UsuarioForm({
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Seleccionar rol" />
+                          <SelectValue placeholder={t('usuarios.selectRol')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         {!clientOnly && (
                           <SelectGroup>
-                            <SelectLabel>Roles Internos</SelectLabel>
+                            <SelectLabel>{t('usuarios.rolesInternos')}</SelectLabel>
                             {INTERNAL_ROLES.map((rol) => (
                               <SelectItem key={rol} value={rol}>
                                 <div className="flex flex-col">
-                                  <span>{ROLE_CONFIG[rol].label}</span>
+                                  <span>{t(`usuarios.roles.${rol}`)}</span>
                                   <span className="text-xs text-muted-foreground">
-                                    {ROLE_CONFIG[rol].description}
+                                    {t(`usuarios.roles.${rol}_desc`)}
                                   </span>
                                 </div>
                               </SelectItem>
@@ -226,13 +216,13 @@ export function UsuarioForm({
                           </SelectGroup>
                         )}
                         <SelectGroup>
-                          <SelectLabel>Roles de Cliente</SelectLabel>
+                          <SelectLabel>{t('usuarios.rolesCliente')}</SelectLabel>
                           {CLIENT_ROLES.map((rol) => (
                             <SelectItem key={rol} value={rol}>
                               <div className="flex flex-col">
-                                <span>{ROLE_CONFIG[rol].label}</span>
+                                <span>{t(`usuarios.roles.${rol}`)}</span>
                                 <span className="text-xs text-muted-foreground">
-                                  {ROLE_CONFIG[rol].description}
+                                  {t(`usuarios.roles.${rol}_desc`)}
                                 </span>
                               </div>
                             </SelectItem>
@@ -254,7 +244,7 @@ export function UsuarioForm({
                     <FormItem>
                       <FormLabel className="flex items-center gap-2">
                         <Building2 className="h-4 w-4" />
-                        Cliente
+                        {t('usuarios.cliente')}
                       </FormLabel>
                       <Select
                         onValueChange={(value) => {
@@ -270,7 +260,9 @@ export function UsuarioForm({
                           <SelectTrigger>
                             <SelectValue
                               placeholder={
-                                clientes.length === 0 ? 'No hay clientes' : 'Seleccionar cliente'
+                                clientes.length === 0
+                                  ? t('usuarios.noClientes')
+                                  : t('usuarios.selectCliente')
                               }
                             />
                           </SelectTrigger>
@@ -304,10 +296,8 @@ export function UsuarioForm({
                         />
                       </FormControl>
                       <div className="space-y-1 leading-none">
-                        <FormLabel>Usuario Activo</FormLabel>
-                        <FormDescription>
-                          Los usuarios inactivos no pueden iniciar sesion
-                        </FormDescription>
+                        <FormLabel>{t('usuarios.usuarioActivo')}</FormLabel>
+                        <FormDescription>{t('usuarios.usuarioActivoDesc')}</FormDescription>
                       </div>
                     </FormItem>
                   )}
@@ -323,10 +313,8 @@ export function UsuarioForm({
                 render={() => (
                   <FormItem>
                     <div className="mb-4">
-                      <FormLabel>Sucursales Permitidas</FormLabel>
-                      <FormDescription>
-                        Selecciona las sucursales a las que tendra acceso
-                      </FormDescription>
+                      <FormLabel>{t('usuarios.sucursalesPermitidas')}</FormLabel>
+                      <FormDescription>{t('usuarios.sucursalesDesc')}</FormDescription>
                     </div>
                     <div className="grid gap-2 md:grid-cols-2">
                       {filteredSucursales.map((sucursal) => (
@@ -381,7 +369,7 @@ export function UsuarioForm({
                 name="propietarioId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Propietario (Opcional)</FormLabel>
+                    <FormLabel>{t('usuarios.propietarioOpcional')}</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       value={field.value ?? ''}
@@ -389,11 +377,11 @@ export function UsuarioForm({
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Todos los propietarios" />
+                          <SelectValue placeholder={t('usuarios.todosPropietarios')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">Todos los propietarios</SelectItem>
+                        <SelectItem value="">{t('usuarios.todosPropietarios')}</SelectItem>
                         {filteredPropietarios.map((prop) => (
                           <SelectItem key={prop.id} value={prop.id}>
                             {prop.nombre}
@@ -401,9 +389,7 @@ export function UsuarioForm({
                         ))}
                       </SelectContent>
                     </Select>
-                    <FormDescription>
-                      Limita el acceso a buses de un propietario especifico
-                    </FormDescription>
+                    <FormDescription>{t('usuarios.propietarioDesc')}</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -413,19 +399,19 @@ export function UsuarioForm({
             <div className="flex justify-end gap-3">
               {onCancel && (
                 <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
-                  Cancelar
+                  {t('common.cancel')}
                 </Button>
               )}
               <Button type="submit" disabled={isLoading}>
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Guardando...
+                    {t('common.saving')}
                   </>
                 ) : isEditing ? (
-                  'Guardar Cambios'
+                  t('common.saveChanges')
                 ) : (
-                  'Crear Usuario'
+                  t('usuarios.createUsuario')
                 )}
               </Button>
             </div>
@@ -443,8 +429,8 @@ interface RoleBadgeProps {
 }
 
 export function RoleBadge({ rol, className }: RoleBadgeProps) {
+  const { t } = useTranslation()
   const isInternal = INTERNAL_ROLES.includes(rol as (typeof INTERNAL_ROLES)[number])
-  const config = ROLE_CONFIG[rol]
 
   return (
     <span
@@ -452,7 +438,7 @@ export function RoleBadge({ rol, className }: RoleBadgeProps) {
         isInternal ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
       } ${className ?? ''}`}
     >
-      {config.label}
+      {t(`usuarios.roles.${rol}`)}
     </span>
   )
 }

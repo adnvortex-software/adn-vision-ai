@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   AlertTriangle,
   Bus,
@@ -24,7 +25,7 @@ import { Label } from '@/components/ui/label'
 import { EventoEstadoBadge } from './NovedadesEventosTable'
 import type { EventoConDetalles } from '@/types/novedad'
 import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { es, enUS } from 'date-fns/locale'
 
 interface NovedadDetailModalProps {
   evento: EventoConDetalles | null
@@ -35,18 +36,6 @@ interface NovedadDetailModalProps {
   onGeneratePdf?: (evento: EventoConDetalles) => Promise<void>
 }
 
-function formatTimestamp(timestamp: unknown): string {
-  try {
-    if (timestamp && typeof timestamp === 'object' && 'toDate' in timestamp) {
-      const date = (timestamp as { toDate: () => Date }).toDate()
-      return format(date, "EEEE d 'de' MMMM 'de' yyyy, HH:mm:ss", { locale: es })
-    }
-    return '-'
-  } catch {
-    return '-'
-  }
-}
-
 export function NovedadDetailModal({
   evento,
   isOpen,
@@ -55,8 +44,25 @@ export function NovedadDetailModal({
   onDiscard,
   onGeneratePdf,
 }: NovedadDetailModalProps) {
+  const { t, i18n } = useTranslation()
+  const dateLocale = i18n.language.startsWith('en') ? enUS : es
   const [notas, setNotas] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
+
+  const formatTimestamp = (timestamp: unknown): string => {
+    try {
+      if (timestamp && typeof timestamp === 'object' && 'toDate' in timestamp) {
+        const date = (timestamp as { toDate: () => Date }).toDate()
+        const formatStr = i18n.language.startsWith('en')
+          ? 'EEEE, MMMM d, yyyy, HH:mm:ss'
+          : "EEEE d 'de' MMMM 'de' yyyy, HH:mm:ss"
+        return format(date, formatStr, { locale: dateLocale })
+      }
+      return '-'
+    } catch {
+      return '-'
+    }
+  }
 
   const handleResolve = async () => {
     if (!evento || !onResolve) return
@@ -108,7 +114,7 @@ export function NovedadDetailModal({
             <DialogTitle>{evento.novedadNombre ?? evento.tipoNovedad}</DialogTitle>
           </div>
           <DialogDescription asChild>
-            <span>Detalles del evento detectado</span>
+            <span>{t('novedades.eventDetails')}</span>
           </DialogDescription>
         </DialogHeader>
 
@@ -121,7 +127,7 @@ export function NovedadDetailModal({
               </div>
             ) : (
               <div className="flex aspect-video items-center justify-center rounded-lg border bg-muted">
-                <p className="text-sm text-muted-foreground">Sin imagen disponible</p>
+                <p className="text-sm text-muted-foreground">{t('novedades.noImage')}</p>
               </div>
             )}
 
@@ -130,7 +136,7 @@ export function NovedadDetailModal({
               <Button variant="outline" className="w-full" asChild>
                 <a href={evento.videoClipUrl} target="_blank" rel="noopener noreferrer">
                   <Video className="mr-2 h-4 w-4" />
-                  Ver video clip
+                  {t('novedades.viewVideoClip')}
                 </a>
               </Button>
             )}
@@ -140,7 +146,9 @@ export function NovedadDetailModal({
           <div className="space-y-4">
             {/* Estado */}
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-muted-foreground">Estado</span>
+              <span className="text-sm font-medium text-muted-foreground">
+                {t('common.status')}
+              </span>
               <EventoEstadoBadge estado={evento.estado} />
             </div>
 
@@ -148,7 +156,7 @@ export function NovedadDetailModal({
             <div className="flex items-start gap-2">
               <Clock className="mt-0.5 h-4 w-4 text-muted-foreground" />
               <div>
-                <p className="text-sm font-medium">Fecha y hora</p>
+                <p className="text-sm font-medium">{t('novedades.dateTime')}</p>
                 <p className="text-sm text-muted-foreground">{formatTimestamp(evento.timestamp)}</p>
               </div>
             </div>
@@ -157,7 +165,7 @@ export function NovedadDetailModal({
             <div className="flex items-start gap-2">
               <Bus className="mt-0.5 h-4 w-4 text-muted-foreground" />
               <div>
-                <p className="text-sm font-medium">Vehiculo</p>
+                <p className="text-sm font-medium">{t('buses.vehicle')}</p>
                 <p className="text-sm text-muted-foreground">{evento.busPlaca ?? '-'}</p>
               </div>
             </div>
@@ -166,7 +174,7 @@ export function NovedadDetailModal({
             <div className="flex items-start gap-2">
               <Video className="mt-0.5 h-4 w-4 text-muted-foreground" />
               <div>
-                <p className="text-sm font-medium">Camara</p>
+                <p className="text-sm font-medium">{t('novedades.camera')}</p>
                 <p className="text-sm text-muted-foreground">{evento.camaraNombre ?? '-'}</p>
               </div>
             </div>
@@ -176,7 +184,7 @@ export function NovedadDetailModal({
               <div className="flex items-start gap-2">
                 <User className="mt-0.5 h-4 w-4 text-muted-foreground" />
                 <div>
-                  <p className="text-sm font-medium">Revisado por</p>
+                  <p className="text-sm font-medium">{t('novedades.reviewedBy')}</p>
                   <p className="text-sm text-muted-foreground">
                     {evento.revisadoPor}
                     {evento.revisadoAt && ` - ${formatTimestamp(evento.revisadoAt)}`}
@@ -188,7 +196,9 @@ export function NovedadDetailModal({
             {/* Existing notes */}
             {evento.notas && (
               <div className="rounded-lg bg-muted p-3">
-                <p className="mb-1 text-xs font-medium text-muted-foreground">Notas</p>
+                <p className="mb-1 text-xs font-medium text-muted-foreground">
+                  {t('eventos.notas')}
+                </p>
                 <p className="text-sm">{evento.notas}</p>
               </div>
             )}
@@ -196,7 +206,9 @@ export function NovedadDetailModal({
             {/* Additional data */}
             {Object.keys(evento.datos).length > 0 && (
               <div className="rounded-lg border p-3">
-                <p className="mb-2 text-xs font-medium text-muted-foreground">Datos adicionales</p>
+                <p className="mb-2 text-xs font-medium text-muted-foreground">
+                  {t('novedades.additionalData')}
+                </p>
                 <pre className="text-xs text-muted-foreground">
                   {JSON.stringify(evento.datos, null, 2)}
                 </pre>
@@ -212,11 +224,11 @@ export function NovedadDetailModal({
             <div className="space-y-2">
               <Label htmlFor="notas" className="flex items-center gap-2">
                 <MessageSquare className="h-4 w-4" />
-                Notas (opcional)
+                {t('novedades.notesOptional')}
               </Label>
               <Textarea
                 id="notas"
-                placeholder="Agregar notas sobre la resolucion..."
+                placeholder={t('novedades.notesPlaceholder')}
                 value={notas}
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
                   setNotas(e.target.value)
@@ -241,7 +253,7 @@ export function NovedadDetailModal({
                   ) : (
                     <CheckCircle className="mr-2 h-4 w-4" />
                   )}
-                  Marcar Resuelto
+                  {t('novedades.markResolved')}
                 </Button>
               )}
               {onDiscard && (
@@ -257,7 +269,7 @@ export function NovedadDetailModal({
                   ) : (
                     <XCircle className="mr-2 h-4 w-4" />
                   )}
-                  Descartar
+                  {t('eventos.descartar')}
                 </Button>
               )}
               {onGeneratePdf && (
@@ -273,7 +285,7 @@ export function NovedadDetailModal({
                   ) : (
                     <FileText className="mr-2 h-4 w-4" />
                   )}
-                  Generar PDF
+                  {t('eventos.generarPDF')}
                 </Button>
               )}
             </div>
@@ -286,7 +298,7 @@ export function NovedadDetailModal({
             <Button variant="outline" className="w-full" asChild>
               <a href={evento.reportePdfUrl} target="_blank" rel="noopener noreferrer">
                 <FileText className="mr-2 h-4 w-4" />
-                Descargar PDF del reporte
+                {t('novedades.downloadPdf')}
               </a>
             </Button>
           </div>

@@ -54,6 +54,26 @@ export interface ConteoEvento {
 }
 
 /**
+ * Lista todos los conteos actuales de todos los buses
+ */
+export async function listAllConteos(): Promise<ConteoResumen[]> {
+  const snapshot = await getDocs(collection(db, COLLECTION))
+
+  return snapshot.docs.map((docSnap) => {
+    const data = docSnap.data() as ConteoResumenFirestore
+    return {
+      busId: data.busId ?? docSnap.id,
+      clienteId: data.clienteId ?? '',
+      entradasDia: data.entradasDia ?? 0,
+      salidasDia: data.salidasDia ?? 0,
+      aforoActual: data.aforoActual ?? 0,
+      fechaOperativa: data.fechaOperativa ?? '',
+      updatedAt: data.updatedAt ?? null,
+    }
+  })
+}
+
+/**
  * Obtiene el resumen de conteo de un bus
  */
 export async function getConteoResumen(busId: string): Promise<ConteoResumen | null> {

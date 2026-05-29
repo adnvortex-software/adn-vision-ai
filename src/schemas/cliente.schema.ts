@@ -77,6 +77,7 @@ export const clienteFirestoreSchema = z.object({
   contactoTelefono: z.string(),
   planContratado: z.enum(PLANS),
   activo: z.boolean().optional().default(true),
+  logoUrl: z.string().nullable().optional(),
   createdAt: z.unknown(),
   updatedAt: z.unknown(),
   createdBy: z.string().optional().default('system'),

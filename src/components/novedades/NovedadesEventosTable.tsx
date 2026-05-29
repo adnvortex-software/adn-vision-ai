@@ -1,5 +1,6 @@
 import { type ColumnDef } from '@tanstack/react-table'
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   AlertTriangle,
   MoreHorizontal,
@@ -22,7 +23,7 @@ import {
 import type { EventoConDetalles } from '@/types/novedad'
 import type { EventState } from '@/config/constants'
 import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { es, enUS } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
 
 interface NovedadesEventosTableProps {
@@ -34,41 +35,29 @@ interface NovedadesEventosTableProps {
   onGeneratePdf?: (evento: EventoConDetalles) => void
 }
 
-const ESTADO_CONFIG: Record<EventState, { label: string; colorClass: string; bgClass: string }> = {
-  nuevo: {
-    label: 'Nuevo',
-    colorClass: 'text-blue-700',
-    bgClass: 'bg-blue-100',
-  },
-  revisado: {
-    label: 'Revisado',
-    colorClass: 'text-amber-700',
-    bgClass: 'bg-amber-100',
-  },
-  resuelto: {
-    label: 'Resuelto',
-    colorClass: 'text-green-700',
-    bgClass: 'bg-green-100',
-  },
-  descartado: {
-    label: 'Descartado',
-    colorClass: 'text-gray-700',
-    bgClass: 'bg-gray-100',
-  },
-}
-
-function formatTimestamp(timestamp: unknown): string {
-  try {
-    // Handle Firestore timestamp
-    if (timestamp && typeof timestamp === 'object' && 'toDate' in timestamp) {
-      const date = (timestamp as { toDate: () => Date }).toDate()
-      return format(date, 'd MMM yyyy, HH:mm', { locale: es })
-    }
-    return '-'
-  } catch {
-    return '-'
+const ESTADO_CONFIG: Record<EventState, { labelKey: string; colorClass: string; bgClass: string }> =
+  {
+    nuevo: {
+      labelKey: 'eventos.nuevo',
+      colorClass: 'text-blue-700',
+      bgClass: 'bg-blue-100',
+    },
+    revisado: {
+      labelKey: 'eventos.revisado',
+      colorClass: 'text-amber-700',
+      bgClass: 'bg-amber-100',
+    },
+    resuelto: {
+      labelKey: 'eventos.resuelto',
+      colorClass: 'text-green-700',
+      bgClass: 'bg-green-100',
+    },
+    descartado: {
+      labelKey: 'eventos.descartado',
+      colorClass: 'text-gray-700',
+      bgClass: 'bg-gray-100',
+    },
   }
-}
 
 export function NovedadesEventosTable({
   eventos,
@@ -78,11 +67,26 @@ export function NovedadesEventosTable({
   onDiscard,
   onGeneratePdf,
 }: NovedadesEventosTableProps) {
+  const { t, i18n } = useTranslation()
+  const dateLocale = i18n.language.startsWith('en') ? enUS : es
+
+  const formatTimestamp = (timestamp: unknown): string => {
+    try {
+      if (timestamp && typeof timestamp === 'object' && 'toDate' in timestamp) {
+        const date = (timestamp as { toDate: () => Date }).toDate()
+        return format(date, 'd MMM yyyy, HH:mm', { locale: dateLocale })
+      }
+      return '-'
+    } catch {
+      return '-'
+    }
+  }
+
   const columns: ColumnDef<EventoConDetalles>[] = useMemo(
     () => [
       {
         accessorKey: 'timestamp',
-        header: 'Fecha/Hora',
+        header: t('novedades.dateTime'),
         cell: ({ row }) => (
           <div className="flex items-center gap-2">
             <Clock className="h-4 w-4 text-muted-foreground" />
@@ -92,9 +96,8 @@ export function NovedadesEventosTable({
       },
       {
         accessorKey: 'tipoNovedad',
-        header: 'Novedad',
+        header: t('novedades.tipoNovedad'),
         cell: ({ row }) => {
-          // We'd need the category from catalogo, but for now show type
           return (
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-amber-500" />
@@ -112,7 +115,7 @@ export function NovedadesEventosTable({
       },
       {
         accessorKey: 'busPlaca',
-        header: 'Bus',
+        header: t('buses.title'),
         cell: ({ row }) => (
           <span className="rounded bg-muted px-2 py-0.5 font-mono text-sm">
             {row.original.busPlaca ?? '-'}
@@ -121,7 +124,7 @@ export function NovedadesEventosTable({
       },
       {
         accessorKey: 'estado',
-        header: 'Estado',
+        header: t('common.status'),
         cell: ({ row }) => {
           const estado = row.original.estado
           const config = ESTADO_CONFIG[estado]
@@ -133,22 +136,26 @@ export function NovedadesEventosTable({
                 config.colorClass
               )}
             >
-              {config.label}
+              {t(config.labelKey)}
             </span>
           )
         },
       },
       {
         accessorKey: 'screenshotUrl',
-        header: 'Captura',
+        header: t('novedades.capture'),
         cell: ({ row }) => {
           const url = row.original.screenshotUrl
           if (!url) {
-            return <span className="text-sm text-muted-foreground">Sin imagen</span>
+            return <span className="text-sm text-muted-foreground">{t('novedades.noImage')}</span>
           }
           return (
             <div className="h-12 w-16 overflow-hidden rounded border">
-              <img src={url} alt="Captura del evento" className="h-full w-full object-cover" />
+              <img
+                src={url}
+                alt={t('novedades.captureAlt')}
+                className="h-full w-full object-cover"
+              />
             </div>
           )
         },
@@ -163,12 +170,12 @@ export function NovedadesEventosTable({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <span className="sr-only">Abrir menu</span>
+                  <span className="sr-only">{t('novedades.openMenu')}</span>
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                <DropdownMenuLabel>{t('common.actions')}</DropdownMenuLabel>
                 {onView && (
                   <DropdownMenuItem
                     onClick={() => {
@@ -176,7 +183,7 @@ export function NovedadesEventosTable({
                     }}
                   >
                     <Eye className="mr-2 h-4 w-4" />
-                    Ver detalles
+                    {t('novedades.viewDetails')}
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
@@ -187,7 +194,7 @@ export function NovedadesEventosTable({
                     }}
                   >
                     <CheckCircle className="mr-2 h-4 w-4 text-green-600" />
-                    Marcar resuelto
+                    {t('eventos.marcarResuelto')}
                   </DropdownMenuItem>
                 )}
                 {onDiscard && evento.estado !== 'descartado' && (
@@ -197,7 +204,7 @@ export function NovedadesEventosTable({
                     }}
                   >
                     <XCircle className="mr-2 h-4 w-4 text-gray-600" />
-                    Descartar
+                    {t('eventos.descartar')}
                   </DropdownMenuItem>
                 )}
                 {onGeneratePdf && (
@@ -209,7 +216,7 @@ export function NovedadesEventosTable({
                       }}
                     >
                       <FileText className="mr-2 h-4 w-4" />
-                      Generar PDF
+                      {t('eventos.generarPDF')}
                     </DropdownMenuItem>
                   </>
                 )}
@@ -219,7 +226,7 @@ export function NovedadesEventosTable({
         },
       },
     ],
-    [onView, onResolve, onDiscard, onGeneratePdf]
+    [t, dateLocale, onView, onResolve, onDiscard, onGeneratePdf]
   )
 
   return (
@@ -228,9 +235,9 @@ export function NovedadesEventosTable({
       data={eventos}
       isLoading={isLoading}
       searchColumn="tipoNovedad"
-      searchPlaceholder="Buscar eventos..."
-      emptyMessage="No hay eventos"
-      emptyDescription="Los eventos de novedades apareceran aqui"
+      searchPlaceholder={t('novedades.searchEvents')}
+      emptyMessage={t('novedades.noEvents')}
+      emptyDescription={t('novedades.eventsWillAppearHere')}
     />
   )
 }
@@ -242,6 +249,7 @@ interface EventoEstadoBadgeProps {
 }
 
 export function EventoEstadoBadge({ estado, size = 'md', className }: EventoEstadoBadgeProps) {
+  const { t } = useTranslation()
   const config = ESTADO_CONFIG[estado]
 
   return (
@@ -254,7 +262,7 @@ export function EventoEstadoBadge({ estado, size = 'md', className }: EventoEsta
         className
       )}
     >
-      {config.label}
+      {t(config.labelKey)}
     </span>
   )
 }

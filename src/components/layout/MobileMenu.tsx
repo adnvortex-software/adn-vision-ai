@@ -1,11 +1,12 @@
 import { Link, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import {
   LayoutDashboard,
   Building2,
   Bus,
+  ClipboardList,
   Users,
   AlertTriangle,
-  FileText,
   Settings,
   X,
   LogOut,
@@ -21,7 +22,7 @@ import type { Usuario } from '@/types/auth'
 import type { Permission } from '@/lib/permissions'
 
 interface NavItem {
-  label: string
+  labelKey: string
   href: string
   icon: React.ComponentType<{ className?: string }>
   permission?: Permission
@@ -29,36 +30,36 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   {
-    label: 'Dashboard',
+    labelKey: 'nav.dashboard',
     href: '/dashboard',
     icon: LayoutDashboard,
   },
   {
-    label: 'Clientes',
+    labelKey: 'nav.clientes',
     href: '/clientes',
     icon: Building2,
     permission: 'clientes.read',
   },
   {
-    label: 'Buses',
+    labelKey: 'nav.buses',
     href: '/buses',
     icon: Bus,
     permission: 'buses.read',
   },
   {
-    label: 'Novedades',
+    labelKey: 'nav.despachos',
+    href: '/despachos',
+    icon: ClipboardList,
+    permission: 'buses.read',
+  },
+  {
+    labelKey: 'nav.novedades',
     href: '/novedades',
     icon: AlertTriangle,
     permission: 'eventos.read',
   },
   {
-    label: 'Reportes',
-    href: '/reportes',
-    icon: FileText,
-    permission: 'reportes.download',
-  },
-  {
-    label: 'Usuarios',
+    labelKey: 'nav.usuarios',
     href: '/usuarios',
     icon: Users,
     permission: 'usuarios.read',
@@ -81,6 +82,7 @@ interface MobileMenuProps {
 
 export function MobileMenu({ usuario, onLogout }: MobileMenuProps) {
   const location = useLocation()
+  const { t } = useTranslation()
   const { mobileMenuOpen, setMobileMenuOpen } = useUIStore()
   const { can } = usePermissions({ usuario })
 
@@ -139,6 +141,7 @@ export function MobileMenu({ usuario, onLogout }: MobileMenuProps) {
           {visibleItems.map((item) => {
             const isActive = location.pathname.startsWith(item.href)
             const Icon = item.icon
+            const label = t(item.labelKey)
 
             return (
               <Link
@@ -153,7 +156,7 @@ export function MobileMenu({ usuario, onLogout }: MobileMenuProps) {
                 )}
               >
                 <Icon className="h-5 w-5 flex-shrink-0" />
-                <span>{item.label}</span>
+                <span>{label}</span>
               </Link>
             )
           })}
@@ -167,7 +170,7 @@ export function MobileMenu({ usuario, onLogout }: MobileMenuProps) {
             className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
           >
             <Settings className="h-5 w-5 flex-shrink-0" />
-            <span>Configuración</span>
+            <span>{t('nav.configuracion')}</span>
           </Link>
           <button
             onClick={() => {
@@ -177,7 +180,7 @@ export function MobileMenu({ usuario, onLogout }: MobileMenuProps) {
             className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
           >
             <LogOut className="h-5 w-5 flex-shrink-0" />
-            <span>Cerrar Sesión</span>
+            <span>{t('auth.logout')}</span>
           </button>
         </div>
       </SheetContent>

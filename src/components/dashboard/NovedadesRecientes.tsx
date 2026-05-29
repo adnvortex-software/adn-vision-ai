@@ -1,10 +1,11 @@
 import { AlertTriangle, Clock, ChevronRight, Bus } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { EventoEstadoBadge } from '@/components/novedades/NovedadesEventosTable'
 import type { EventoConDetalles } from '@/types/novedad'
 import { formatDistanceToNow } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { es, enUS } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
 
 interface NovedadesRecientesProps {
@@ -15,18 +16,6 @@ interface NovedadesRecientesProps {
   className?: string
 }
 
-function formatTimestamp(timestamp: unknown): string {
-  try {
-    if (timestamp && typeof timestamp === 'object' && 'toDate' in timestamp) {
-      const date = (timestamp as { toDate: () => Date }).toDate()
-      return formatDistanceToNow(date, { addSuffix: true, locale: es })
-    }
-    return '-'
-  } catch {
-    return '-'
-  }
-}
-
 export function NovedadesRecientes({
   eventos,
   isLoading = false,
@@ -34,13 +23,28 @@ export function NovedadesRecientes({
   onVerEvento,
   className,
 }: NovedadesRecientesProps) {
+  const { t, i18n } = useTranslation()
+  const dateLocale = i18n.language.startsWith('en') ? enUS : es
+
+  const formatTimestamp = (timestamp: unknown): string => {
+    try {
+      if (timestamp && typeof timestamp === 'object' && 'toDate' in timestamp) {
+        const date = (timestamp as { toDate: () => Date }).toDate()
+        return formatDistanceToNow(date, { addSuffix: true, locale: dateLocale })
+      }
+      return '-'
+    } catch {
+      return '-'
+    }
+  }
+
   if (isLoading) {
     return (
       <Card className={cn(className)}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-amber-500" />
-            Novedades Recientes
+            {t('dashboard.recentNovelties')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -66,13 +70,13 @@ export function NovedadesRecientes({
         <div>
           <CardTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-amber-500" />
-            Novedades Recientes
+            {t('dashboard.recentNovelties')}
           </CardTitle>
-          <CardDescription>Ultimas alertas detectadas</CardDescription>
+          <CardDescription>{t('dashboard.lastAlertsDetected')}</CardDescription>
         </div>
         {onVerTodos && eventos.length > 0 && (
           <Button variant="ghost" size="sm" onClick={onVerTodos}>
-            Ver todas
+            {t('common.seeAll')}
             <ChevronRight className="ml-1 h-4 w-4" />
           </Button>
         )}
@@ -81,9 +85,9 @@ export function NovedadesRecientes({
         {eventos.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-8 text-center">
             <AlertTriangle className="h-12 w-12 text-muted-foreground/30" />
-            <p className="mt-4 text-sm font-medium">Sin novedades recientes</p>
+            <p className="mt-4 text-sm font-medium">{t('dashboard.noRecentNovelties')}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Las alertas detectadas apareceran aqui
+              {t('dashboard.alertsWillAppearHere')}
             </p>
           </div>
         ) : (
@@ -102,7 +106,7 @@ export function NovedadesRecientes({
                   {evento.screenshotUrl ? (
                     <img
                       src={evento.screenshotUrl}
-                      alt="Captura"
+                      alt={t('dashboard.capture')}
                       className="h-full w-full object-cover"
                     />
                   ) : (

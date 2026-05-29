@@ -1,6 +1,16 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Building2, MapPin, Users, Bus, Pencil, MoreHorizontal } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import {
+  ArrowLeft,
+  Building2,
+  MapPin,
+  Users,
+  Bus,
+  Pencil,
+  MoreHorizontal,
+  Image,
+} from 'lucide-react'
 import { PageHeader } from '@/components/common/PageHeader'
 import { LoadingState } from '@/components/common/LoadingState'
 import { Button } from '@/components/ui/button'
@@ -18,6 +28,7 @@ import { getCliente, listSucursales, listPropietarios } from '@/services/cliente
 import { useToast } from '@/hooks/use-toast'
 
 export default function ClienteDetailPage() {
+  const { t } = useTranslation()
   const { clienteId } = useParams<{ clienteId: string }>()
   const navigate = useNavigate()
   const { toast } = useToast()
@@ -42,8 +53,8 @@ export default function ClienteDetailPage() {
       } catch (error) {
         console.error('Error loading cliente:', error)
         toast({
-          title: 'Error',
-          description: 'No se pudo cargar el cliente',
+          title: t('common.error'),
+          description: t('clientes.loadError'),
           variant: 'destructive',
         })
       } finally {
@@ -62,9 +73,9 @@ export default function ClienteDetailPage() {
       <div className="container mx-auto py-6">
         <div className="flex flex-col items-center justify-center rounded-lg border py-12">
           <Building2 className="h-12 w-12 text-muted-foreground/30" />
-          <h3 className="mt-4 text-lg font-semibold">Cliente no encontrado</h3>
+          <h3 className="mt-4 text-lg font-semibold">{t('clientes.notFound')}</h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            El cliente con ID {clienteId} no existe
+            {t('clientes.notFoundDescription', { id: clienteId })}
           </p>
           <Button
             className="mt-4"
@@ -74,7 +85,7 @@ export default function ClienteDetailPage() {
             }}
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Volver a clientes
+            {t('clientes.backToClientes')}
           </Button>
         </div>
       </div>
@@ -101,7 +112,7 @@ export default function ClienteDetailPage() {
               }}
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Volver
+              {t('common.back')}
             </Button>
             <Button
               onClick={() => {
@@ -109,7 +120,7 @@ export default function ClienteDetailPage() {
               }}
             >
               <Pencil className="mr-2 h-4 w-4" />
-              Editar
+              {t('common.edit')}
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -124,7 +135,7 @@ export default function ClienteDetailPage() {
                   }}
                 >
                   <MapPin className="mr-2 h-4 w-4" />
-                  Gestionar Sucursales
+                  {t('clientes.manageSucursales')}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => {
@@ -132,7 +143,7 @@ export default function ClienteDetailPage() {
                   }}
                 >
                   <Users className="mr-2 h-4 w-4" />
-                  Gestionar Propietarios
+                  {t('clientes.managePropietarios')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -146,29 +157,50 @@ export default function ClienteDetailPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Building2 className="h-5 w-5" />
-              Informacion General
+              {t('clientes.generalInfo')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Logo */}
+            <div className="flex items-center gap-4">
+              <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-lg border bg-muted">
+                {cliente.logoUrl ? (
+                  <img
+                    src={cliente.logoUrl}
+                    alt={t('clientes.logoAlt', { name: cliente.nombre })}
+                    className="h-full w-full object-contain"
+                  />
+                ) : (
+                  <Image className="h-8 w-8 text-muted-foreground" />
+                )}
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">{t('clientes.companyLogo')}</p>
+                {!cliente.logoUrl && (
+                  <p className="text-xs text-muted-foreground">{t('clientes.addLogoHint')}</p>
+                )}
+              </div>
+            </div>
+
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <p className="text-sm text-muted-foreground">Plan Actual</p>
+                <p className="text-sm text-muted-foreground">{t('clientes.currentPlan')}</p>
                 <Badge className={planColors[cliente.planContratado]}>
-                  {cliente.planContratado}
+                  {t(`clientes.plans.${cliente.planContratado}`)}
                 </Badge>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Estado</p>
+                <p className="text-sm text-muted-foreground">{t('clientes.status')}</p>
                 <Badge variant={cliente.activo ? 'default' : 'secondary'}>
-                  {cliente.activo ? 'Activo' : 'Inactivo'}
+                  {cliente.activo ? t('common.active') : t('common.inactive')}
                 </Badge>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Contacto</p>
+                <p className="text-sm text-muted-foreground">{t('clientes.contact')}</p>
                 <p className="font-medium">{cliente.contactoEmail}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Telefono</p>
+                <p className="text-sm text-muted-foreground">{t('clientes.phone')}</p>
                 <p className="font-medium">{cliente.contactoTelefono}</p>
               </div>
             </div>
@@ -178,27 +210,27 @@ export default function ClienteDetailPage() {
         {/* Stats */}
         <Card>
           <CardHeader>
-            <CardTitle>Estadisticas</CardTitle>
+            <CardTitle>{t('clientes.statistics')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">Sucursales</span>
+                <span className="text-sm">{t('clientes.sucursales')}</span>
               </div>
               <span className="font-bold">{sucursales.length}</span>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Users className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">Propietarios</span>
+                <span className="text-sm">{t('clientes.propietarios')}</span>
               </div>
               <span className="font-bold">{propietarios.length}</span>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Bus className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">Buses</span>
+                <span className="text-sm">{t('buses.title')}</span>
               </div>
               <span className="font-bold">0</span>
             </div>
@@ -212,9 +244,11 @@ export default function ClienteDetailPage() {
           <div>
             <CardTitle className="flex items-center gap-2">
               <MapPin className="h-5 w-5" />
-              Sucursales
+              {t('clientes.sucursales')}
             </CardTitle>
-            <CardDescription>{sucursales.length} sucursales registradas</CardDescription>
+            <CardDescription>
+              {t('clientes.sucursalesCount', { count: sucursales.length })}
+            </CardDescription>
           </div>
           <Button
             variant="outline"
@@ -223,12 +257,14 @@ export default function ClienteDetailPage() {
               navigate(`/clientes/${clienteId ?? ''}/sucursales`)
             }}
           >
-            Gestionar
+            {t('common.manage')}
           </Button>
         </CardHeader>
         <CardContent>
           {sucursales.length === 0 ? (
-            <p className="text-center text-sm text-muted-foreground">No hay sucursales</p>
+            <p className="text-center text-sm text-muted-foreground">
+              {t('clientes.noSucursales')}
+            </p>
           ) : (
             <div className="space-y-2">
               {sucursales.map((sucursal) => (
@@ -253,9 +289,11 @@ export default function ClienteDetailPage() {
           <div>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
-              Propietarios
+              {t('clientes.propietarios')}
             </CardTitle>
-            <CardDescription>{propietarios.length} propietarios registrados</CardDescription>
+            <CardDescription>
+              {t('clientes.propietariosCount', { count: propietarios.length })}
+            </CardDescription>
           </div>
           <Button
             variant="outline"
@@ -264,12 +302,14 @@ export default function ClienteDetailPage() {
               navigate(`/clientes/${clienteId ?? ''}/propietarios`)
             }}
           >
-            Gestionar
+            {t('common.manage')}
           </Button>
         </CardHeader>
         <CardContent>
           {propietarios.length === 0 ? (
-            <p className="text-center text-sm text-muted-foreground">No hay propietarios</p>
+            <p className="text-center text-sm text-muted-foreground">
+              {t('clientes.noPropietarios')}
+            </p>
           ) : (
             <div className="space-y-2">
               {propietarios.map((propietario) => (

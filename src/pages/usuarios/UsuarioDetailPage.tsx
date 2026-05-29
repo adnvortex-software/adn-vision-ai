@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ArrowLeft, User, Shield, Building2, MapPin, Pencil, UserX, UserCheck } from 'lucide-react'
 import { PageHeader } from '@/components/common/PageHeader'
 import { LoadingState } from '@/components/common/LoadingState'
@@ -16,6 +17,7 @@ const mockUsuario: UsuarioConDetalles | null = null
 export default function UsuarioDetailPage() {
   const { usuarioId } = useParams<{ usuarioId: string }>()
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const { toast } = useToast()
   const [isLoading] = useState(false)
   const [showRolForm, setShowRolForm] = useState(false)
@@ -30,9 +32,9 @@ export default function UsuarioDetailPage() {
       <div className="container mx-auto py-6">
         <div className="flex flex-col items-center justify-center rounded-lg border py-12">
           <User className="h-12 w-12 text-muted-foreground/30" />
-          <h3 className="mt-4 text-lg font-semibold">Usuario no encontrado</h3>
+          <h3 className="mt-4 text-lg font-semibold">{t('usuarios.notFound')}</h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            El usuario con ID {usuarioId} no existe
+            {t('usuarios.notFoundWithId', { id: usuarioId })}
           </p>
           <Button
             className="mt-4"
@@ -42,7 +44,7 @@ export default function UsuarioDetailPage() {
             }}
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Volver a usuarios
+            {t('usuarios.backToList')}
           </Button>
         </div>
       </div>
@@ -55,8 +57,10 @@ export default function UsuarioDetailPage() {
       // TODO: Implement actual toggle
       await new Promise((resolve) => setTimeout(resolve, 1000))
       toast({
-        title: mockUsuario.activo ? 'Usuario desactivado' : 'Usuario activado',
-        description: `${mockUsuario.nombre} ha sido ${mockUsuario.activo ? 'desactivado' : 'activado'}`,
+        title: mockUsuario.activo ? t('usuarios.deactivated') : t('usuarios.activated'),
+        description: mockUsuario.activo
+          ? t('usuarios.deactivatedDesc', { name: mockUsuario.nombre })
+          : t('usuarios.activatedDesc', { name: mockUsuario.nombre }),
       })
     } finally {
       setIsProcessing(false)
@@ -70,8 +74,8 @@ export default function UsuarioDetailPage() {
       // TODO: Change role in Firebase
       await new Promise((resolve) => setTimeout(resolve, 1000))
       toast({
-        title: 'Rol actualizado',
-        description: `El rol de ${mockUsuario.nombre} ha sido cambiado`,
+        title: t('usuarios.roleUpdated'),
+        description: t('usuarios.roleUpdatedDesc', { name: mockUsuario.nombre }),
       })
       setShowRolForm(false)
     } finally {
@@ -93,7 +97,7 @@ export default function UsuarioDetailPage() {
               }}
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Volver
+              {t('common.back')}
             </Button>
             <Button
               variant="outline"
@@ -105,12 +109,12 @@ export default function UsuarioDetailPage() {
               {mockUsuario.activo ? (
                 <>
                   <UserX className="mr-2 h-4 w-4" />
-                  Desactivar
+                  {t('usuarios.deactivate')}
                 </>
               ) : (
                 <>
                   <UserCheck className="mr-2 h-4 w-4" />
-                  Activar
+                  {t('usuarios.activate')}
                 </>
               )}
             </Button>
@@ -120,7 +124,7 @@ export default function UsuarioDetailPage() {
               }}
             >
               <Pencil className="mr-2 h-4 w-4" />
-              Editar
+              {t('common.edit')}
             </Button>
           </div>
         }
@@ -132,7 +136,7 @@ export default function UsuarioDetailPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5" />
-              Informacion General
+              {t('usuarios.generalInfo')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -147,9 +151,9 @@ export default function UsuarioDetailPage() {
             </div>
 
             <div>
-              <p className="text-sm text-muted-foreground">Estado</p>
+              <p className="text-sm text-muted-foreground">{t('common.status')}</p>
               <Badge variant={mockUsuario.activo ? 'default' : 'secondary'}>
-                {mockUsuario.activo ? 'Activo' : 'Inactivo'}
+                {mockUsuario.activo ? t('common.active') : t('common.inactive')}
               </Badge>
             </div>
           </CardContent>
@@ -160,7 +164,7 @@ export default function UsuarioDetailPage() {
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5" />
-              Rol y Permisos
+              {t('usuarios.roleAndPermissions')}
             </CardTitle>
             <Button
               variant="outline"
@@ -169,12 +173,12 @@ export default function UsuarioDetailPage() {
                 setShowRolForm(true)
               }}
             >
-              Cambiar Rol
+              {t('usuarios.changeRole')}
             </Button>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <p className="text-sm text-muted-foreground">Rol Actual</p>
+              <p className="text-sm text-muted-foreground">{t('usuarios.currentRole')}</p>
               <div className="mt-1">
                 <RoleBadge rol={mockUsuario.rol} />
               </div>
@@ -182,7 +186,7 @@ export default function UsuarioDetailPage() {
 
             {mockUsuario.clienteNombre && (
               <div>
-                <p className="text-sm text-muted-foreground">Cliente</p>
+                <p className="text-sm text-muted-foreground">{t('usuarios.cliente')}</p>
                 <div className="mt-1 flex items-center gap-2">
                   <Building2 className="h-4 w-4 text-muted-foreground" />
                   <span className="font-medium">{mockUsuario.clienteNombre}</span>
@@ -192,7 +196,7 @@ export default function UsuarioDetailPage() {
 
             {mockUsuario.sucursalesNombres && mockUsuario.sucursalesNombres.length > 0 && (
               <div>
-                <p className="text-sm text-muted-foreground">Sucursales</p>
+                <p className="text-sm text-muted-foreground">{t('usuarios.sucursales')}</p>
                 <div className="mt-1 flex flex-wrap gap-2">
                   {mockUsuario.sucursalesNombres.map((sucursal) => (
                     <Badge key={sucursal} variant="outline">

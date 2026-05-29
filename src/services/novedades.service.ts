@@ -13,7 +13,6 @@ import {
   serverTimestamp,
   onSnapshot,
   type Unsubscribe,
-  Timestamp,
 } from 'firebase/firestore'
 import { db } from '@/config/firebase'
 import { eventoFirestoreSchema, novedadCatalogoSchema } from '@/schemas/novedad.schema'
@@ -242,11 +241,16 @@ export async function listEventos(
     fechaHasta,
   } = options
 
-  let q = query(
-    collection(db, EVENTOS_COLLECTION),
-    orderBy('timestamp', 'desc'),
-    limit(pageLimit + 1)
-  )
+  // Build query - avoid composite index by not using orderBy with date filters
+  // We'll sort in JavaScript after fetching
+  const hasDateFilters = fechaDesde !== undefined || fechaHasta !== undefined
+
+  let q = hasDateFilters
+    ? query(
+        collection(db, EVENTOS_COLLECTION),
+        limit(pageLimit * 3) // Fetch more to filter by date in JS
+      )
+    : query(collection(db, EVENTOS_COLLECTION), orderBy('timestamp', 'desc'), limit(pageLimit + 1))
 
   if (clienteId) {
     q = query(q, where('clienteId', '==', clienteId))
@@ -264,15 +268,9 @@ export async function listEventos(
     q = query(q, where('estado', '==', estado))
   }
 
-  if (fechaDesde) {
-    q = query(q, where('timestamp', '>=', Timestamp.fromDate(fechaDesde)))
-  }
-
-  if (fechaHasta) {
-    q = query(q, where('timestamp', '<=', Timestamp.fromDate(fechaHasta)))
-  }
-
-  if (startAfterId) {
+  // Only apply date filters in Firestore if no other filters that would require composite index
+  // Otherwise filter in JavaScript
+  if (!hasDateFilters && startAfterId) {
     const startDoc = await getDoc(doc(db, EVENTOS_COLLECTION, startAfterId))
     if (startDoc.exists()) {
       q = query(q, startAfter(startDoc))
@@ -280,15 +278,14 @@ export async function listEventos(
   }
 
   const snapshot = await getDocs(q)
-  const docs = snapshot.docs.slice(0, pageLimit)
-  const hasMore = snapshot.docs.length > pageLimit
 
   const data: Entity<Evento>[] = []
-  for (const docSnap of docs) {
+  for (const docSnap of snapshot.docs) {
     const docData = docSnap.data() as FirestoreDocData
     const parsed = eventoFirestoreSchema.safeParse(docData)
     if (!parsed.success) continue
-    data.push({
+
+    const evento: Entity<Evento> = {
       id: docSnap.id,
       ...parsed.data,
       timestamp: (docData as unknown as { timestamp: unknown }).timestamp as Evento['timestamp'],
@@ -296,13 +293,33 @@ export async function listEventos(
         null) as Evento['revisadoAt'],
       createdAt: docData.createdAt,
       updatedAt: docData.updatedAt,
-    })
+    }
+
+    // Filter by date in JavaScript if needed
+    if (hasDateFilters && 'toDate' in evento.timestamp) {
+      const eventDate = evento.timestamp.toDate()
+      if (fechaDesde && eventDate < fechaDesde) continue
+      if (fechaHasta && eventDate > fechaHasta) continue
+    }
+
+    data.push(evento)
   }
 
+  // Sort by timestamp descending
+  data.sort((a, b) => {
+    const aTime = 'toMillis' in a.timestamp ? a.timestamp.toMillis() : 0
+    const bTime = 'toMillis' in b.timestamp ? b.timestamp.toMillis() : 0
+    return bTime - aTime
+  })
+
+  // Apply pagination
+  const paginatedData = data.slice(0, pageLimit)
+  const hasMore = data.length > pageLimit
+
   return {
-    data,
+    data: paginatedData,
     hasMore,
-    lastDoc: docs[docs.length - 1]?.id,
+    lastDoc: paginatedData[paginatedData.length - 1]?.id,
   }
 }
 
@@ -415,6 +432,33 @@ export async function getConteoActual(busId: string): Promise<Conteo | null> {
 }
 
 /**
+ * Lista todos los conteos actuales (tiempo real)
+ */
+export async function listAllConteos(
+  options: {
+    clienteId?: string | null
+    limit?: number
+  } = {}
+): Promise<Conteo[]> {
+  try {
+    const q = query(collection(db, CONTEOS_COLLECTION), limit(options.limit ?? 500))
+
+    const snapshot = await getDocs(q)
+    let results = snapshot.docs.map((docSnap) => docSnap.data() as Conteo)
+
+    // Filter by clienteId in memory
+    if (options.clienteId) {
+      results = results.filter((c) => c.clienteId === options.clienteId)
+    }
+
+    return results
+  } catch (error) {
+    console.error('[listAllConteos] Error:', error)
+    return []
+  }
+}
+
+/**
  * Suscribe a conteo en tiempo real de un bus
  */
 export function subscribeToConteo(
@@ -466,4 +510,41 @@ export async function listConteosDiarios(
   const snapshot = await getDocs(q)
 
   return snapshot.docs.map((docSnap) => docSnap.data() as ConteoDiario)
+}
+
+/**
+ * Lista todos los conteos diarios en un rango de fechas
+ * Opcionalmente filtra por clienteId
+ */
+export async function listAllConteosDiarios(options: {
+  fechaDesde: string
+  fechaHasta: string
+  clienteId?: string | null
+  limit?: number
+}): Promise<ConteoDiario[]> {
+  try {
+    let q = query(
+      collection(db, CONTEOS_DIARIOS_COLLECTION),
+      where('fecha', '>=', options.fechaDesde),
+      where('fecha', '<=', options.fechaHasta),
+      orderBy('fecha')
+    )
+
+    if (options.limit) {
+      q = query(q, limit(options.limit))
+    }
+
+    const snapshot = await getDocs(q)
+    let results = snapshot.docs.map((docSnap) => docSnap.data() as ConteoDiario)
+
+    // Filter by clienteId in memory (to avoid composite index)
+    if (options.clienteId) {
+      results = results.filter((c) => c.clienteId === options.clienteId)
+    }
+
+    return results
+  } catch (error) {
+    console.error('[listAllConteosDiarios] Error:', error)
+    return []
+  }
 }

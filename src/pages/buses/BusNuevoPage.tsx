@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 import { PageHeader } from '@/components/common/PageHeader'
 import { Button } from '@/components/ui/button'
@@ -22,6 +23,7 @@ import { createBus, updateBus } from '@/services/buses.service'
 import { createCamarasBatch } from '@/services/camaras.service'
 
 export default function BusNuevoPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
@@ -45,8 +47,8 @@ export default function BusNuevoPage() {
       } catch (error) {
         console.error('Error loading clientes:', error)
         toast({
-          title: 'Error',
-          description: 'No se pudieron cargar los clientes',
+          title: t('common.error'),
+          description: t('clientes.loadError'),
           variant: 'destructive',
         })
       } finally {
@@ -91,16 +93,19 @@ export default function BusNuevoPage() {
       }
 
       toast({
-        title: 'Bus creado',
-        description: `${data.placa} ha sido registrado exitosamente${data.camaras.length > 0 ? ` con ${String(data.camaras.length)} cámara(s)` : ''}`,
+        title: t('buses.createSuccess'),
+        description: t('buses.createSuccessDesc', {
+          placa: data.placa,
+          count: data.camaras.length,
+        }),
       })
 
       navigate('/buses')
     } catch (error) {
       console.error('Error in handleComplete:', error)
-      const message = error instanceof Error ? error.message : 'No se pudo crear el bus'
+      const message = error instanceof Error ? error.message : t('buses.createError')
       toast({
-        title: 'Error',
+        title: t('common.error'),
         description: message,
         variant: 'destructive',
       })
@@ -120,8 +125,8 @@ export default function BusNuevoPage() {
   return (
     <div className="container mx-auto max-w-3xl space-y-6 py-6">
       <PageHeader
-        title="Nuevo Bus"
-        description="Configura un nuevo vehiculo con el asistente"
+        title={t('buses.nuevo')}
+        description={t('buses.wizardDescription')}
         actions={
           <Button
             variant="outline"
@@ -130,7 +135,7 @@ export default function BusNuevoPage() {
             }}
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Cancelar
+            {t('common.cancel')}
           </Button>
         }
       />
@@ -139,15 +144,15 @@ export default function BusNuevoPage() {
       {clientes.length > 1 && (
         <Card>
           <CardHeader>
-            <CardTitle>Seleccionar Cliente</CardTitle>
-            <CardDescription>Elige el cliente al que pertenecera este vehiculo</CardDescription>
+            <CardTitle>{t('buses.selectClient')}</CardTitle>
+            <CardDescription>{t('buses.selectClientDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <Label>Cliente</Label>
+              <Label>{t('buses.cliente')}</Label>
               <Select value={selectedClienteId} onValueChange={setSelectedClienteId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar cliente" />
+                  <SelectValue placeholder={t('buses.selectClientPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
                   {clientes.map((cliente) => (
@@ -165,16 +170,14 @@ export default function BusNuevoPage() {
       {clientes.length === 0 && (
         <Card>
           <CardContent className="pt-6">
-            <p className="text-center text-muted-foreground">
-              No hay clientes registrados. Crea un cliente primero.
-            </p>
+            <p className="text-center text-muted-foreground">{t('buses.noClients')}</p>
             <div className="mt-4 flex justify-center">
               <Button
                 onClick={() => {
                   navigate('/clientes/nuevo')
                 }}
               >
-                Crear Cliente
+                {t('clientes.nuevo')}
               </Button>
             </div>
           </CardContent>

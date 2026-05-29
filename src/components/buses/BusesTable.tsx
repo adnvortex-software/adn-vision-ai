@@ -1,5 +1,6 @@
 import { type ColumnDef } from '@tanstack/react-table'
 import { useMemo, useState, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Bus as BusIcon,
   MoreHorizontal,
@@ -48,14 +49,6 @@ interface BusesTableProps {
   onView?: (bus: BusConDetalles) => void
   onEdit?: (bus: BusConDetalles) => void
   onDelete?: (bus: BusConDetalles) => void
-}
-
-const VEHICLE_TYPE_LABELS: Record<string, string> = {
-  bus: 'Bus',
-  buseta: 'Buseta',
-  van: 'Van',
-  microbus: 'Microbus',
-  otro: 'Otro',
 }
 
 // Group buses by client
@@ -109,6 +102,7 @@ export function BusesTable({
   onEdit,
   onDelete,
 }: BusesTableProps) {
+  const { t } = useTranslation()
   const busGroups = useMemo(() => groupBusesByClient(buses), [buses])
 
   // Initialize expanded state from localStorage, defaulting to all expanded if no saved state
@@ -180,7 +174,7 @@ export function BusesTable({
     () => [
       {
         accessorKey: 'placa',
-        header: 'Vehiculo',
+        header: t('buses.vehicle'),
         cell: ({ row }) => {
           const bus = row.original
           // Check if connected based on lastHeartbeat (within last 2 minutes)
@@ -197,13 +191,13 @@ export function BusesTable({
                   className={`absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-background ${
                     isConnected ? 'bg-green-500' : 'bg-red-500'
                   }`}
-                  title={isConnected ? 'Conectado' : 'Desconectado'}
+                  title={isConnected ? t('buses.connected') : t('buses.disconnected')}
                 />
               </div>
               <div>
                 <div className="font-medium">{bus.placa}</div>
                 <div className="text-sm text-muted-foreground">
-                  {VEHICLE_TYPE_LABELS[bus.tipoVehiculo] ?? bus.tipoVehiculo}
+                  {t(`buses.tipos.${bus.tipoVehiculo}`)}
                   {bus.rutaTexto && ` - ${bus.rutaTexto}`}
                 </div>
               </div>
@@ -213,7 +207,7 @@ export function BusesTable({
       },
       {
         accessorKey: 'numeroInterno',
-        header: 'No. Interno',
+        header: t('buses.interno'),
         cell: ({ row }) => {
           const numeroInterno = row.original.numeroInterno
           if (numeroInterno === undefined) {
@@ -224,14 +218,14 @@ export function BusesTable({
       },
       {
         accessorKey: 'estado',
-        header: 'Estado',
+        header: t('buses.estado'),
         cell: ({ row }) => {
           return <BusStatusIndicator estado={row.original.estado} size="sm" />
         },
       },
       {
         id: 'conteo',
-        header: 'Conteo',
+        header: t('buses.count'),
         cell: ({ row }) => (
           <Button
             variant="ghost"
@@ -242,13 +236,13 @@ export function BusesTable({
             className="h-8 px-2"
           >
             <Users className="mr-1 h-4 w-4" />
-            Ver
+            {t('common.view')}
           </Button>
         ),
       },
       {
         id: 'envivo',
-        header: 'En vivo',
+        header: t('buses.live'),
         cell: ({ row }) => (
           <Button
             variant="ghost"
@@ -259,13 +253,13 @@ export function BusesTable({
             className="h-8 px-2"
           >
             <Video className="mr-1 h-4 w-4" />
-            Ver
+            {t('common.view')}
           </Button>
         ),
       },
       {
         id: 'detalles',
-        header: 'Detalles',
+        header: t('buses.details'),
         cell: ({ row }) =>
           onView ? (
             <Button
@@ -277,7 +271,7 @@ export function BusesTable({
               className="h-8 px-2"
             >
               <Eye className="mr-1 h-4 w-4" />
-              Ver
+              {t('common.view')}
             </Button>
           ) : null,
       },
@@ -291,7 +285,7 @@ export function BusesTable({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <span className="sr-only">Mas opciones</span>
+                  <span className="sr-only">{t('buses.moreOptions')}</span>
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -302,7 +296,7 @@ export function BusesTable({
                   }}
                 >
                   <Settings className="mr-2 h-4 w-4" />
-                  Configurar conteo
+                  {t('buses.configureCounting')}
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => {
@@ -310,7 +304,7 @@ export function BusesTable({
                   }}
                 >
                   <AlertTriangle className="mr-2 h-4 w-4" />
-                  Configurar novedades
+                  {t('buses.configureNovelties')}
                 </DropdownMenuItem>
                 {onEdit && (
                   <DropdownMenuItem
@@ -319,7 +313,7 @@ export function BusesTable({
                     }}
                   >
                     <Pencil className="mr-2 h-4 w-4" />
-                    Editar
+                    {t('common.edit')}
                   </DropdownMenuItem>
                 )}
                 {onDelete && (
@@ -332,7 +326,7 @@ export function BusesTable({
                       className="text-destructive focus:text-destructive"
                     >
                       <Trash2 className="mr-2 h-4 w-4" />
-                      Eliminar
+                      {t('common.delete')}
                     </DropdownMenuItem>
                   </>
                 )}
@@ -343,6 +337,7 @@ export function BusesTable({
       },
     ],
     [
+      t,
       onView,
       onEdit,
       onDelete,
@@ -373,7 +368,8 @@ export function BusesTable({
                 <Building2 className="h-5 w-5 text-primary" />
                 <span className="text-lg font-semibold">{group.clienteNombre}</span>
                 <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground">
-                  {group.buses.length} {group.buses.length === 1 ? 'vehiculo' : 'vehiculos'}
+                  {group.buses.length}{' '}
+                  {group.buses.length === 1 ? t('buses.vehicle') : t('buses.vehicles')}
                 </span>
               </div>
             </AccordionTrigger>
@@ -383,9 +379,9 @@ export function BusesTable({
                 data={group.buses}
                 isLoading={isLoading}
                 searchColumn="placa"
-                searchPlaceholder="Buscar por placa..."
-                emptyMessage="No hay buses"
-                emptyDescription="Crea un nuevo bus para comenzar"
+                searchPlaceholder={t('buses.searchPlate')}
+                emptyMessage={t('buses.noBuses')}
+                emptyDescription={t('buses.createToStart')}
               />
             </AccordionContent>
           </AccordionItem>

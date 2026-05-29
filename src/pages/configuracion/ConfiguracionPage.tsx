@@ -72,7 +72,7 @@ function getInitials(name: string): string {
 
 export default function ConfiguracionPage() {
   const { theme, toggleTheme } = useTheme()
-  const { i18n } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { toast } = useToast()
   const { usuario, refreshUsuario } = useAuthStore()
   const [notificaciones, setNotificaciones] = useState(true)
@@ -89,6 +89,9 @@ export default function ConfiguracionPage() {
   const [showPasswordDialog, setShowPasswordDialog] = useState(false)
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
+
+  // Current language (normalized to base code)
+  const currentLang = i18n.language.split('-')[0] ?? 'es'
 
   // Profile form
   const profileForm = useForm<UpdateProfileFormData>({
@@ -130,8 +133,8 @@ export default function ConfiguracionPage() {
     if (!file.type.startsWith('image/')) {
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: 'Solo se permiten archivos de imagen',
+        title: t('common.error'),
+        description: t('validation.required'),
       })
       return
     }
@@ -140,8 +143,8 @@ export default function ConfiguracionPage() {
     if (file.size > 5 * 1024 * 1024) {
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: 'La imagen no debe superar los 5MB',
+        title: t('common.error'),
+        description: t('validation.required'),
       })
       return
     }
@@ -160,15 +163,15 @@ export default function ConfiguracionPage() {
       await refreshUsuario()
 
       toast({
-        title: 'Foto actualizada',
-        description: 'Tu foto de perfil ha sido actualizada',
+        title: t('configuracion.fotoActualizada'),
+        description: t('configuracion.fotoActualizadaDesc'),
       })
     } catch (error) {
       console.error('Error uploading photo:', error)
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: 'No se pudo subir la foto',
+        title: t('common.error'),
+        description: t('errors.generic'),
       })
     } finally {
       setIsUploadingPhoto(false)
@@ -187,16 +190,16 @@ export default function ConfiguracionPage() {
       await refreshUsuario()
 
       toast({
-        title: 'Perfil actualizado',
-        description: 'Tus datos han sido actualizados',
+        title: t('configuracion.perfilActualizado'),
+        description: t('configuracion.perfilActualizadoDesc'),
       })
       setIsEditingProfile(false)
     } catch (error) {
       console.error('Error updating profile:', error)
       toast({
         variant: 'destructive',
-        title: 'Error',
-        description: 'No se pudo actualizar el perfil',
+        title: t('common.error'),
+        description: t('errors.generic'),
       })
     }
   }
@@ -214,8 +217,8 @@ export default function ConfiguracionPage() {
       await updatePassword(user, data.newPassword)
 
       toast({
-        title: 'Contraseña actualizada',
-        description: 'Tu contraseña ha sido cambiada exitosamente',
+        title: t('configuracion.contrasenaActualizada'),
+        description: t('configuracion.contrasenaActualizadaDesc'),
       })
       setShowPasswordDialog(false)
       passwordForm.reset()
@@ -224,13 +227,13 @@ export default function ConfiguracionPage() {
       const firebaseError = error as { code?: string }
       if (firebaseError.code === 'auth/wrong-password') {
         passwordForm.setError('currentPassword', {
-          message: 'La contraseña actual es incorrecta',
+          message: t('configuracion.contrasenaIncorrecta'),
         })
       } else {
         toast({
           variant: 'destructive',
-          title: 'Error',
-          description: 'No se pudo cambiar la contraseña',
+          title: t('common.error'),
+          description: t('errors.generic'),
         })
       }
     }
@@ -240,16 +243,16 @@ export default function ConfiguracionPage() {
 
   return (
     <div className="container mx-auto max-w-3xl space-y-6 py-6">
-      <PageHeader title="Configuracion" description="Personaliza tu experiencia en la plataforma" />
+      <PageHeader title={t('configuracion.title')} description={t('configuracion.description')} />
 
       {/* Perfil */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User className="h-5 w-5" />
-            Perfil
+            {t('configuracion.perfil')}
           </CardTitle>
-          <CardDescription>Administra tu informacion personal</CardDescription>
+          <CardDescription>{t('configuracion.perfilDesc')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Photo */}
@@ -304,7 +307,7 @@ export default function ConfiguracionPage() {
                   name="nombre"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nombre completo</FormLabel>
+                      <FormLabel>{t('configuracion.nombreCompleto')}</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
@@ -317,7 +320,7 @@ export default function ConfiguracionPage() {
                   name="telefono"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Telefono (opcional)</FormLabel>
+                      <FormLabel>{t('configuracion.telefonoOpcional')}</FormLabel>
                       <FormControl>
                         <Input
                           {...field}
@@ -334,10 +337,10 @@ export default function ConfiguracionPage() {
                     {profileForm.formState.isSubmitting ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Guardando...
+                        {t('common.loading')}
                       </>
                     ) : (
-                      'Guardar'
+                      t('configuracion.guardar')
                     )}
                   </Button>
                   <Button
@@ -347,7 +350,7 @@ export default function ConfiguracionPage() {
                       setIsEditingProfile(false)
                     }}
                   >
-                    Cancelar
+                    {t('configuracion.cancelar')}
                   </Button>
                 </div>
               </form>
@@ -355,13 +358,15 @@ export default function ConfiguracionPage() {
           ) : (
             <div className="space-y-4">
               <div>
-                <Label className="text-muted-foreground">Correo electronico</Label>
+                <Label className="text-muted-foreground">
+                  {t('configuracion.correoElectronico')}
+                </Label>
                 <p className="text-sm">{usuario?.email}</p>
               </div>
               <div>
-                <Label className="text-muted-foreground">Telefono</Label>
+                <Label className="text-muted-foreground">{t('configuracion.telefono')}</Label>
                 <p className="text-sm">
-                  {(usuario as { telefono?: string }).telefono ?? 'No configurado'}
+                  {(usuario as { telefono?: string }).telefono ?? t('configuracion.noConfigurado')}
                 </p>
               </div>
               <Button
@@ -374,7 +379,7 @@ export default function ConfiguracionPage() {
                   setIsEditingProfile(true)
                 }}
               >
-                Editar Perfil
+                {t('configuracion.editarPerfil')}
               </Button>
             </div>
           )}
@@ -386,18 +391,18 @@ export default function ConfiguracionPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Palette className="h-5 w-5" />
-            Apariencia
+            {t('configuracion.apariencia')}
           </CardTitle>
-          <CardDescription>Personaliza el aspecto de la interfaz</CardDescription>
+          <CardDescription>{t('configuracion.aparienciaDesc')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label className="flex items-center gap-2">
                 {theme === 'dark' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-                Tema Oscuro
+                {t('configuracion.temaOscuro')}
               </Label>
-              <p className="text-sm text-muted-foreground">Cambia entre el tema claro y oscuro</p>
+              <p className="text-sm text-muted-foreground">{t('configuracion.temaOscuroDesc')}</p>
             </div>
             <Switch checked={theme === 'dark'} onCheckedChange={toggleTheme} />
           </div>
@@ -406,17 +411,25 @@ export default function ConfiguracionPage() {
             <div className="space-y-0.5">
               <Label className="flex items-center gap-2">
                 <Globe className="h-4 w-4" />
-                Idioma
+                {t('configuracion.idioma')}
               </Label>
-              <p className="text-sm text-muted-foreground">Selecciona el idioma de la interfaz</p>
+              <p className="text-sm text-muted-foreground">{t('configuracion.idiomaDesc')}</p>
             </div>
-            <Select value={i18n.language} onValueChange={handleLanguageChange}>
+            <Select value={currentLang} onValueChange={handleLanguageChange}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="es">Espanol</SelectItem>
-                <SelectItem value="en">English</SelectItem>
+                <SelectItem value="es">
+                  <span className="flex items-center gap-2">
+                    <span>🇨🇴</span> Espanol
+                  </span>
+                </SelectItem>
+                <SelectItem value="en">
+                  <span className="flex items-center gap-2">
+                    <span>🇺🇸</span> English
+                  </span>
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -428,23 +441,27 @@ export default function ConfiguracionPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Bell className="h-5 w-5" />
-            Notificaciones
+            {t('configuracion.notificaciones')}
           </CardTitle>
-          <CardDescription>Configura las alertas y notificaciones</CardDescription>
+          <CardDescription>{t('configuracion.notificacionesDesc')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label>Notificaciones Push</Label>
-              <p className="text-sm text-muted-foreground">Recibe alertas de novedades criticas</p>
+              <Label>{t('configuracion.notificacionesPush')}</Label>
+              <p className="text-sm text-muted-foreground">
+                {t('configuracion.notificacionesPushDesc')}
+              </p>
             </div>
             <Switch checked={notificaciones} onCheckedChange={setNotificaciones} />
           </div>
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label>Sonidos de Alerta</Label>
-              <p className="text-sm text-muted-foreground">Reproduce sonido al recibir alertas</p>
+              <Label>{t('configuracion.sonidosAlerta')}</Label>
+              <p className="text-sm text-muted-foreground">
+                {t('configuracion.sonidosAlertaDesc')}
+              </p>
             </div>
             <Switch checked={sonidos} onCheckedChange={setSonidos} />
           </div>
@@ -456,15 +473,17 @@ export default function ConfiguracionPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5" />
-            Seguridad
+            {t('configuracion.seguridad')}
           </CardTitle>
-          <CardDescription>Gestiona la seguridad de tu cuenta</CardDescription>
+          <CardDescription>{t('configuracion.seguridadDesc')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label>Cambiar Contrasena</Label>
-              <p className="text-sm text-muted-foreground">Actualiza tu contrasena de acceso</p>
+              <Label>{t('configuracion.cambiarContrasena')}</Label>
+              <p className="text-sm text-muted-foreground">
+                {t('configuracion.cambiarContrasenaDesc')}
+              </p>
             </div>
             <Button
               variant="outline"
@@ -472,7 +491,7 @@ export default function ConfiguracionPage() {
                 setShowPasswordDialog(true)
               }}
             >
-              Cambiar
+              {t('configuracion.cambiar')}
             </Button>
           </div>
         </CardContent>
@@ -483,17 +502,15 @@ export default function ConfiguracionPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <HelpCircle className="h-5 w-5" />
-            Ayuda
+            {t('configuracion.ayuda')}
           </CardTitle>
-          <CardDescription>Recursos de ayuda y tutoriales</CardDescription>
+          <CardDescription>{t('configuracion.ayudaDesc')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label>Tour de la Aplicacion</Label>
-              <p className="text-sm text-muted-foreground">
-                Vuelve a ver el recorrido guiado por la plataforma
-              </p>
+              <Label>{t('configuracion.tourApp')}</Label>
+              <p className="text-sm text-muted-foreground">{t('configuracion.tourAppDesc')}</p>
             </div>
             <Button
               variant="outline"
@@ -505,10 +522,10 @@ export default function ConfiguracionPage() {
               {isRestartingTour ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Reiniciando...
+                  {t('common.loading')}
                 </>
               ) : (
-                'Ver Tour'
+                t('configuracion.verTour')
               )}
             </Button>
           </div>
@@ -519,10 +536,8 @@ export default function ConfiguracionPage() {
       <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Cambiar Contraseña</DialogTitle>
-            <DialogDescription>
-              Ingresa tu contraseña actual y la nueva contraseña
-            </DialogDescription>
+            <DialogTitle>{t('configuracion.cambiarContrasena')}</DialogTitle>
+            <DialogDescription>{t('configuracion.cambiarContrasenaDesc')}</DialogDescription>
           </DialogHeader>
           <Form {...passwordForm}>
             <form
@@ -536,7 +551,7 @@ export default function ConfiguracionPage() {
                 name="currentPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Contraseña actual</FormLabel>
+                    <FormLabel>{t('configuracion.contrasenaActual')}</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Input type={showCurrentPassword ? 'text' : 'password'} {...field} />
@@ -566,7 +581,7 @@ export default function ConfiguracionPage() {
                 name="newPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nueva contraseña</FormLabel>
+                    <FormLabel>{t('configuracion.nuevaContrasena')}</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Input type={showNewPassword ? 'text' : 'password'} {...field} />
@@ -596,7 +611,7 @@ export default function ConfiguracionPage() {
                 name="confirmPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Confirmar nueva contraseña</FormLabel>
+                    <FormLabel>{t('configuracion.confirmarContrasena')}</FormLabel>
                     <FormControl>
                       <Input type="password" {...field} />
                     </FormControl>
@@ -613,16 +628,16 @@ export default function ConfiguracionPage() {
                     passwordForm.reset()
                   }}
                 >
-                  Cancelar
+                  {t('configuracion.cancelar')}
                 </Button>
                 <Button type="submit" disabled={passwordForm.formState.isSubmitting}>
                   {passwordForm.formState.isSubmitting ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Cambiando...
+                      {t('common.loading')}
                     </>
                   ) : (
-                    'Cambiar Contraseña'
+                    t('configuracion.cambiarContrasena')
                   )}
                 </Button>
               </DialogFooter>

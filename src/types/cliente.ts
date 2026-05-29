@@ -11,6 +11,7 @@ export interface Cliente extends BaseEntity {
   contactoTelefono: string
   planContratado: Plan
   activo: boolean
+  logoUrl?: string | null
 }
 
 /**

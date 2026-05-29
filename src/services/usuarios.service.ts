@@ -12,7 +12,8 @@ import {
   limit,
   serverTimestamp,
 } from 'firebase/firestore'
-import { db } from '@/config/firebase'
+import { createUserWithEmailAndPassword, getAuth, signOut } from 'firebase/auth'
+import { db, getSecondaryApp } from '@/config/firebase'
 import { usuarioFirestoreSchema } from '@/schemas/auth.schema'
 import type { Usuario, CreateUsuarioData, UpdateUsuarioData } from '@/types/auth'
 import type { Entity, PaginatedQuery, PaginatedResult, FirestoreDocData } from '@/types/firestore'
@@ -308,4 +309,89 @@ export async function createUsuarioInvitation(
   })
 
   return docRef.id
+}
+
+/**
+ * Genera una contraseña aleatoria segura
+ */
+function generatePassword(length = 12): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%'
+  let password = ''
+  for (let i = 0; i < length; i++) {
+    password += chars.charAt(Math.floor(Math.random() * chars.length))
+  }
+  return password
+}
+
+/**
+ * Crea un usuario directamente en Firebase Auth y Firestore
+ * Retorna las credenciales para entregar al usuario
+ */
+export async function createUsuarioDirecto(
+  data: CreateUsuarioData,
+  createdBy: string
+): Promise<{ uid: string; email: string; password: string }> {
+  // Verificar si ya existe un usuario con este email
+  const existingUser = await getUsuarioByEmail(data.email)
+  if (existingUser) {
+    throw new Error('Ya existe un usuario con este email')
+  }
+
+  // Generar contraseña temporal
+  const password = generatePassword()
+
+  // Usar una instancia secundaria de Firebase para no afectar la sesión actual
+  const secondaryApp = getSecondaryApp()
+  const secondaryAuth = getAuth(secondaryApp)
+
+  try {
+    // Crear usuario en Firebase Auth
+    const userCredential = await createUserWithEmailAndPassword(
+      secondaryAuth,
+      data.email.toLowerCase(),
+      password
+    )
+
+    const uid = userCredential.user.uid
+
+    // Cerrar sesión en la app secundaria (no afecta la sesión principal)
+    await signOut(secondaryAuth)
+
+    // Crear documento en Firestore
+    const docRef = doc(db, COLLECTION, uid)
+    await setDoc(docRef, {
+      uid,
+      email: data.email.toLowerCase(),
+      nombre: data.nombre,
+      rol: data.rol,
+      clienteId: data.clienteId ?? null,
+      sucursalIds: data.sucursalIds ?? null,
+      propietarioId: data.propietarioId ?? null,
+      activo: true,
+      deleted: false,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      createdBy,
+    })
+
+    return {
+      uid,
+      email: data.email.toLowerCase(),
+      password,
+    }
+  } catch (error) {
+    // Si falla la creación en Auth, propagar el error
+    if (error instanceof Error) {
+      if (error.message.includes('email-already-in-use')) {
+        throw new Error('Este email ya está registrado en el sistema')
+      }
+      if (error.message.includes('weak-password')) {
+        throw new Error('La contraseña generada no cumple los requisitos')
+      }
+      if (error.message.includes('invalid-email')) {
+        throw new Error('El email no es válido')
+      }
+    }
+    throw error
+  }
 }

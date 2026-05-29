@@ -1,5 +1,6 @@
 import { type ColumnDef } from '@tanstack/react-table'
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Building2, MoreHorizontal, Pencil, Trash2, Eye, MapPin, Users } from 'lucide-react'
 import { DataTable } from '@/components/common/DataTable'
 import { Button } from '@/components/ui/button'
@@ -48,11 +49,12 @@ export function ClientesTable({
   onManageSucursales,
   onManagePropietarios,
 }: ClientesTableProps) {
+  const { t } = useTranslation()
   const columns: ColumnDef<Entity<Cliente>>[] = useMemo(
     () => [
       {
         accessorKey: 'nombre',
-        header: 'Empresa',
+        header: t('clientes.empresa'),
         cell: ({ row }) => (
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
@@ -60,14 +62,16 @@ export function ClientesTable({
             </div>
             <div>
               <div className="font-medium">{row.getValue('nombre')}</div>
-              <div className="text-sm text-muted-foreground">NIT: {row.original.nit}</div>
+              <div className="text-sm text-muted-foreground">
+                {t('clientes.nit')}: {row.original.nit}
+              </div>
             </div>
           </div>
         ),
       },
       {
         accessorKey: 'planContratado',
-        header: 'Plan',
+        header: t('clientes.plan'),
         cell: ({ row }) => {
           const plan = row.original.planContratado
           const badge = PLAN_BADGES[plan]
@@ -82,7 +86,7 @@ export function ClientesTable({
       },
       {
         accessorKey: 'contactoEmail',
-        header: 'Contacto',
+        header: t('clientes.contact'),
         cell: ({ row }) => (
           <div>
             <div className="text-sm">{row.getValue('contactoEmail')}</div>
@@ -92,7 +96,7 @@ export function ClientesTable({
       },
       {
         accessorKey: 'activo',
-        header: 'Estado',
+        header: t('clientes.status'),
         cell: ({ row }) => {
           const activo = row.original.activo
           return (
@@ -101,7 +105,7 @@ export function ClientesTable({
                 activo ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
               }`}
             >
-              {activo ? 'Activo' : 'Inactivo'}
+              {activo ? t('common.active') : t('common.inactive')}
             </span>
           )
         },
@@ -116,12 +120,12 @@ export function ClientesTable({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <span className="sr-only">Abrir menu</span>
+                  <span className="sr-only">{t('common.openMenu')}</span>
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                <DropdownMenuLabel>{t('common.actions')}</DropdownMenuLabel>
                 {onView && (
                   <DropdownMenuItem
                     onClick={() => {
@@ -129,7 +133,7 @@ export function ClientesTable({
                     }}
                   >
                     <Eye className="mr-2 h-4 w-4" />
-                    Ver detalles
+                    {t('common.viewDetails')}
                   </DropdownMenuItem>
                 )}
                 {onEdit && (
@@ -139,7 +143,7 @@ export function ClientesTable({
                     }}
                   >
                     <Pencil className="mr-2 h-4 w-4" />
-                    Editar
+                    {t('common.edit')}
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
@@ -150,7 +154,7 @@ export function ClientesTable({
                     }}
                   >
                     <MapPin className="mr-2 h-4 w-4" />
-                    Sucursales
+                    {t('clientes.sucursales')}
                   </DropdownMenuItem>
                 )}
                 {onManagePropietarios && (
@@ -160,7 +164,7 @@ export function ClientesTable({
                     }}
                   >
                     <Users className="mr-2 h-4 w-4" />
-                    Propietarios
+                    {t('clientes.propietarios')}
                   </DropdownMenuItem>
                 )}
                 {onDelete && (
@@ -173,7 +177,7 @@ export function ClientesTable({
                       className="text-destructive focus:text-destructive"
                     >
                       <Trash2 className="mr-2 h-4 w-4" />
-                      Eliminar
+                      {t('common.delete')}
                     </DropdownMenuItem>
                   </>
                 )}
@@ -183,7 +187,7 @@ export function ClientesTable({
         },
       },
     ],
-    [onView, onEdit, onDelete, onManageSucursales, onManagePropietarios]
+    [t, onView, onEdit, onDelete, onManageSucursales, onManagePropietarios]
   )
 
   return (
@@ -192,9 +196,9 @@ export function ClientesTable({
       data={clientes}
       isLoading={isLoading}
       searchColumn="nombre"
-      searchPlaceholder="Buscar por nombre..."
-      emptyMessage="No hay clientes"
-      emptyDescription="Crea un nuevo cliente para comenzar"
+      searchPlaceholder={t('clientes.searchPlaceholder')}
+      emptyMessage={t('clientes.noClientes')}
+      emptyDescription={t('clientes.noClientesDescription')}
     />
   )
 }

@@ -1,5 +1,6 @@
 import { type ColumnDef } from '@tanstack/react-table'
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   User,
   MoreHorizontal,
@@ -60,11 +61,12 @@ export function UsuariosTable({
   onResetOnboarding,
   currentUserId,
 }: UsuariosTableProps) {
+  const { t } = useTranslation()
   const columns: ColumnDef<UsuarioConDetalles>[] = useMemo(
     () => [
       {
         accessorKey: 'nombre',
-        header: 'Usuario',
+        header: t('usuarios.user'),
         cell: ({ row }) => {
           const usuario = row.original
           return (
@@ -77,7 +79,7 @@ export function UsuariosTable({
                   <span className="font-medium">{usuario.nombre}</span>
                   {usuario.id === currentUserId && (
                     <span className="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">
-                      Tu
+                      {t('usuarios.you')}
                     </span>
                   )}
                 </div>
@@ -89,18 +91,18 @@ export function UsuariosTable({
       },
       {
         accessorKey: 'rol',
-        header: 'Rol',
+        header: t('usuarios.rol'),
         cell: ({ row }) => {
           return <RoleBadge rol={row.original.rol} />
         },
       },
       {
         accessorKey: 'clienteNombre',
-        header: 'Cliente',
+        header: t('usuarios.cliente'),
         cell: ({ row }) => {
           const cliente = row.original.clienteNombre
           if (!cliente) {
-            return <span className="text-sm text-muted-foreground">Interno</span>
+            return <span className="text-sm text-muted-foreground">{t('usuarios.internal')}</span>
           }
           return (
             <div className="flex items-center gap-2">
@@ -112,11 +114,13 @@ export function UsuariosTable({
       },
       {
         accessorKey: 'sucursalesNombres',
-        header: 'Sucursales',
+        header: t('clientes.sucursales'),
         cell: ({ row }) => {
           const sucursales = row.original.sucursalesNombres
           if (!sucursales || sucursales.length === 0) {
-            return <span className="text-sm text-muted-foreground">Todas</span>
+            return (
+              <span className="text-sm text-muted-foreground">{t('usuarios.allBranches')}</span>
+            )
           }
           if (sucursales.length === 1) {
             return <span className="text-sm">{sucursales[0]}</span>
@@ -131,7 +135,7 @@ export function UsuariosTable({
       },
       {
         accessorKey: 'activo',
-        header: 'Estado',
+        header: t('common.status'),
         cell: ({ row }) => {
           const activo = row.original.activo
           return (
@@ -141,7 +145,7 @@ export function UsuariosTable({
                 activo ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
               )}
             >
-              {activo ? 'Activo' : 'Inactivo'}
+              {activo ? t('common.active') : t('common.inactive')}
             </span>
           )
         },
@@ -157,12 +161,12 @@ export function UsuariosTable({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <span className="sr-only">Abrir menu</span>
+                  <span className="sr-only">{t('usuarios.openMenu')}</span>
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                <DropdownMenuLabel>{t('common.actions')}</DropdownMenuLabel>
                 {onView && (
                   <DropdownMenuItem
                     onClick={() => {
@@ -170,7 +174,7 @@ export function UsuariosTable({
                     }}
                   >
                     <Eye className="mr-2 h-4 w-4" />
-                    Ver detalles
+                    {t('usuarios.viewDetails')}
                   </DropdownMenuItem>
                 )}
                 {onEdit && !isSelf && (
@@ -180,7 +184,7 @@ export function UsuariosTable({
                     }}
                   >
                     <Pencil className="mr-2 h-4 w-4" />
-                    Editar
+                    {t('common.edit')}
                   </DropdownMenuItem>
                 )}
                 {onChangeRole && !isSelf && (
@@ -190,7 +194,7 @@ export function UsuariosTable({
                     }}
                   >
                     <Shield className="mr-2 h-4 w-4" />
-                    Cambiar rol
+                    {t('usuarios.changeRole')}
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
@@ -201,7 +205,7 @@ export function UsuariosTable({
                     }}
                   >
                     <Mail className="mr-2 h-4 w-4" />
-                    Reenviar invitacion
+                    {t('usuarios.resendInvite')}
                   </DropdownMenuItem>
                 )}
                 {onResetOnboarding && (
@@ -211,7 +215,7 @@ export function UsuariosTable({
                     }}
                   >
                     <RotateCcw className="mr-2 h-4 w-4" />
-                    Reiniciar tour
+                    {t('usuarios.resetTour')}
                   </DropdownMenuItem>
                 )}
                 {onToggleActive && !isSelf && (
@@ -223,12 +227,12 @@ export function UsuariosTable({
                     {usuario.activo ? (
                       <>
                         <UserX className="mr-2 h-4 w-4" />
-                        Desactivar
+                        {t('usuarios.deactivate')}
                       </>
                     ) : (
                       <>
                         <UserCheck className="mr-2 h-4 w-4" />
-                        Activar
+                        {t('usuarios.activate')}
                       </>
                     )}
                   </DropdownMenuItem>
@@ -243,7 +247,7 @@ export function UsuariosTable({
                       className="text-destructive focus:text-destructive"
                     >
                       <Trash2 className="mr-2 h-4 w-4" />
-                      Eliminar
+                      {t('common.delete')}
                     </DropdownMenuItem>
                   </>
                 )}
@@ -254,6 +258,7 @@ export function UsuariosTable({
       },
     ],
     [
+      t,
       onView,
       onEdit,
       onDelete,
@@ -271,9 +276,9 @@ export function UsuariosTable({
       data={usuarios}
       isLoading={isLoading}
       searchColumn="nombre"
-      searchPlaceholder="Buscar usuario..."
-      emptyMessage="No hay usuarios"
-      emptyDescription="Crea un nuevo usuario para comenzar"
+      searchPlaceholder={t('usuarios.searchUser')}
+      emptyMessage={t('usuarios.noUsers')}
+      emptyDescription={t('usuarios.createUserToStart')}
     />
   )
 }

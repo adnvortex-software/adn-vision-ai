@@ -27,6 +27,10 @@ const BusNuevoPage = lazy(() => import('@/pages/buses/BusNuevoPage'))
 const BusEditPage = lazy(() => import('@/pages/buses/BusEditPage'))
 const BusConfigCamarasPage = lazy(() => import('@/pages/buses/BusConfigCamarasPage'))
 
+// Despachos pages
+const DespachosListPage = lazy(() => import('@/pages/despachos/DespachosListPage'))
+const DespachoCreatePage = lazy(() => import('@/pages/despachos/DespachoCreatePage'))
+
 // Novedades pages
 const NovedadesEventosPage = lazy(() => import('@/pages/novedades/NovedadesEventosPage'))
 const NovedadEventoDetailPage = lazy(() => import('@/pages/novedades/NovedadEventoDetailPage'))
@@ -171,6 +175,24 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingState fullScreen />}>
             <BusConfigCamarasPage />
+          </Suspense>
+        ),
+      },
+
+      // Despachos
+      {
+        path: '/despachos',
+        element: (
+          <Suspense fallback={<LoadingState fullScreen />}>
+            <DespachosListPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/despachos/nuevo',
+        element: (
+          <Suspense fallback={<LoadingState fullScreen />}>
+            <DespachoCreatePage />
           </Suspense>
         ),
       },

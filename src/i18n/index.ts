@@ -17,6 +17,8 @@ void i18n
     resources,
     fallbackLng: 'es',
     supportedLngs: ['es', 'en'],
+    // Normalizar el idioma a solo el codigo base (es, en) sin region
+    load: 'languageOnly',
     interpolation: {
       escapeValue: false,
     },

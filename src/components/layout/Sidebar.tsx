@@ -1,11 +1,12 @@
 import { Link, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import {
   LayoutDashboard,
   Building2,
   Bus,
+  ClipboardList,
   Users,
   AlertTriangle,
-  FileText,
   Settings,
   ChevronLeft,
   ChevronRight,
@@ -19,7 +20,7 @@ import type { Usuario } from '@/types/auth'
 import type { Permission } from '@/lib/permissions'
 
 interface NavItem {
-  label: string
+  labelKey: string
   href: string
   icon: React.ComponentType<{ className?: string }>
   permission?: Permission
@@ -27,36 +28,36 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   {
-    label: 'Dashboard',
+    labelKey: 'nav.dashboard',
     href: '/dashboard',
     icon: LayoutDashboard,
   },
   {
-    label: 'Clientes',
+    labelKey: 'nav.clientes',
     href: '/clientes',
     icon: Building2,
     permission: 'clientes.read',
   },
   {
-    label: 'Buses',
+    labelKey: 'nav.buses',
     href: '/buses',
     icon: Bus,
     permission: 'buses.read',
   },
   {
-    label: 'Novedades',
+    labelKey: 'nav.despachos',
+    href: '/despachos',
+    icon: ClipboardList,
+    permission: 'buses.read',
+  },
+  {
+    labelKey: 'nav.novedades',
     href: '/novedades',
     icon: AlertTriangle,
     permission: 'eventos.read',
   },
   {
-    label: 'Reportes',
-    href: '/reportes',
-    icon: FileText,
-    permission: 'reportes.download',
-  },
-  {
-    label: 'Usuarios',
+    labelKey: 'nav.usuarios',
     href: '/usuarios',
     icon: Users,
     permission: 'usuarios.read',
@@ -69,6 +70,7 @@ interface SidebarProps {
 
 export function Sidebar({ usuario }: SidebarProps) {
   const location = useLocation()
+  const { t } = useTranslation()
   const { sidebarCollapsed, toggleSidebar } = useUIStore()
   const { can } = usePermissions({ usuario })
 
@@ -107,6 +109,7 @@ export function Sidebar({ usuario }: SidebarProps) {
           {visibleItems.map((item) => {
             const isActive = location.pathname.startsWith(item.href)
             const Icon = item.icon
+            const label = t(item.labelKey)
 
             return (
               <Link
@@ -119,10 +122,10 @@ export function Sidebar({ usuario }: SidebarProps) {
                     : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
                   sidebarCollapsed && 'justify-center px-2'
                 )}
-                title={sidebarCollapsed ? item.label : undefined}
+                title={sidebarCollapsed ? label : undefined}
               >
                 <Icon className="h-5 w-5 flex-shrink-0" />
-                {!sidebarCollapsed && <span>{item.label}</span>}
+                {!sidebarCollapsed && <span>{label}</span>}
               </Link>
             )
           })}
@@ -136,10 +139,10 @@ export function Sidebar({ usuario }: SidebarProps) {
               'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground',
               sidebarCollapsed && 'justify-center px-2'
             )}
-            title={sidebarCollapsed ? 'Configuración' : undefined}
+            title={sidebarCollapsed ? t('nav.configuracion') : undefined}
           >
             <Settings className="h-5 w-5 flex-shrink-0" />
-            {!sidebarCollapsed && <span>Configuración</span>}
+            {!sidebarCollapsed && <span>{t('nav.configuracion')}</span>}
           </Link>
         </div>
       </div>

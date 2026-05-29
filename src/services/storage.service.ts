@@ -18,6 +18,7 @@ const STORAGE_PATHS = {
   reportes: 'reportes',
   conductorFotos: 'conductor-fotos',
   profilePhotos: 'profile-photos',
+  clienteLogos: 'cliente-logos',
 } as const
 
 /**
@@ -267,4 +268,31 @@ export async function cleanupOldScreenshots(
   }
 
   return toDelete.length
+}
+
+/**
+ * Sube logo de cliente
+ */
+export async function uploadClienteLogo(clienteId: string, file: File | Blob): Promise<string> {
+  const extension = file instanceof File ? (file.name.split('.').pop() ?? 'png') : 'png'
+  const filename = `logo_${String(Date.now())}.${extension}`
+  const path = `${STORAGE_PATHS.clienteLogos}/${clienteId}/${filename}`
+
+  // Eliminar logo anterior
+  try {
+    const existingFiles = await listFiles(`${STORAGE_PATHS.clienteLogos}/${clienteId}`)
+    for (const filePath of existingFiles) {
+      await deleteFile(filePath)
+    }
+  } catch {
+    // Ignorar si no hay logo anterior
+  }
+
+  return uploadFile(path, file, {
+    contentType: file.type || 'image/png',
+    customMetadata: {
+      clienteId,
+      uploadedAt: new Date().toISOString(),
+    },
+  })
 }

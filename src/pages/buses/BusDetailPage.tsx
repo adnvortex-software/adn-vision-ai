@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import {
   ArrowLeft,
   Bus,
@@ -23,6 +24,7 @@ import type { Entity } from '@/types/firestore'
 import { useToast } from '@/hooks/use-toast'
 
 export default function BusDetailPage() {
+  const { t } = useTranslation()
   const { busId } = useParams<{ busId: string }>()
   const navigate = useNavigate()
   const { toast } = useToast()
@@ -41,8 +43,8 @@ export default function BusDetailPage() {
       } catch (error) {
         console.error('Error loading bus:', error)
         toast({
-          title: 'Error',
-          description: 'No se pudo cargar la información del bus',
+          title: t('common.error'),
+          description: t('buses.loadError'),
           variant: 'destructive',
         })
       } finally {
@@ -66,8 +68,10 @@ export default function BusDetailPage() {
       <div className="container mx-auto py-6">
         <div className="flex flex-col items-center justify-center rounded-lg border py-12">
           <Bus className="h-12 w-12 text-muted-foreground/30" />
-          <h3 className="mt-4 text-lg font-semibold">Bus no encontrado</h3>
-          <p className="mt-1 text-sm text-muted-foreground">El bus con ID {busId} no existe</p>
+          <h3 className="mt-4 text-lg font-semibold">{t('buses.notFound')}</h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {t('buses.notFoundDesc', { id: busId })}
+          </p>
           <Button
             className="mt-4"
             variant="outline"
@@ -76,7 +80,7 @@ export default function BusDetailPage() {
             }}
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Volver a buses
+            {t('buses.backToBuses')}
           </Button>
         </div>
       </div>
@@ -92,7 +96,7 @@ export default function BusDetailPage() {
             <BusStatusIndicator estado={bus.estado} />
           </div>
         }
-        description={bus.deviceId ? `Device ID: ${bus.deviceId}` : 'Sin Device ID'}
+        description={bus.deviceId ? `Device ID: ${bus.deviceId}` : t('buses.noDeviceId')}
         actions={
           <div className="flex items-center gap-2">
             <Button
@@ -102,7 +106,7 @@ export default function BusDetailPage() {
               }}
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Volver
+              {t('common.back')}
             </Button>
             <Button
               onClick={() => {
@@ -110,7 +114,7 @@ export default function BusDetailPage() {
               }}
             >
               <Pencil className="mr-2 h-4 w-4" />
-              Editar
+              {t('common.edit')}
             </Button>
           </div>
         }
@@ -122,25 +126,25 @@ export default function BusDetailPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Bus className="h-5 w-5" />
-              Informacion del Vehiculo
+              {t('buses.vehicleInfo')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <p className="text-sm text-muted-foreground">Tipo de Vehiculo</p>
-                <p className="font-medium capitalize">{bus.tipoVehiculo}</p>
+                <p className="text-sm text-muted-foreground">{t('buses.tipo')}</p>
+                <p className="font-medium capitalize">{t(`buses.tipos.${bus.tipoVehiculo}`)}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Device ID</p>
                 <p className="font-mono text-sm">{bus.deviceId ?? '-'}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Estado</p>
+                <p className="text-sm text-muted-foreground">{t('buses.estado')}</p>
                 <BusStatusIndicator estado={bus.estado} />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Camaras Configuradas</p>
+                <p className="text-sm text-muted-foreground">{t('buses.configuredCameras')}</p>
                 <p className="font-medium">{bus.numCamarasConfiguradas}</p>
               </div>
             </div>
@@ -156,22 +160,22 @@ export default function BusDetailPage() {
               ) : (
                 <Wifi className="h-5 w-5 text-green-500" />
               )}
-              Conectividad
+              {t('buses.conectividad')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <p className="text-sm text-muted-foreground">IP ZeroTier</p>
+              <p className="text-sm text-muted-foreground">{t('buses.ipRouter')}</p>
               <p className="font-mono text-sm">{bus.ztIpRouter}</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Subnet LAN</p>
+              <p className="text-sm text-muted-foreground">{t('buses.subnetLan')}</p>
               <p className="font-mono text-sm">{bus.subnetLan}</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Ultimo Heartbeat</p>
+              <p className="text-sm text-muted-foreground">{t('buses.lastHeartbeat')}</p>
               <p className="text-sm">
-                {bus.lastHeartbeat ? bus.lastHeartbeat.toDate().toLocaleString() : 'Nunca'}
+                {bus.lastHeartbeat ? bus.lastHeartbeat.toDate().toLocaleString() : t('buses.never')}
               </p>
             </div>
           </CardContent>
@@ -188,7 +192,7 @@ export default function BusDetailPage() {
               </div>
               <div>
                 <p className="text-2xl font-bold">0</p>
-                <p className="text-sm text-muted-foreground">Entradas hoy</p>
+                <p className="text-sm text-muted-foreground">{t('buses.entriesToday')}</p>
               </div>
             </div>
           </CardContent>
@@ -201,7 +205,7 @@ export default function BusDetailPage() {
               </div>
               <div>
                 <p className="text-2xl font-bold">0</p>
-                <p className="text-sm text-muted-foreground">Salidas hoy</p>
+                <p className="text-sm text-muted-foreground">{t('buses.exitsToday')}</p>
               </div>
             </div>
           </CardContent>
@@ -214,7 +218,7 @@ export default function BusDetailPage() {
               </div>
               <div>
                 <p className="text-2xl font-bold">0</p>
-                <p className="text-sm text-muted-foreground">Novedades hoy</p>
+                <p className="text-sm text-muted-foreground">{t('buses.noveltiesToday')}</p>
               </div>
             </div>
           </CardContent>
@@ -226,15 +230,17 @@ export default function BusDetailPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Camera className="h-5 w-5" />
-            Camaras Configuradas
+            {t('buses.configuredCameras')}
           </CardTitle>
-          <CardDescription>{camaras.length} camara(s) configurada(s)</CardDescription>
+          <CardDescription>
+            {t('buses.camerasConfiguredCount', { count: camaras.length })}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {camaras.length === 0 ? (
             <div className="py-8 text-center">
               <Camera className="mx-auto h-8 w-8 text-muted-foreground/30" />
-              <p className="mt-2 text-sm text-muted-foreground">No hay camaras configuradas</p>
+              <p className="mt-2 text-sm text-muted-foreground">{t('buses.noCameras')}</p>
             </div>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -243,12 +249,14 @@ export default function BusDetailPage() {
                   <div className="flex items-center justify-between">
                     <span className="font-medium">{camara.nombre}</span>
                     <Badge variant={camara.habilitada ? 'default' : 'secondary'}>
-                      {camara.habilitada ? 'Activa' : 'Inactiva'}
+                      {camara.habilitada ? t('common.active') : t('common.inactive')}
                     </Badge>
                   </div>
-                  <p className="mt-1 text-sm capitalize text-muted-foreground">{camara.perfil}</p>
+                  <p className="mt-1 text-sm capitalize text-muted-foreground">
+                    {t(`camaras.perfiles.${camara.perfil}`)}
+                  </p>
                   <p className="mt-1 font-mono text-xs text-muted-foreground">
-                    Canal {camara.canal}
+                    {t('camaras.canal')} {camara.canal}
                   </p>
                 </div>
               ))}
