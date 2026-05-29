@@ -26,8 +26,8 @@ interface PassengerChartProps {
 
 export function PassengerChart({ data, className, title, description }: PassengerChartProps) {
   const { t } = useTranslation()
-  const totalPasajeros = data.reduce((sum, d) => sum + d.totalPasajeros, 0)
-  const promedioDiario = data.length > 0 ? Math.round(totalPasajeros / data.length) : 0
+  const totalDelPeriodo = data.reduce((sum, d) => sum + d.totalPasajeros, 0)
+  const promedioPorDia = data.length > 0 ? Math.round(totalDelPeriodo / data.length) : 0
 
   return (
     <Card className={cn(className)}>
@@ -38,20 +38,20 @@ export function PassengerChart({ data, className, title, description }: Passenge
               <Users className="h-5 w-5 text-blue-600" />
               {title ?? t('dashboard.passengerCount')}
             </CardTitle>
-            <CardDescription>{description ?? t('dashboard.totalPassengers')}</CardDescription>
+            <CardDescription>{description ?? t('dashboard.passengersPerDay')}</CardDescription>
           </div>
           <div className="flex gap-6 text-right">
             <div>
               <div className="text-2xl font-bold text-blue-600">
-                {totalPasajeros.toLocaleString()}
+                {totalDelPeriodo.toLocaleString()}
               </div>
-              <div className="text-xs text-muted-foreground">{t('dashboard.totalPassengers')}</div>
+              <div className="text-xs text-muted-foreground">{t('dashboard.periodTotal')}</div>
             </div>
             <div>
               <div className="text-2xl font-bold text-emerald-600">
-                {promedioDiario.toLocaleString()}
+                {promedioPorDia.toLocaleString()}
               </div>
-              <div className="text-xs text-muted-foreground">{t('dashboard.dailyAverage')}</div>
+              <div className="text-xs text-muted-foreground">{t('dashboard.averagePerDay')}</div>
             </div>
           </div>
         </div>
