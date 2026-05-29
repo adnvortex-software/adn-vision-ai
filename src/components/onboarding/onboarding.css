@@ -138,10 +138,13 @@
   font-weight: 500;
   line-height: 1;
   border: 1px solid hsl(var(--border));
+  /* Hide the default X icon */
+  font-size: 0;
 }
 
 .driver-popover.adn-lynx-popover .driver-popover-close-btn::before {
   content: 'Saltar';
+  font-size: 0.75rem;
 }
 
 .driver-popover.adn-lynx-popover .driver-popover-close-btn:hover {

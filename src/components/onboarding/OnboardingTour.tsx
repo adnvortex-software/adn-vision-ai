@@ -322,9 +322,9 @@ export function OnboardingTour({ onComplete }: OnboardingTourProps) {
         stageRadius: 8,
         popoverClass: 'adn-lynx-popover',
         progressText: '{{current}} de {{total}}',
-        nextBtnText: 'Siguiente →',
-        prevBtnText: '← Anterior',
-        doneBtnText: '✓ Finalizar',
+        nextBtnText: 'Siguiente',
+        prevBtnText: 'Anterior',
+        doneBtnText: 'Finalizar',
         showButtons: ['next', 'previous', 'close'],
         onCloseClick: () => {
           closeTour()
