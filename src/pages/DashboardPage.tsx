@@ -42,7 +42,7 @@ import { listBuses } from '@/services/buses.service'
 import { listClientes } from '@/services/clientes.service'
 import { listEventos } from '@/services/novedades.service'
 import { listDespachos } from '@/services/despachos.service'
-import { listAllConteos, type ConteoResumen } from '@/services/conteos.service'
+import { getConteosDiariosForDashboard, type ConteoDiario } from '@/services/conteos.service'
 import { useToast } from '@/hooks/use-toast'
 import { useAuthStore } from '@/stores/auth.store'
 
@@ -65,7 +65,7 @@ export default function DashboardPage() {
   const [clientes, setClientes] = useState<Entity<Cliente>[]>([])
   const [allEventos, setAllEventos] = useState<EventoConDetalles[]>([])
   const [allDespachos, setAllDespachos] = useState<Entity<Despacho>[]>([])
-  const [allConteos, setAllConteos] = useState<ConteoResumen[]>([])
+  const [allConteos, setAllConteos] = useState<ConteoDiario[]>([])
 
   // Client filter
   const isClient = usuario?.rol === 'client_admin' || usuario?.rol === 'client_viewer'
@@ -116,6 +116,8 @@ export default function DashboardPage() {
   const loadData = useCallback(async () => {
     try {
       const { start, end } = getDateRange(dateRange)
+      const fechaDesde = format(start, 'yyyy-MM-dd')
+      const fechaHasta = format(end, 'yyyy-MM-dd')
 
       const [busesResult, clientesResult, eventosResult, despachosResult, conteosResult] =
         await Promise.all([
@@ -123,7 +125,7 @@ export default function DashboardPage() {
           listClientes({ limit: 100 }),
           listEventos({ limit: 500, fechaDesde: start, fechaHasta: end }),
           listDespachos({ limit: 500, fechaDesde: start, fechaHasta: end }),
-          listAllConteos(),
+          getConteosDiariosForDashboard({ fechaDesde, fechaHasta }),
         ])
 
       // Map buses with client names
@@ -232,7 +234,7 @@ export default function DashboardPage() {
     }))
   }, [eventos])
 
-  // Passenger data from real conteos
+  // Passenger data from conteosDiarios
   const passengerChartData = useMemo(() => {
     const { days } = getDateRange(dateRange)
     const data = []
@@ -241,10 +243,10 @@ export default function DashboardPage() {
       const date = subDays(new Date(), i)
       const dateStr = format(date, 'yyyy-MM-dd')
 
-      // Filter conteos by fechaOperativa
-      const dayConteos = conteos.filter((c) => c.fechaOperativa === dateStr)
-      const totalEntradas = dayConteos.reduce((sum, c) => sum + c.entradasDia, 0)
-      const totalSalidas = dayConteos.reduce((sum, c) => sum + c.salidasDia, 0)
+      // Filter conteos by fecha (from conteosDiarios)
+      const dayConteos = conteos.filter((c) => c.fecha === dateStr)
+      const totalEntradas = dayConteos.reduce((sum, c) => sum + c.totalEntradas, 0)
+      const totalSalidas = dayConteos.reduce((sum, c) => sum + c.totalSalidas, 0)
 
       data.push({
         fecha: format(date, 'dd MMM', { locale: dateLocale }),

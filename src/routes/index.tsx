@@ -52,6 +52,9 @@ const UsuarioDetailPage = lazy(() => import('@/pages/usuarios/UsuarioDetailPage'
 // Configuracion pages
 const ConfiguracionPage = lazy(() => import('@/pages/configuracion/ConfiguracionPage'))
 
+// Admin pages
+const BackfillConteosPage = lazy(() => import('@/pages/admin/BackfillConteosPage'))
+
 // Helper to wrap lazy components with Suspense - defined inline to avoid react-refresh warning
 export const router = createBrowserRouter([
   // Public routes (login, password reset)
@@ -315,6 +318,16 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<LoadingState fullScreen />}>
             <ConfiguracionPage />
+          </Suspense>
+        ),
+      },
+
+      // Admin
+      {
+        path: '/admin/backfill-conteos',
+        element: (
+          <Suspense fallback={<LoadingState fullScreen />}>
+            <BackfillConteosPage />
           </Suspense>
         ),
       },

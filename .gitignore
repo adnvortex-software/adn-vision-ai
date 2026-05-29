@@ -12,6 +12,7 @@ dist-ssr
 .env.staging
 .env.production
 .env*.local
+adn-lynx-fb-firebase-adminsdk-fbsvc-d3ec607a23.json
 
 # Logs
 logs
