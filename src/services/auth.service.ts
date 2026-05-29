@@ -91,6 +91,22 @@ function notifyMockAuthListeners() {
 }
 
 /**
+ * Traduce códigos de error de Firebase a mensajes amigables
+ */
+function getAuthErrorMessage(errorCode: string): string {
+  const errorMessages: Record<string, string> = {
+    'auth/invalid-email': 'El correo electrónico no es válido',
+    'auth/user-disabled': 'Esta cuenta ha sido deshabilitada',
+    'auth/user-not-found': 'No existe una cuenta con este correo electrónico',
+    'auth/wrong-password': 'La contraseña es incorrecta',
+    'auth/invalid-credential': 'Credenciales inválidas. Verifica tu correo y contraseña',
+    'auth/too-many-requests': 'Demasiados intentos fallidos. Intenta de nuevo más tarde',
+    'auth/network-request-failed': 'Error de conexión. Verifica tu internet',
+  }
+  return errorMessages[errorCode] ?? 'Error al iniciar sesión. Intenta de nuevo'
+}
+
+/**
  * Inicia sesión con email y contraseña
  */
 export async function login(
@@ -109,8 +125,17 @@ export async function login(
     return mockCurrentUser
   }
 
-  const result = await signInWithEmailAndPassword(auth, email, password)
-  return result.user
+  try {
+    const result = await signInWithEmailAndPassword(auth, email, password)
+    return result.user
+  } catch (error) {
+    // Firebase errors have a 'code' property
+    const firebaseError = error as { code?: string; message?: string }
+    if (firebaseError.code) {
+      throw new Error(getAuthErrorMessage(firebaseError.code))
+    }
+    throw new Error('Error al iniciar sesión. Intenta de nuevo')
+  }
 }
 
 /**
