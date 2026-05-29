@@ -268,7 +268,7 @@ export default function DashboardPage() {
         return {
           key: clienteId,
           name: cliente?.nombre ?? clienteId,
-          color: CLIENT_COLORS[index % CLIENT_COLORS.length],
+          color: CLIENT_COLORS[index % CLIENT_COLORS.length] ?? '#3b82f6',
         }
       })
 
