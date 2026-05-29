@@ -14,8 +14,7 @@ import { cn } from '@/lib/utils'
 
 interface PassengerData {
   fecha: string
-  entradas: number
-  salidas: number
+  totalPasajeros: number
 }
 
 interface PassengerChartProps {
@@ -27,8 +26,8 @@ interface PassengerChartProps {
 
 export function PassengerChart({ data, className, title, description }: PassengerChartProps) {
   const { t } = useTranslation()
-  const totalEntradas = data.reduce((sum, d) => sum + d.entradas, 0)
-  const totalSalidas = data.reduce((sum, d) => sum + d.salidas, 0)
+  const totalPasajeros = data.reduce((sum, d) => sum + d.totalPasajeros, 0)
+  const promedioDiario = data.length > 0 ? Math.round(totalPasajeros / data.length) : 0
 
   return (
     <Card className={cn(className)}>
@@ -39,20 +38,20 @@ export function PassengerChart({ data, className, title, description }: Passenge
               <Users className="h-5 w-5 text-blue-600" />
               {title ?? t('dashboard.passengerCount')}
             </CardTitle>
-            <CardDescription>{description ?? t('dashboard.entriesAndExits')}</CardDescription>
+            <CardDescription>{description ?? t('dashboard.totalPassengers')}</CardDescription>
           </div>
           <div className="flex gap-6 text-right">
             <div>
-              <div className="text-2xl font-bold text-emerald-600">
-                {totalEntradas.toLocaleString()}
+              <div className="text-2xl font-bold text-blue-600">
+                {totalPasajeros.toLocaleString()}
               </div>
-              <div className="text-xs text-muted-foreground">{t('dashboard.entries')}</div>
+              <div className="text-xs text-muted-foreground">{t('dashboard.totalPassengers')}</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-rose-600">
-                {totalSalidas.toLocaleString()}
+              <div className="text-2xl font-bold text-emerald-600">
+                {promedioDiario.toLocaleString()}
               </div>
-              <div className="text-xs text-muted-foreground">{t('dashboard.exits')}</div>
+              <div className="text-xs text-muted-foreground">{t('dashboard.dailyAverage')}</div>
             </div>
           </div>
         </div>
@@ -62,13 +61,9 @@ export function PassengerChart({ data, className, title, description }: Passenge
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <defs>
-                <linearGradient id="colorEntradas" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="colorSalidas" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#f43f5e" stopOpacity={0} />
+                <linearGradient id="colorPasajeros" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
@@ -96,19 +91,11 @@ export function PassengerChart({ data, className, title, description }: Passenge
               />
               <Area
                 type="monotone"
-                dataKey="entradas"
-                name={t('dashboard.entries')}
-                stroke="#10b981"
+                dataKey="totalPasajeros"
+                name={t('dashboard.totalPassengers')}
+                stroke="#3b82f6"
                 strokeWidth={2}
-                fill="url(#colorEntradas)"
-              />
-              <Area
-                type="monotone"
-                dataKey="salidas"
-                name={t('dashboard.exits')}
-                stroke="#f43f5e"
-                strokeWidth={2}
-                fill="url(#colorSalidas)"
+                fill="url(#colorPasajeros)"
               />
             </AreaChart>
           </ResponsiveContainer>
