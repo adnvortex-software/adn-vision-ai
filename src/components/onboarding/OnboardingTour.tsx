@@ -1,6 +1,6 @@
-import { useEffect, useCallback, useState } from 'react'
+import { useEffect, useCallback, useState, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { driver, type DriveStep, type Config } from 'driver.js'
+import { driver, type DriveStep, type Config, type Driver } from 'driver.js'
 import { doc, updateDoc } from 'firebase/firestore'
 import { db } from '@/config/firebase'
 import { useAuthStore } from '@/stores/auth.store'
@@ -257,6 +257,7 @@ export function OnboardingTour({ onComplete }: OnboardingTourProps) {
   const location = useLocation()
   const { usuario, setUsuario } = useAuthStore()
   const [tourStarted, setTourStarted] = useState(false)
+  const driverRef = useRef<Driver | null>(null)
 
   const markOnboardingComplete = useCallback(async () => {
     if (!usuario?.uid) return
@@ -278,6 +279,15 @@ export function OnboardingTour({ onComplete }: OnboardingTourProps) {
       console.error('Error marking onboarding complete:', error)
     }
   }, [usuario, setUsuario, onComplete])
+
+  const closeTour = useCallback(() => {
+    if (driverRef.current) {
+      driverRef.current.destroy()
+      driverRef.current = null
+    }
+    setTourStarted(false)
+    void markOnboardingComplete()
+  }, [markOnboardingComplete])
 
   const startTour = useCallback(() => {
     if (!usuario?.rol || tourStarted) return
@@ -317,22 +327,33 @@ export function OnboardingTour({ onComplete }: OnboardingTourProps) {
         doneBtnText: '✓ Finalizar',
         showButtons: ['next', 'previous', 'close'],
         onCloseClick: () => {
-          void markOnboardingComplete()
+          closeTour()
+        },
+        onNextClick: (_element, _step, options) => {
+          // Check if this is the last step
+          if (!options.state.activeIndex || options.state.activeIndex >= filteredSteps.length - 1) {
+            closeTour()
+          } else {
+            // Move to next step
+            driverRef.current?.moveNext()
+          }
         },
         onDestroyStarted: () => {
           void markOnboardingComplete()
         },
         onDestroyed: () => {
+          driverRef.current = null
           setTourStarted(false)
         },
         steps: filteredSteps,
       }
 
       const driverObj = driver(driverConfig)
+      driverRef.current = driverObj
       setTourStarted(true)
       driverObj.drive()
     }
-  }, [usuario, tourStarted, markOnboardingComplete, navigate, location.pathname])
+  }, [usuario, tourStarted, markOnboardingComplete, closeTour, navigate, location.pathname])
 
   useEffect(() => {
     // Only start tour if user hasn't completed onboarding
@@ -348,6 +369,16 @@ export function OnboardingTour({ onComplete }: OnboardingTourProps) {
     }
     return undefined
   }, [usuario, tourStarted, startTour])
+
+  // Cleanup driver on unmount
+  useEffect(() => {
+    return () => {
+      if (driverRef.current) {
+        driverRef.current.destroy()
+        driverRef.current = null
+      }
+    }
+  }, [])
 
   return null // This component doesn't render anything visible
 }
