@@ -384,9 +384,10 @@
     "limpiarFiltros": "Limpiar filtros",
     "abrirMenu": "Abrir menú",
     "verTirilla": "Ver tirilla",
+    "completar": "Completar",
     "cambiarEstado": "Cambiar estado",
     "estados": {
-      "programado": "Programado",
+      "pendiente": "Pendiente",
       "en_curso": "En curso",
       "completado": "Completado",
       "cancelado": "Cancelado"

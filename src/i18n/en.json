@@ -384,9 +384,10 @@
     "limpiarFiltros": "Clear filters",
     "abrirMenu": "Open menu",
     "verTirilla": "View slip",
+    "completar": "Complete",
     "cambiarEstado": "Change status",
     "estados": {
-      "programado": "Scheduled",
+      "pendiente": "Pending",
       "en_curso": "In progress",
       "completado": "Completed",
       "cancelado": "Cancelled"
