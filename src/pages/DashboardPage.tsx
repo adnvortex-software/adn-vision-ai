@@ -349,7 +349,9 @@ export default function DashboardPage() {
         title={t('dashboard.title')}
         description={
           selectedClienteId
-            ? `${t('common.filter')}: ${selectedClienteName}`
+            ? isClient
+              ? selectedClienteName
+              : `${t('common.filter')}: ${selectedClienteName}`
             : t('dashboard.description')
         }
         actions={
