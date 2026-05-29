@@ -29,6 +29,7 @@ import {
   KPIGrid,
   NovedadesRecientes,
   PassengerChart,
+  CLIENT_COLORS,
   NovedadesChart,
   FlotaDonutChart,
   DespachosChart,
@@ -237,25 +238,71 @@ export default function DashboardPage() {
   // Passenger data from conteosDiarios
   const passengerChartData = useMemo(() => {
     const { days } = getDateRange(dateRange)
-    const data = []
 
-    for (let i = days - 1; i >= 0; i--) {
-      const date = subDays(new Date(), i)
-      const dateStr = format(date, 'yyyy-MM-dd')
+    if (selectedClienteId) {
+      // Single client mode: show average per day
+      const data: Record<string, unknown>[] = []
+      for (let i = days - 1; i >= 0; i--) {
+        const date = subDays(new Date(), i)
+        const dateStr = format(date, 'yyyy-MM-dd')
+        const dayConteos = conteos.filter((c) => c.fecha === dateStr)
+        const totalEntradas = dayConteos.reduce((sum, c) => sum + c.totalEntradas, 0)
+        const totalSalidas = dayConteos.reduce((sum, c) => sum + c.totalSalidas, 0)
+        const promedio = (totalEntradas + totalSalidas) / 2
 
-      // Filter conteos by fecha (from conteosDiarios)
-      const dayConteos = conteos.filter((c) => c.fecha === dateStr)
-      const totalEntradas = dayConteos.reduce((sum, c) => sum + c.totalEntradas, 0)
-      const totalSalidas = dayConteos.reduce((sum, c) => sum + c.totalSalidas, 0)
-
-      data.push({
-        fecha: format(date, 'dd MMM', { locale: dateLocale }),
-        entradas: totalEntradas,
-        salidas: totalSalidas,
+        data.push({
+          fecha: format(date, 'dd MMM', { locale: dateLocale }),
+          promedio: Math.round(promedio),
+        })
+      }
+      return { data, clients: undefined, totalPassengers: undefined }
+    } else {
+      // Multi-client mode: show one line per client
+      const clientsWithData = new Set<string>()
+      allConteos.forEach((c) => {
+        if (c.clienteId) clientsWithData.add(c.clienteId)
       })
+
+      const clientLines = Array.from(clientsWithData).map((clienteId, index) => {
+        const cliente = clientes.find((c) => c.id === clienteId)
+        return {
+          key: clienteId,
+          name: cliente?.nombre ?? clienteId,
+          color: CLIENT_COLORS[index % CLIENT_COLORS.length],
+        }
+      })
+
+      const data: Record<string, unknown>[] = []
+      for (let i = days - 1; i >= 0; i--) {
+        const date = subDays(new Date(), i)
+        const dateStr = format(date, 'yyyy-MM-dd')
+        const dayData: Record<string, unknown> = {
+          fecha: format(date, 'dd MMM', { locale: dateLocale }),
+        }
+
+        // Calculate average for each client
+        clientLines.forEach((client) => {
+          const clientDayConteos = allConteos.filter(
+            (c) => c.fecha === dateStr && c.clienteId === client.key
+          )
+          const totalEntradas = clientDayConteos.reduce((sum, c) => sum + c.totalEntradas, 0)
+          const totalSalidas = clientDayConteos.reduce((sum, c) => sum + c.totalSalidas, 0)
+          const promedio = (totalEntradas + totalSalidas) / 2
+          dayData[client.key] = Math.round(promedio)
+        })
+
+        data.push(dayData)
+      }
+
+      // Calculate total passengers
+      const totalPassengers = allConteos.reduce(
+        (sum, c) => sum + (c.totalEntradas + c.totalSalidas) / 2,
+        0
+      )
+
+      return { data, clients: clientLines, totalPassengers }
     }
-    return data
-  }, [conteos, dateRange, getDateRange, dateLocale])
+  }, [conteos, allConteos, clientes, selectedClienteId, dateRange, getDateRange, dateLocale])
 
   // Despachos chart data
   const despachosChartData = useMemo(() => {
@@ -411,7 +458,9 @@ export default function DashboardPage() {
       {/* Charts Row 1 */}
       <div className="grid gap-6 lg:grid-cols-2">
         <PassengerChart
-          data={passengerChartData}
+          data={passengerChartData.data}
+          clients={passengerChartData.clients}
+          totalPassengers={passengerChartData.totalPassengers}
           title={t('dashboard.passengerCount')}
           description={`${t('dashboard.trendOf')} ${dateRange === 'today' ? t('dashboard.today').toLowerCase() : `${String(getDateRange(dateRange).days)} ${t('common.days')}`}`}
         />
@@ -463,16 +512,16 @@ export default function DashboardPage() {
                 <div className="text-sm text-muted-foreground">
                   {t('dashboard.totalPassengers')}
                 </div>
-                <div className="mt-1 text-2xl font-bold text-emerald-600">
-                  {passengerChartData.reduce((sum, d) => sum + d.entradas, 0).toLocaleString()}
+                <div className="mt-1 text-2xl font-bold text-blue-600">
+                  {Math.round(
+                    conteos.reduce((sum, c) => sum + (c.totalEntradas + c.totalSalidas) / 2, 0)
+                  ).toLocaleString()}
                 </div>
-                <div className="text-xs text-muted-foreground">
-                  {t('dashboard.entriesRegistered')}
-                </div>
+                <div className="text-xs text-muted-foreground">{t('dashboard.inPeriod')}</div>
               </div>
               <div className="rounded-lg border p-4">
                 <div className="text-sm text-muted-foreground">{t('dashboard.completionRate')}</div>
-                <div className="mt-1 text-2xl font-bold text-blue-600">
+                <div className="mt-1 text-2xl font-bold text-emerald-600">
                   {kpis.totalDespachos > 0
                     ? Math.round((kpis.despachosCompletados / kpis.totalDespachos) * 100)
                     : 0}
@@ -485,10 +534,12 @@ export default function DashboardPage() {
               <div className="rounded-lg border p-4">
                 <div className="text-sm text-muted-foreground">{t('dashboard.dailyAverage')}</div>
                 <div className="mt-1 text-2xl font-bold">
-                  {passengerChartData.length > 0
+                  {passengerChartData.data.length > 0
                     ? Math.round(
-                        passengerChartData.reduce((sum, d) => sum + d.entradas, 0) /
-                          passengerChartData.length
+                        conteos.reduce(
+                          (sum, c) => sum + (c.totalEntradas + c.totalSalidas) / 2,
+                          0
+                        ) / passengerChartData.data.length
                       ).toLocaleString()
                     : 0}
                 </div>

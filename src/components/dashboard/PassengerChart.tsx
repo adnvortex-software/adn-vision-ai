@@ -1,34 +1,77 @@
 import {
-  AreaChart,
-  Area,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Legend,
 } from 'recharts'
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-interface PassengerData {
-  fecha: string
-  entradas: number
-  salidas: number
+// Colors for multiple client lines
+const CLIENT_COLORS = [
+  '#3b82f6', // blue
+  '#10b981', // emerald
+  '#f59e0b', // amber
+  '#8b5cf6', // violet
+  '#ec4899', // pink
+  '#06b6d4', // cyan
+  '#f97316', // orange
+  '#84cc16', // lime
+]
+
+interface ClientLine {
+  key: string
+  name: string
+  color: string
 }
 
 interface PassengerChartProps {
-  data: PassengerData[]
+  data: Record<string, unknown>[]
+  clients?: ClientLine[]
+  totalPassengers?: number
   className?: string
   title?: string
   description?: string
 }
 
-export function PassengerChart({ data, className, title, description }: PassengerChartProps) {
+export function PassengerChart({
+  data,
+  clients,
+  totalPassengers,
+  className,
+  title,
+  description,
+}: PassengerChartProps) {
   const { t } = useTranslation()
-  const totalEntradas = data.reduce((sum, d) => sum + d.entradas, 0)
-  const totalSalidas = data.reduce((sum, d) => sum + d.salidas, 0)
+
+  // Single client mode: just one line called "promedio"
+  const isSingleClient = !clients || clients.length === 0
+  const linesToRender: ClientLine[] = isSingleClient
+    ? [{ key: 'promedio', name: t('dashboard.totalPassengers'), color: '#3b82f6' }]
+    : clients
+
+  // Calculate total from data
+  const calculatedTotal =
+    totalPassengers ??
+    data.reduce((sum, d) => {
+      if (isSingleClient) {
+        const promedio = d.promedio as number | undefined
+        return sum + (promedio ?? 0)
+      }
+      return (
+        sum +
+        linesToRender.reduce((lineSum, line) => {
+          const value = d[line.key] as number | undefined
+          return lineSum + (value ?? 0)
+        }, 0)
+      )
+    }, 0)
 
   return (
     <Card className={cn(className)}>
@@ -39,38 +82,20 @@ export function PassengerChart({ data, className, title, description }: Passenge
               <Users className="h-5 w-5 text-blue-600" />
               {title ?? t('dashboard.passengerCount')}
             </CardTitle>
-            <CardDescription>{description ?? t('dashboard.entriesAndExits')}</CardDescription>
+            <CardDescription>{description ?? t('dashboard.dailyAverage')}</CardDescription>
           </div>
-          <div className="flex gap-6 text-right">
-            <div>
-              <div className="text-2xl font-bold text-emerald-600">
-                {totalEntradas.toLocaleString()}
-              </div>
-              <div className="text-xs text-muted-foreground">{t('dashboard.entries')}</div>
+          <div className="text-right">
+            <div className="text-2xl font-bold text-blue-600">
+              {Math.round(calculatedTotal).toLocaleString()}
             </div>
-            <div>
-              <div className="text-2xl font-bold text-rose-600">
-                {totalSalidas.toLocaleString()}
-              </div>
-              <div className="text-xs text-muted-foreground">{t('dashboard.exits')}</div>
-            </div>
+            <div className="text-xs text-muted-foreground">{t('dashboard.totalPassengers')}</div>
           </div>
         </div>
       </CardHeader>
       <CardContent>
         <div className="h-[280px]">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-              <defs>
-                <linearGradient id="colorEntradas" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="colorSalidas" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#f43f5e" stopOpacity={0} />
-                </linearGradient>
-              </defs>
+            <LineChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis
                 dataKey="fecha"
@@ -93,27 +118,27 @@ export function PassengerChart({ data, className, title, description }: Passenge
                   borderRadius: '8px',
                   fontSize: '12px',
                 }}
+                formatter={(value: number) => [Math.round(value), '']}
               />
-              <Area
-                type="monotone"
-                dataKey="entradas"
-                name={t('dashboard.entries')}
-                stroke="#10b981"
-                strokeWidth={2}
-                fill="url(#colorEntradas)"
-              />
-              <Area
-                type="monotone"
-                dataKey="salidas"
-                name={t('dashboard.exits')}
-                stroke="#f43f5e"
-                strokeWidth={2}
-                fill="url(#colorSalidas)"
-              />
-            </AreaChart>
+              {!isSingleClient && <Legend />}
+              {linesToRender.map((line) => (
+                <Line
+                  key={line.key}
+                  type="monotone"
+                  dataKey={line.key}
+                  name={line.name}
+                  stroke={line.color}
+                  strokeWidth={2}
+                  dot={{ r: 3 }}
+                  activeDot={{ r: 5 }}
+                />
+              ))}
+            </LineChart>
           </ResponsiveContainer>
         </div>
       </CardContent>
     </Card>
   )
 }
+
+export { CLIENT_COLORS }
