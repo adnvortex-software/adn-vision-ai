@@ -121,8 +121,8 @@ conteosDiarios/
 
 ### Próximos Pasos
 
-1. [ ] Ejecutar el backfill desde la página de admin
-2. [ ] Verificar que conteosDiarios tenga los datos correctos
+1. [x] Ejecutar el backfill desde la página de admin ✅ (ejecutado via script)
+2. [x] Verificar que conteosDiarios tenga los datos correctos ✅ (16 documentos creados)
 3. [ ] Verificar que el dashboard muestre los datos históricos
 4. [ ] Limpiar datos incorrectos del día actual en conteos/{busId}
 
@@ -135,4 +135,38 @@ conteosDiarios/
 
 ### Datos de Buses Actuales
 
-(Se llenará cuando se ejecute el backfill)
+#### Ejecución del Backfill: 2026-05-29
+
+**Resumen:**
+
+- Buses procesados: 2
+- Total días: 16
+- Total eventos: 2355
+
+**Detalle por Bus:**
+
+| Bus ID               | Días | Rango de Fechas         | Entradas | Salidas |
+| -------------------- | ---- | ----------------------- | -------- | ------- |
+| jhBZImNcXl2gZsgPI6Jz | 8    | 2026-05-21 → 2026-05-28 | 658      | 703     |
+| kkDfcus6fWb1g1YQumFi | 8    | 2026-05-21 → 2026-05-28 | 485      | 509     |
+
+**Documentos creados en `conteosDiarios`:**
+
+- jhBZImNcXl2gZsgPI6Jz_2026-05-21
+- jhBZImNcXl2gZsgPI6Jz_2026-05-22
+- jhBZImNcXl2gZsgPI6Jz_2026-05-23
+- jhBZImNcXl2gZsgPI6Jz_2026-05-24
+- jhBZImNcXl2gZsgPI6Jz_2026-05-25
+- jhBZImNcXl2gZsgPI6Jz_2026-05-26
+- jhBZImNcXl2gZsgPI6Jz_2026-05-27
+- jhBZImNcXl2gZsgPI6Jz_2026-05-28
+- kkDfcus6fWb1g1YQumFi_2026-05-21
+- kkDfcus6fWb1g1YQumFi_2026-05-22
+- kkDfcus6fWb1g1YQumFi_2026-05-23
+- kkDfcus6fWb1g1YQumFi_2026-05-24
+- kkDfcus6fWb1g1YQumFi_2026-05-25
+- kkDfcus6fWb1g1YQumFi_2026-05-26
+- kkDfcus6fWb1g1YQumFi_2026-05-27
+- kkDfcus6fWb1g1YQumFi_2026-05-28
+
+**Estado:** ✅ Backfill completado exitosamente
