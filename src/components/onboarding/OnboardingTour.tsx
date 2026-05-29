@@ -330,8 +330,9 @@ export function OnboardingTour({ onComplete }: OnboardingTourProps) {
           closeTour()
         },
         onNextClick: (_element, _step, options) => {
+          const currentIndex = options.state.activeIndex ?? 0
           // Check if this is the last step
-          if (!options.state.activeIndex || options.state.activeIndex >= filteredSteps.length - 1) {
+          if (currentIndex >= filteredSteps.length - 1) {
             closeTour()
           } else {
             // Move to next step
