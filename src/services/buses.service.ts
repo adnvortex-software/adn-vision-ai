@@ -93,17 +93,8 @@ export async function listBuses(
 ): Promise<PaginatedResult<Entity<Bus>>> {
   const { limit: pageLimit = 20, startAfter: startAfterId, clienteId, estado } = options
 
-  // Query without activo filter - we filter in JavaScript to handle documents
-  // that might not have the 'activo' field set
-  let q = query(collection(db, COLLECTION), orderBy('placa'), limit(pageLimit + 1))
-
-  if (clienteId) {
-    q = query(q, where('clienteId', '==', clienteId))
-  }
-
-  if (estado) {
-    q = query(q, where('estado', '==', estado))
-  }
+  // Query all buses and filter in JavaScript to avoid composite index requirements
+  let q = query(collection(db, COLLECTION), orderBy('placa'))
 
   if (startAfterId) {
     const startDoc = await getDoc(doc(db, COLLECTION, startAfterId))
@@ -113,11 +104,10 @@ export async function listBuses(
   }
 
   const snapshot = await getDocs(q)
-  const docs = snapshot.docs.slice(0, pageLimit)
-  const hasMore = snapshot.docs.length > pageLimit
 
-  const data: Entity<Bus>[] = []
-  for (const docSnap of docs) {
+  // Filter in JavaScript to avoid composite index requirements
+  const allBuses: Entity<Bus>[] = []
+  for (const docSnap of snapshot.docs) {
     const docData = docSnap.data() as FirestoreDocData
     const parsed = busFirestoreSchema.safeParse(docData)
     if (!parsed.success) {
@@ -135,13 +125,21 @@ export async function listBuses(
     // Filter out deleted/inactive buses
     if (item.deleted) continue
     if (!item.activo) continue
-    data.push(item)
+    // Filter by clienteId if provided
+    if (clienteId && item.clienteId !== clienteId) continue
+    // Filter by estado if provided
+    if (estado && item.estado !== estado) continue
+    allBuses.push(item)
   }
+
+  // Apply pagination
+  const data = allBuses.slice(0, pageLimit)
+  const hasMore = allBuses.length > pageLimit
 
   return {
     data,
     hasMore,
-    lastDoc: docs[docs.length - 1]?.id,
+    lastDoc: data[data.length - 1]?.id,
   }
 }
 
@@ -249,11 +247,8 @@ export function subscribeToBuses(
   callback: (buses: Entity<Bus>[]) => void,
   options: { clienteId?: string } = {}
 ): Unsubscribe {
-  let q = query(collection(db, COLLECTION), orderBy('placa'))
-
-  if (options.clienteId) {
-    q = query(q, where('clienteId', '==', options.clienteId))
-  }
+  // Query all buses, filter in JavaScript to avoid composite index requirements
+  const q = query(collection(db, COLLECTION), orderBy('placa'))
 
   return onSnapshot(q, (snapshot) => {
     const buses: Entity<Bus>[] = []
@@ -274,6 +269,8 @@ export function subscribeToBuses(
       }
       if (item.deleted) continue
       if (!item.activo) continue
+      // Filter by clienteId if provided
+      if (options.clienteId && item.clienteId !== options.clienteId) continue
       buses.push(item)
     }
     callback(buses)

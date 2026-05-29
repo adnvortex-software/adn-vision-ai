@@ -1,6 +1,14 @@
 {
   "indexes": [
     {
+      "collectionGroup": "buses",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "clienteId", "order": "ASCENDING" },
+        { "fieldPath": "placa", "order": "ASCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "despachos",
       "queryScope": "COLLECTION",
       "fields": [
